@@ -1,0 +1,11 @@
+/*
+ *  定义任务的脚本
+ *  <li>    定义统一执行的脚本  不仅仅用于某一个模块
+ *  <li>    定义成一个独立的脚本，其他脚本均可以正常引用
+ */
+
+task createConfigJson << {
+    println "任务0"
+    File file = new File("");
+    println file.getAbsolutePath()
+}

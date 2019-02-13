@@ -1,1 +1,1 @@
-include ':app', ':xfresh',':myfresh', ':g_j_0', ':g_a_0', ':g_j_1'
+include ':app', ':xfresh',':myfresh', ':g_j_0', ':g_a_0', ':g_j_1', ':plugin_rely', ':g_a_rely', ':g_a_rely_static'

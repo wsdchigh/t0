@@ -37,6 +37,7 @@ public class ViewHolder0 {
         adapter = new Adapter0(context);
         lv.setAdapter(adapter);
 
+
         for (int i1 = 0; i1 < 18; i1++) {
             data.add("ksv"+i++);
         }

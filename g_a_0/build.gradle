@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply from: '../rely0.gradle'
+apply from: '../work0.gradle'
 
 android {
     compileSdkVersion 28
@@ -33,4 +35,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     implementation project(":g_j_0")
+    implementation project(":g_j_1")
+    //implementation project(":g_a_rely_static")
+
 }

@@ -1,5 +1,20 @@
 package com.wsdc.g_a_0;
 
+import android.content.Context;
+import android.content.res.AssetManager;
+
+import com.alibaba.fastjson.JSON;
+import com.wsdc.file.FileUtils;
+import com.wsdc.g_a_0.plugin.IData;
+import com.wsdc.g_a_0.plugin.IPlugin;
+import com.wsdc.g_a_0.plugin.inner.DefaultMainIData;
+import com.wsdc.io.IOUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /*
  *  启动者
  *  <li>    通过一系列的配置文件启动，配置文件存放在 /file/starter_wsdc目录下面
@@ -54,5 +69,120 @@ public class Starter{
      *  存放apk的位置
      */
     private String apk_files = "apks";
+
+    private Context context;
+    private File rootFile;
+    private File apkJson;
+    private File apkFiles;
+
+    /*
+     *  全局插件
+     *  <li>    这个插件不参与路由，用于全局的数据投递
+     */
+    private IPlugin globalPlugin;
+
+    public Starter(Context context) {
+        this.context = context;
+
+        if(!checkConfig()){
+            copyConfig();
+        }
+        loadingConfig();
+        parseConfig();
+        asyncToggle();
+    }
+
+    /*
+     *  启动的位置
+     *  <li>    检查配置
+     *          <li>    如果配置不存在，那么去assets中加载数据
+     *          <li>    复制一份到本地中进行存储
+     *
+     *  <li>    解析配置
+     *
+     *
+     *  <li>    创建路由和插件
+     *
+     *
+     *  <li>    服务器异步访问，同步数据
+     *          <li>    比对版本，不同则下载
+     *          <li>    删除过时数据，避免占用过多内存
+     */
+    public static void install(Context context){
+        instance = new Starter(context);
+    }
+
+    private static Starter instance;
+
+    public static Starter getInstance(){
+        return instance;
+    }
+
+    private boolean checkConfig(){
+        rootFile = new File(context.getFilesDir(),"starter_wsdc");
+        if(!rootFile.exists()){
+            return false;
+        }
+
+        apkJson = new File(rootFile,apk_json);
+        apkFiles = new File(rootFile,apk_files);
+        return true;
+    }
+
+    /*
+     *  apk.json
+     *  apks    下的所有apk文件
+     */
+    private void copyConfig(){
+        try{
+            AssetManager assets = context.getAssets();
+            InputStream is = assets.open(apk_json);
+            if(!rootFile.exists()){
+                rootFile.mkdirs();
+            }
+            apkJson = new File(rootFile,apk_json);
+            apkFiles = new File(rootFile,apk_files);
+            apkFiles.mkdirs();
+
+            OutputStream os = FileUtils.outputStream(apkJson);
+            IOUtils.write(is,os);
+
+            String[] apks = assets.list("apks");
+            for (String fileName : apks) {
+                final String name = fileName.replace("apks/","");
+                final File tmpFile = new File(apkFiles,name);
+
+                IOUtils.write(assets.open(fileName),FileUtils.outputStream(tmpFile));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadingConfig(){
+
+    }
+
+    private void parseConfig(){
+
+    }
+
+    private void asyncToggle(){
+
+    }
+
+    /*
+     *  清理数据
+     */
+    private void invalid(){
+
+    }
+
+    /*
+     *  重启APP
+     */
+    private void restart(){
+
+    }
 
 }

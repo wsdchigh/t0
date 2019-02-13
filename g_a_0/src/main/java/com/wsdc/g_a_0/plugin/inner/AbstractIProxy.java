@@ -13,6 +13,10 @@ public abstract class AbstractIProxy<T> implements IProxy<T> {
     public Context context;
     public T wrap;
 
+    /*
+     *  构造函数固定
+     *  <li>    按照这个函数进行反射获取
+     */
     public AbstractIProxy(List<Integer> keys, IPlugin<T,Integer> plugin, Context context) {
         this.keys = keys;
         this.plugin = plugin;

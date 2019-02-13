@@ -1,0 +1,7 @@
+dependencies{
+    /*
+     *  动态库
+     *  <li>    编译静态库
+     */
+    implementation project(':g_a_rely_static')
+}

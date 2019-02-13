@@ -3,11 +3,17 @@
 buildscript {
     
     repositories {
+        mavenLocal()
+        maven {
+            url "http://maven.aliyun.com/nexus/content/groups/public"
+        }
         google()
         jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.0'
+        //  如果想要向java那样引入架包，就在这里做
+        classpath 'com.alibaba:fastjson:1.2.55'
         
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -17,6 +23,10 @@ buildscript {
 
 allprojects {
     repositories {
+        mavenLocal()
+        maven {
+            url "http://maven.aliyun.com/nexus/content/groups/public"
+        }
         google()
         jcenter()
     }

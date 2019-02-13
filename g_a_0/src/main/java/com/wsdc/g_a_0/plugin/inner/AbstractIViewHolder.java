@@ -11,10 +11,10 @@ import com.wsdc.g_a_0.plugin.IViewHolder;
 public abstract class AbstractIViewHolder<T> implements IViewHolder<T> {
     public Context context;
     public T wrap;
-    public IPlugin<T> plugin;
+    public IPlugin<T,Integer> plugin;
     public View rootView;
 
-    public AbstractIViewHolder(Context context, T wrap,IPlugin<T> plugin) {
+    public AbstractIViewHolder(Context context, T wrap,IPlugin<T,Integer> plugin) {
         this.context = context;
         this.wrap = wrap;
         this.plugin = plugin;

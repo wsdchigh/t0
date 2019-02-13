@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 
+import com.wsdc.g_a_0.APK;
 import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.plugin.IProxy;
@@ -30,16 +31,19 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
 
     private IPlugin parent;
 
+    private int status = 0;
+    private int container_id;
+    private APK apk;
+
+    //  创建顶层的插件
     public DefaultPlugin(Context context, IRouter router,
-                         IProxy<T> proxy, IData data, IViewHolder<T> viewHolder,
-                         String key, T wrap) {
+                         String key, T wrap,int container_id,APK apk) {
         this.context = context;
         this.router = router;
-        this.proxy = proxy;
-        this.data = data;
-        this.viewHolder = viewHolder;
         this.key = key;
         this.wrap = wrap;
+        this.container_id = container_id;
+        this.apk = apk;
 
         handler = new Handler(){
             @Override
@@ -52,21 +56,35 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
                 }
             }
         };
+
+        status = status | 1;
+        loading();
     }
+
+    //  根据一个父插件创建一个子插件
     public DefaultPlugin(Context context, IRouter router,
-                         IProxy<T> proxy, IData data, IViewHolder<T> viewHolder,
-                         String key, T wrap,IPlugin parent) {
+                         String key, T wrap,int container_id,APK apk,IPlugin parent) {
         this.context = context;
         this.router = router;
-        this.proxy = proxy;
-        this.data = data;
-        this.viewHolder = viewHolder;
         this.key = key;
         this.wrap = wrap;
         this.parent = parent;
         this.handler = parent.handler();
+        this.container_id = container_id;
+        this.apk = apk;
 
         parent.register(this);
+
+        status = status | ((parent.status() & STATUS_LEVEL) + 1);
+
+        loading();
+    }
+
+    /*
+     *  根据配置实例获取对应的 Proxy data viewHolder
+     */
+    private void loading(){
+
     }
 
     @Override
@@ -86,6 +104,21 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
         }
 
         return false;
+    }
+
+    @Override
+    public int status() {
+        return status;
+    }
+
+    @Override
+    public int id() {
+        return container_id;
+    }
+
+    @Override
+    public APK apk() {
+        return apk;
     }
 
     @Override
