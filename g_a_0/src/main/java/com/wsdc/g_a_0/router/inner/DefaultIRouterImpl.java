@@ -1,10 +1,12 @@
 package com.wsdc.g_a_0.router.inner;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 
+import com.wsdc.g_a_0.XInfoAll;
 import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.router.IRouter;
@@ -24,6 +26,12 @@ public class DefaultIRouterImpl implements IRouter {
     IData<Integer> data;
 
     List<IPlugin> pluginStack = new LinkedList<>();
+    XInfoAll infoAll;
+
+    public DefaultIRouterImpl(XInfoAll infoAll, Context context) {
+        this.infoAll = infoAll;
+        routerMap = new DefaultIRouterMapImpl(infoAll,context,this);
+    }
 
     @Override
     public IRouterMap map() {
@@ -32,7 +40,7 @@ public class DefaultIRouterImpl implements IRouter {
 
     @Override
     public IPlugin go(String key, int mode) {
-        final IPlugin plugin = routerMap.get(key,mode);
+        final IPlugin plugin = routerMap.getRouterPlugin(key,mode);
         final IPlugin origin = currentIPlugin;
         if(plugin != null){
 
@@ -105,6 +113,11 @@ public class DefaultIRouterImpl implements IRouter {
     }
 
     @Override
+    public IPlugin getExistsPluginLevel1(String key) {
+        return null;
+    }
+
+    @Override
     public IData data() {
         return data;
     }
@@ -112,5 +125,10 @@ public class DefaultIRouterImpl implements IRouter {
     @Override
     public IPlugin currentPlugin() {
         return currentIPlugin;
+    }
+
+    @Override
+    public XInfoAll infoAll() {
+        return infoAll;
     }
 }

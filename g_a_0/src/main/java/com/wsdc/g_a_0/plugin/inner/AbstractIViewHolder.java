@@ -14,9 +14,9 @@ public abstract class AbstractIViewHolder<T> implements IViewHolder<T> {
     public IPlugin<T,Integer> plugin;
     public View rootView;
 
-    public AbstractIViewHolder(Context context, T wrap,IPlugin<T,Integer> plugin) {
+    public AbstractIViewHolder(IPlugin<T,Integer> plugin,Context context) {
         this.context = context;
-        this.wrap = wrap;
+        this.wrap = plugin.wrap();
         this.plugin = plugin;
     }
 

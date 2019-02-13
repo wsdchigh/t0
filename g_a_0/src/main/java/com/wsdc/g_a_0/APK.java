@@ -19,4 +19,14 @@ public interface APK {
      *  提供一个资源管理者，用于管理apk中的资源
      */
     Resources resources();
+
+    /*
+     *  获取APK中携带的信息
+     */
+    XInfo info();
+
+    /*
+     *   获取所有的插件信息
+     */
+    //XInfoAll infoAll();
 }

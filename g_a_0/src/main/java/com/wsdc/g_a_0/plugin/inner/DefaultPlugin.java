@@ -5,16 +5,21 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.wsdc.g_a_0.APK;
+import com.wsdc.g_a_0.XInfo;
 import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.plugin.IProxy;
 import com.wsdc.g_a_0.plugin.IViewHolder;
 import com.wsdc.g_a_0.router.IRouter;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import dalvik.system.DexClassLoader;
 
 public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     private Context context;
@@ -36,13 +41,9 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     private APK apk;
 
     //  创建顶层的插件
-    public DefaultPlugin(Context context, IRouter router,
-                         String key, T wrap,int container_id,APK apk) {
-        this.context = context;
+    public DefaultPlugin(IRouter router,String key, APK apk) {
         this.router = router;
         this.key = key;
-        this.wrap = wrap;
-        this.container_id = container_id;
         this.apk = apk;
 
         handler = new Handler(){
@@ -58,33 +59,30 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
         };
 
         status = status | 1;
-        loading();
     }
 
-    //  根据一个父插件创建一个子插件
-    public DefaultPlugin(Context context, IRouter router,
-                         String key, T wrap,int container_id,APK apk,IPlugin parent) {
-        this.context = context;
+    /*
+     *  二级插件的创建
+     *  <li>    Fragment
+     *  <li>    Fragment的切换需要预先构建Fragment，所以，这里需要创建wrap
+     */
+    public DefaultPlugin(IRouter router,String key,APK apk,IPlugin parent) {
         this.router = router;
         this.key = key;
-        this.wrap = wrap;
         this.parent = parent;
         this.handler = parent.handler();
-        this.container_id = container_id;
         this.apk = apk;
 
         parent.register(this);
 
         status = status | ((parent.status() & STATUS_LEVEL) + 1);
 
-        loading();
-    }
+        XInfo info = apk.info();
+        XInfo.XPlugin plugin0 = null;
+        info.plugins
+        for (XInfo.WrapInfo wrapInfo : info.wrapInfos) {
 
-    /*
-     *  根据配置实例获取对应的 Proxy data viewHolder
-     */
-    private void loading(){
-
+        }
     }
 
     @Override
@@ -139,6 +137,66 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     @Override
     public IRouter router() {
         return router;
+    }
+
+    @Override
+    public void install(Context context,int container_id,T t) {
+        this.context = context;
+        this.container_id = container_id;
+        this.wrap = t;
+
+        /*
+         *  生成 proxy data viewHolder信息
+         */
+        List<XInfo.XPlugin> plugins = apk.info().plugins;
+        XInfo.XPlugin plugin0 = null;
+        for (XInfo.XPlugin plugin : plugins) {
+            if(plugin.key.equals(key)){
+                plugin0 = plugin;
+                break;
+            }
+        }
+
+        if(plugin0 == null){
+            throw  new RuntimeException("不存在指定的插件");
+        }
+
+        final DexClassLoader classLoader = apk.classLoader();
+        try {
+            Class proxyClz = classLoader.loadClass(plugin0.proxyPath);
+            Class viewHolderClz = classLoader.loadClass(plugin0.viewHolderPath);
+
+            Constructor proxyConstructor = proxyClz.getConstructor(IPlugin.class, Context.class);
+            proxyConstructor.setAccessible(true);
+            proxy = (IProxy<T>) proxyConstructor.newInstance(this,context);
+
+            Constructor viewHolderConstructor = viewHolderClz.getConstructor(IPlugin.class, Context.class);
+            viewHolderConstructor.setAccessible(true);
+            viewHolder = (IViewHolder<T>) viewHolderConstructor.newInstance(this,context);
+
+            if(parent != null && plugin0.userParent){
+                data = parent.data();
+            }else{
+                Class dataClz = classLoader.loadClass(plugin0.iDataPath);
+                Constructor dataConstructor = dataClz.getConstructor(IPlugin.class);
+                dataConstructor.setAccessible(true);
+                data = (IData) dataConstructor.newInstance(this);
+            }
+
+            return ;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        throw new RuntimeException("插件安装异常");
     }
 
     @Override

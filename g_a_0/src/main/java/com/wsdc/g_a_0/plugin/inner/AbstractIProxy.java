@@ -17,8 +17,8 @@ public abstract class AbstractIProxy<T> implements IProxy<T> {
      *  构造函数固定
      *  <li>    按照这个函数进行反射获取
      */
-    public AbstractIProxy(List<Integer> keys, IPlugin<T,Integer> plugin, Context context) {
-        this.keys = keys;
+    public AbstractIProxy(IPlugin<T,Integer> plugin, Context context) {
+        this.keys = keys();
         this.plugin = plugin;
         this.context = context;
 
@@ -44,4 +44,6 @@ public abstract class AbstractIProxy<T> implements IProxy<T> {
     }
 
     public abstract boolean proxy0(Integer key,Object... args);
+
+    protected abstract List<Integer> keys();
 }

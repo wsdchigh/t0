@@ -14,4 +14,13 @@ public class ExampleUnitTest {
     public void addition_isCorrect() {
         assertEquals(4, 2 + 2);
     }
+
+    @Test
+    public void t1(){
+        RouterUtil.RouterBean parse = RouterUtil.parse("/public0/home/cart");
+        System.out.println(parse.module_name);
+        System.out.println(parse.router_level_1);
+        System.out.println(parse.router_level_2);
+        System.out.println(parse.router_name);
+    }
 }

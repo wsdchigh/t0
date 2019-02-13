@@ -20,6 +20,8 @@ public class XInfoAll {
     public int versionCode;
     public List<XInfo> infos;
 
+    public List<XInfo.WrapInfo> wrapInfos;
+
     public String getVersion() {
         return version;
     }

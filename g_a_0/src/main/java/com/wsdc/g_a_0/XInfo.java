@@ -37,6 +37,8 @@ public class XInfo {
 
     public List<XPlugin> plugins;
 
+    public List<WrapInfo> wrapInfos;
+
     public static class XPlugin{
         //  路由的key 唯一
         public String key;
@@ -152,5 +154,21 @@ public class XInfo {
 
     public void setPlugins(List<XPlugin> plugins) {
         this.plugins = plugins;
+    }
+
+    /*
+     *  记录服务的对象
+     *  <li>    Activity
+     *  <li>    Fragment
+     *  <li>    View
+     *  <li>    Dialog
+     *  <li>    PopupWindow
+     *  <li>    Service
+     *  <li>    Broadcast
+     */
+    public static class WrapInfo{
+        public int wrapKey;
+        public String path;
+        public String type;
     }
 }

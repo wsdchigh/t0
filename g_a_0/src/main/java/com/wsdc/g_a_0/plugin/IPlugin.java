@@ -1,5 +1,6 @@
 package com.wsdc.g_a_0.plugin;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 
@@ -73,6 +74,8 @@ public interface IPlugin<T,K> extends ILInk0<IPlugin>,IContainer0<IPlugin,K> {
     IProxy proxy();
     IViewHolder<T> viewHolder();
     IRouter router();
+
+    void install(Context context,int container_id,T t);
 
     //  获取服务的对象
     T wrap();

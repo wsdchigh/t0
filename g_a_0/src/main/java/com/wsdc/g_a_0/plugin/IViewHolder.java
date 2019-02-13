@@ -12,7 +12,7 @@ import com.wsdc.g_j_0.IPeriod0;
  *  <li>    view
  *  <li>    T
  */
-public interface IViewHolder<T> extends IPeriod0<Context>{
+public interface IViewHolder<T> extends IPeriod0<Context>,IDataChangeListener<IData,Integer>{
     View install(Context context,T t);
 
     IData data();
