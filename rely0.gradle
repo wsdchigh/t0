@@ -3,8 +3,10 @@ dependencies{
      *  这些事核心的依赖库
      */
 
-    //  json工具包
-    implementation 'com.alibaba:fastjson:1.2.55'
+    //  json工具包 上面依赖只能用于java工程(运行在android系统没有部分架包)
+    //  下面的依赖用于 android 工程
+    //implementation 'com.alibaba:fastjson:1.2.55'
+    implementation 'com.alibaba:fastjson:1.1.70.android'
 
     //  okhttp3工具包
     implementation "com.squareup.okhttp3:okhttp:3.13.1"
@@ -13,5 +15,10 @@ dependencies{
     implementation "com.github.bumptech.glide:glide:4.8.0"
     //  glide使用okhttp作为底层依赖
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.8.0'
+
+
+    //
+    implementation project(':g_j_0')
+    implementation project(':g_j_1')
 
 }

@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 
 import com.wsdc.g_j_0.IContainer0;
@@ -37,6 +38,9 @@ import java.util.List;
  *
  *  <li>    针对任何一个APK文件创建一个 Resources
  *          <li>    不要对每一个Activity都去创建Resources
+ *
+ *  <li>    如果自身没有获取
+ *          <li>    让local去取出来
  */
 public class ResourceProxy1 extends Resources{
     private List<Resources> proxyList = new LinkedList<>();
@@ -55,150 +59,175 @@ public class ResourceProxy1 extends Resources{
         super(assets, metrics, config);
     }
 
-    public ResourceProxy1(Resources local,AssetManager assets) {
+    public ResourceProxy1(AssetManager assets) {
         /*
          *   针对任何一个APK文件，创建一个
          */
         this(assets,new DisplayMetrics(),new Configuration());
-        this.local = local;
 
-        /*
-         *  <li>    优先自己
-         *  <li>    然后系统自带
-         */
-        proxyList.add(this);
-        proxyList.add(local);
+    }
+
+    public Resources getLocal() {
+        return local;
+    }
+
+    public void setLocal(Resources local) {
+        this.local = local;
     }
 
     @Override
     public Drawable getDrawable(int id,Theme theme) throws NotFoundException {
         Drawable rtn = null;
-        for (Resources resources : proxyList) {
-            if(Build.VERSION.SDK_INT >= 21){
-                try{
-                    rtn = resources.getDrawable(id,theme);
-                }catch (NotFoundException e){
-                    e.printStackTrace();
-                }
-            }else{
-                try{
-                    rtn = resources.getDrawable(id);
-                }catch (NotFoundException e){
-                    e.printStackTrace();
-                }
-            }
 
-            if(rtn != null){
-                return rtn;
-            }
-
+        try{
+            rtn = super.getDrawable(id,theme);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
-        throw new NotFoundException();
+
+        try{
+            if(Build.VERSION.SDK_INT >= 21){
+                rtn = local.getDrawable(id,theme);
+            }else{
+                rtn = local.getDrawable(id);
+            }
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("drawable not found ;id = "+id);
     }
 
     @Override
     public Drawable getDrawable(int id) throws NotFoundException {
-        Drawable rtn = null ;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getDrawable(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+        Drawable rtn = null;
+
+        try{
+            rtn = super.getDrawable(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getDrawable(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("drawable not found ;id = "+id);
     }
 
     @Override
     public CharSequence getText(int id) throws NotFoundException {
         CharSequence rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getText(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getText(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
-        throw new NotFoundException();
+
+        try{
+            rtn = local.getText(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("text not found ;id = "+id);
     }
 
     @Override
     public Typeface getFont(int id) throws NotFoundException {
-        Typeface tf = null;
-        for (Resources resources : proxyList) {
-            if (Build.VERSION.SDK_INT >= 26){
-                try{
-                    tf = resources.getFont(id);
-                }catch (NotFoundException e){
-                    e.printStackTrace();
-                }
-                if(tf != null){
-                    return tf;
-                }
+        Typeface rtn = null;
+
+        try{
+            rtn = super.getFont(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        try{
+            if(Build.VERSION.SDK_INT >= 26){
+                rtn = local.getFont(id);
+                return rtn;
             }
 
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
-        throw new NotFoundException();
+
+        throw new NotFoundException("font not found ;id = "+id);
     }
 
     @Override
     public CharSequence getQuantityText(int id, int quantity) throws NotFoundException {
         CharSequence rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getQuantityText(id,quantity);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
 
-            if(rtn != null){
-                return rtn;
-            }
+        try{
+            rtn = super.getQuantityText(id,quantity);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getQuantityText(id,quantity);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("text not found ;id = "+id);
     }
 
 
     @Override
     public String getString(int id) throws NotFoundException {
         String rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getString(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getString(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getString(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public String getString(int id, Object... formatArgs) throws NotFoundException {
         String rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getString(id,formatArgs);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getString(id,formatArgs);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getString(id,formatArgs);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
 
@@ -206,528 +235,633 @@ public class ResourceProxy1 extends Resources{
     @Override
     public String getQuantityString(int id, int quantity, Object... formatArgs) throws NotFoundException {
         String rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getQuantityString(id,quantity,formatArgs);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getQuantityString(id,quantity,formatArgs);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getQuantityString(id,quantity,formatArgs);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public String getQuantityString(int id, int quantity) throws NotFoundException {
         String rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getQuantityString(id,quantity);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getQuantityString(id,quantity);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getQuantityString(id,quantity);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
+
     }
 
     @Override
     public CharSequence getText(int id, CharSequence def) {
         CharSequence rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getText(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getText(id,def);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getText(id,def);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public CharSequence[] getTextArray(int id) throws NotFoundException {
         CharSequence[] rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getTextArray(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getTextArray(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getTextArray(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
 
     @Override
     public String[] getStringArray(int id) throws NotFoundException {
         String[] rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getStringArray(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getStringArray(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getStringArray(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
 
     @Override
     public int[] getIntArray(int id) throws NotFoundException {
         int[] rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getIntArray(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getIntArray(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getIntArray(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public TypedArray obtainTypedArray(int id) throws NotFoundException {
         TypedArray rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.obtainTypedArray(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.obtainTypedArray(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.obtainTypedArray(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public float getDimension(int id) throws NotFoundException {
         Float rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getDimension(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getDimension(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getDimension(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public int getDimensionPixelOffset(int id) throws NotFoundException {
         Integer rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getDimensionPixelOffset(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getDimensionPixelOffset(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getDimensionPixelOffset(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public int getDimensionPixelSize(int id) throws NotFoundException {
         Integer rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getDimensionPixelSize(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getDimensionPixelSize(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getDimensionPixelSize(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public float getFraction(int id, int base, int pbase) {
         Float rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getFraction(id,base,pbase);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getFraction(id,base,pbase);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getFraction(id,base,pbase);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
 
     @Override
     public Drawable getDrawableForDensity(int id, int density) throws NotFoundException {
         Drawable rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getDrawableForDensity(id,density);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getDrawableForDensity(id,density);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getDrawableForDensity(id,density);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
 
     @Override
     public Drawable getDrawableForDensity(int id, int density, Theme theme) {
         Drawable rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                if(Build.VERSION.SDK_INT >= 21){
-                    rtn = resources.getDrawableForDensity(id,density,theme);
-                }else{
-                    rtn = resources.getDrawableForDensity(id,density);
-                }
 
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+        try{
+            rtn = super.getDrawableForDensity(id,density,theme);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            if (Build.VERSION.SDK_INT >= 21){
+                rtn = local.getDrawableForDensity(id,density,theme);
+            }else{
+                rtn = local.getDrawableForDensity(id,density);
+            }
+
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public Movie getMovie(int id) throws NotFoundException {
         Movie rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getMovie(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getMovie(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getMovie(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public int getColor(int id) throws NotFoundException {
         Integer rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getColor(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getColor(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getColor(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public int getColor(int id, Theme theme) throws NotFoundException {
         Integer rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                if(Build.VERSION.SDK_INT >= 23){
-                    rtn = resources.getColor(id,theme);
-                }else{
-                    rtn = resources.getColor(id);
-                }
-
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+        try{
+            rtn = super.getColor(id,theme);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            if(Build.VERSION.SDK_INT >= 23){
+                rtn = local.getColor(id,theme);
+            }else{
+                rtn = local.getColor(id);
+            }
+
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
 
     @Override
     public ColorStateList getColorStateList(int id) throws NotFoundException {
         ColorStateList rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getColorStateList(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getColorStateList(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getColorStateList(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
 
     @Override
     public ColorStateList getColorStateList(int id, Theme theme) throws NotFoundException {
         ColorStateList rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                if(Build.VERSION.SDK_INT >= 23){
-                    rtn = resources.getColorStateList(id,theme);
-                }else{
-                    rtn = resources.getColorStateList(id);
-                }
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getColorStateList(id,theme);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            if(Build.VERSION.SDK_INT >= 23){
+                rtn = local.getColorStateList(id,theme);
+            }else{
+                rtn = local.getColorStateList(id);
+            }
+
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public boolean getBoolean(int id) throws NotFoundException {
         Boolean rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getBoolean(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getBoolean(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getBoolean(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public int getInteger(int id) throws NotFoundException {
         Integer rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getInteger(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getInteger(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getInteger(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public XmlResourceParser getLayout(int id) throws NotFoundException {
         XmlResourceParser rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getLayout(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getLayout(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getLayout(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
 
     @Override
     public XmlResourceParser getAnimation(int id) throws NotFoundException {
         XmlResourceParser rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getAnimation(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getAnimation(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getAnimation(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
 
     @Override
     public XmlResourceParser getXml(int id) throws NotFoundException {
         XmlResourceParser rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getXml(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.getXml(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getXml(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public InputStream openRawResource(int id) throws NotFoundException {
         InputStream rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.openRawResource(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+
+        try{
+            rtn = super.openRawResource(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.openRawResource(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
 
     @Override
     public InputStream openRawResource(int id, TypedValue value) throws NotFoundException {
         InputStream rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.openRawResource(id,value);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+        try{
+            rtn = super.openRawResource(id,value);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.openRawResource(id,value);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
+
     }
 
     @Override
     public AssetFileDescriptor openRawResourceFd(int id) throws NotFoundException {
         AssetFileDescriptor rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.openRawResourceFd(id);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+        try{
+            rtn = super.openRawResourceFd(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.openRawResourceFd(id);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public void getValue(int id, TypedValue outValue, boolean resolveRefs) throws NotFoundException {
-        for (Resources resources : proxyList) {
-            try{
-                resources.getValue(id,outValue,resolveRefs);
-                return;
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
+        try{
+            super.getValue(id,outValue,resolveRefs);
+            return;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            local.getValue(id,outValue,resolveRefs);
+            return;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public void getValueForDensity(int id, int density, TypedValue outValue, boolean resolveRefs) throws NotFoundException {
-        for (Resources resources : proxyList) {
-            try{
-                resources.getValueForDensity(id,density,outValue,resolveRefs);
-                return;
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
+        try{
+            super.getValueForDensity(id,density,outValue,resolveRefs);
+            return;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            local.getValueForDensity(id,density,outValue,resolveRefs);
+            return;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = "+id);
     }
 
     @Override
     public void getValue(String name, TypedValue outValue, boolean resolveRefs) throws NotFoundException {
-        for (Resources resources : proxyList) {
-            try{
-                resources.getValue(name,outValue,resolveRefs);
-                return;
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
+        try{
+            super.getValue(name,outValue,resolveRefs);
+            return;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            local.getValue(name,outValue,resolveRefs);
+            return;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = ");
     }
 
     //  TODO    这里需要谨慎考虑，到底使用自己还是 local
     @Override
     public TypedArray obtainAttributes(AttributeSet set, int[] attrs) {
-        /*
-        TypedArray rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.obtainAttributes(set,attrs);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
-        }
-
-        throw new NotFoundException();
-        */
+        //return local.obtainAttributes(set,attrs);
         return local.obtainAttributes(set,attrs);
     }
 
@@ -754,69 +888,81 @@ public class ResourceProxy1 extends Resources{
     @Override
     public String getResourceName(int resid) throws NotFoundException {
         String rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getResourceName(resid);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+        try{
+            rtn = super.getResourceName(resid);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getResourceName(resid);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = ");
     }
 
     @Override
     public String getResourcePackageName(int resid) throws NotFoundException {
         String rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getResourcePackageName(resid);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+        try{
+            rtn = super.getResourcePackageName(resid);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getResourcePackageName(resid);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = ");
     }
 
     @Override
     public String getResourceTypeName(int resid) throws NotFoundException {
         String rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getResourceTypeName(resid);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+        try{
+            rtn = super.getResourceTypeName(resid);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getResourceTypeName(resid);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = ");
     }
 
     @Override
     public String getResourceEntryName(int resid) throws NotFoundException {
         String rtn = null;
-        for (Resources resources : proxyList) {
-            try{
-                rtn = resources.getResourceEntryName(resid);
-            }catch (NotFoundException e){
-                e.printStackTrace();
-            }
-            if(rtn != null){
-                return rtn;
-            }
+        try{
+            rtn = super.getResourceEntryName(resid);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
         }
 
-        throw new NotFoundException();
+        try{
+            rtn = local.getResourceEntryName(resid);
+            return rtn;
+        }catch (NotFoundException e){
+            e.printStackTrace();
+        }
+
+        throw new NotFoundException("string not found ;id = ");
     }
 
     @Override

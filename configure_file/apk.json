@@ -1,0 +1,31 @@
+{
+  "infos": [
+    {
+      "http_url": "",
+      "local": true,
+      "local_url": "",
+      "module_name": "test",
+      "name": "test-4.4.4.apk",
+      "plugins": [
+        {
+          "iDataPath": "com.wsdc.g_a_0.plugin.inner.DefaultMainIData",
+          "key": "/test/t0",
+          "proxyPath": "com.wsdchigh.plugin_test.plugin.GuideProxy",
+          "userParent": false,
+          "viewHolderPath": "com.wsdchigh.plugin_test.plugin.GuideViewHolder",
+          "wrapKey": 101
+        }
+      ],
+      "version": "4.4.4"
+    }
+  ],
+  "version": "4.4.4",
+  "versionCode": 444,
+  "wrapInfos": [
+    {
+      "path": "com.wsdchigh.plugin_test.MainActivity",
+      "type": "activity",
+      "wrapKey": 101
+    }
+  ]
+}

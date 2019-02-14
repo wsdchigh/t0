@@ -6,6 +6,7 @@ import android.os.Message;
 
 import com.wsdc.g_a_0.APK;
 import com.wsdc.g_a_0.XInfo;
+import com.wsdc.g_a_0.XInfoAll;
 import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.plugin.IProxy;
@@ -40,6 +41,8 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     private int container_id;
     private APK apk;
 
+    private IPlugin currentChild;
+
     //  创建顶层的插件
     public DefaultPlugin(IRouter router,String key, APK apk) {
         this.router = router;
@@ -66,22 +69,46 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
      *  <li>    Fragment
      *  <li>    Fragment的切换需要预先构建Fragment，所以，这里需要创建wrap
      */
-    public DefaultPlugin(IRouter router,String key,APK apk,IPlugin parent) {
+    public DefaultPlugin(IRouter router, String key, APK apk, IPlugin parent, XInfoAll infoAll) {
         this.router = router;
         this.key = key;
         this.parent = parent;
         this.handler = parent.handler();
         this.apk = apk;
-
         parent.register(this);
+        status = status | ((parent.status() & STATUS_LEVEL_MASK) + 1);
 
-        status = status | ((parent.status() & STATUS_LEVEL) + 1);
-
-        XInfo info = apk.info();
+        //  创建实例    (Fragment)
+        List<XInfo.XPlugin> plugins = apk.info().plugins;
         XInfo.XPlugin plugin0 = null;
-        info.plugins
-        for (XInfo.WrapInfo wrapInfo : info.wrapInfos) {
+        for (XInfo.XPlugin plugin : plugins) {
+            if(plugin.key.equals(key)){
+                plugin0 = plugin;
+                break;
+            }
+        }
+        List<XInfo.WrapInfo> wrapInfos = infoAll.wrapInfos;
+        XInfo.WrapInfo wrapInfo0 = null;
+        for (XInfo.WrapInfo wrapInfo : wrapInfos) {
+            if(wrapInfo.wrapKey == plugin0.wrapKey){
+                wrapInfo0 = wrapInfo;
+            }
+        }
 
+        DexClassLoader classLoader = apk.classLoader();
+        try {
+            /*
+             *  只要类型匹对
+             *  <li>    无参的构造函数
+             */
+            Class<?> clz = classLoader.loadClass(wrapInfo0.path);
+            wrap = (T) clz.newInstance();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
         }
     }
 
@@ -107,6 +134,11 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     @Override
     public int status() {
         return status;
+    }
+
+    @Override
+    public void updateStatus(int newStatus) {
+        this.status = newStatus;
     }
 
     @Override
@@ -141,9 +173,16 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
 
     @Override
     public void install(Context context,int container_id,T t) {
+        //
+        if((status & STATUS_INSTALL_MASK) == STATUS_INSTALL_YES){
+            return;
+        }
+
         this.context = context;
         this.container_id = container_id;
-        this.wrap = t;
+        if(this.wrap == null){
+            this.wrap = t;
+        }
 
         /*
          *  生成 proxy data viewHolder信息
@@ -200,6 +239,11 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     }
 
     @Override
+    public void uninstall() {
+
+    }
+
+    @Override
     public T wrap() {
         return wrap;
     }
@@ -211,15 +255,7 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
 
     @Override
     public IPlugin current() {
-        if(plugins.size() == 0){
-            return null;
-        }
-
-        lock.lock();
-        final IPlugin plugin = plugins.get(plugins.size()-1);
-        lock.unlock();
-
-        return plugin;
+        return currentChild;
     }
 
     @Override
@@ -249,6 +285,7 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
             plugins.add(iPlugin);
         }
         lock.unlock();
+        currentChild = iPlugin;
     }
 
     @Override

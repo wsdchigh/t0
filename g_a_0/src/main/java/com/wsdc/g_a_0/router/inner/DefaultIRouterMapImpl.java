@@ -61,11 +61,16 @@ public class DefaultIRouterMapImpl implements IRouterMap {
             if(parent == null){
                 parent = new DefaultPlugin(router,parse.module_name+parse.router_level_1,apk);
             }
-            rtn = new DefaultPlugin(router,key,apk,parent);
+            rtn = new DefaultPlugin(router,key,apk,parent,infoAll);
         }else{
             rtn = new DefaultPlugin(router,key,apk);
         }
 
+        //  给plugin添加启动模式   需要先清空 然后在添加
+        int status = rtn.status();
+        status = status & (~IPlugin.STATUS_START_SELF_MODE_MASK);
+        status = status | mode;
+        rtn.updateStatus(status);
         return rtn;
     }
 

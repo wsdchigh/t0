@@ -10,12 +10,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
+        </activity>
+        <activity android:name=".activity.GuideActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.WrapActivity1" />
+        <activity android:name=".activity.WrapActivity2" />
+        <activity android:name=".activity.WrapActivity3" />
+        <activity android:name=".activity.WrapActivity4"></activity>
     </application>
 
 </manifest>

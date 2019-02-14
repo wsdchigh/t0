@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 
 public class Creator {
     /*
@@ -19,16 +20,19 @@ public class Creator {
     public void configureCreator(){
         ConfigureCreator cc = new ConfigureCreator();
 
-        if(true){
+        if(false){
             cc.clear();
-
-            return ;
+            return;
         }
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 2; i++) {
             XInfo info = cc.testInfo();
             cc.infoJson(info);
         }
+
+        List<XInfo.WrapInfo> wrapInfos = cc.testWrapInfo();
+        cc.wrapJson(wrapInfos);
+
         XInfoAll infoAll = cc.testInfoAll();
 
         cc.infoAllJson(infoAll);

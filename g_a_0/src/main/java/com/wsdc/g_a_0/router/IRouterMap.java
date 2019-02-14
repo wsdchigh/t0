@@ -26,7 +26,7 @@ public interface IRouterMap {
      *  如果插件不参与路由
      *  <li>    使用该函数获取
      *  <li>    均只是一级插件
-     *  <li>
+     *  <li>    全局插件?dialog插件?service插件
      */
     IPlugin getNormalPlugin(String key);
 

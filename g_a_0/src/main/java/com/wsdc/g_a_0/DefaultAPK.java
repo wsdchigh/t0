@@ -20,6 +20,13 @@ public class DefaultAPK implements APK {
 
     public DefaultAPK(XInfo info,Context context) {
         this.info = info;
+
+        //  标识为自身APK携带的模块
+        if(info.local){
+            classLoader = (DexClassLoader) context.getClassLoader();
+            resources = context.getResources();
+            return;
+        }
         File optimizedDirectoryFile = context.getDir("dex", Context.MODE_PRIVATE);
 
         String filePath = new File(context.getFilesDir()+"start_wsdc/"+info.local_url).getAbsolutePath();
@@ -31,7 +38,8 @@ public class DefaultAPK implements APK {
             Class cls = AssetManager.class;
             Method method = cls.getMethod("addAssetPath", String.class);
             method.invoke(assetManager, filePath);  // 反射设置资源加载路径
-            resources = new Resources(assetManager,new DisplayMetrics(),new Configuration());
+            //resources = new Resources(assetManager,new DisplayMetrics(),new Configuration());
+            resources = new ResourceProxy1(assetManager);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {

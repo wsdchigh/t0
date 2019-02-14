@@ -4,6 +4,19 @@ import java.util.List;
 
 /*
  *  针对任何一个apk提供的信息
+ *  <li>    如果主APP携带了插件信息
+ *          <li>    独立编写插件的时候，所有的插件均在自己的app中
+ *          <li>    编写期间需要独立测试插件    (任何插件均可以独立使用)
+ *          <li>    需要内置一个描述自身APK的消息
+ *          <li>    使用isLocal标记 当前信息描述的是主APK文件
+ *                  <li>    module_name 正常填写
+ *
+ *          <li>    线上的APK是不携带任何插件的，之所以这么设定
+ *                  <li>    让插件能够独立测试
+ *                  <li>    插件测试，本身就属于主APK
+ *
+ *  <li>    主APK只会携带一些必要的数据
+ *
  */
 public class XInfo {
     //  模块的名称 唯一，相同的模块只能存在一个
@@ -37,11 +50,13 @@ public class XInfo {
 
     public List<XPlugin> plugins;
 
-    public List<WrapInfo> wrapInfos;
+    //  标记当前APK为自身APK，而不是其他的插件
+    public boolean local;
 
     public static class XPlugin{
         //  路由的key 唯一
         public String key;
+        //  使用系统提供的默认实现  不需要反射获取
         public String path;
         public String proxyPath;
         public String viewHolderPath;
@@ -156,6 +171,14 @@ public class XInfo {
         this.plugins = plugins;
     }
 
+    public boolean isLocal() {
+        return local;
+    }
+
+    public void setLocal(boolean local) {
+        this.local = local;
+    }
+
     /*
      *  记录服务的对象
      *  <li>    Activity
@@ -170,5 +193,31 @@ public class XInfo {
         public int wrapKey;
         public String path;
         public String type;
+
+        public int getWrapKey() {
+            return wrapKey;
+        }
+
+        public void setWrapKey(int wrapKey) {
+            this.wrapKey = wrapKey;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
     }
+
+
 }

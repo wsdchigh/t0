@@ -8,6 +8,8 @@ import com.wsdc.file.FileUtils;
 import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.plugin.inner.DefaultMainIData;
+import com.wsdc.g_a_0.router.IRouter;
+import com.wsdc.g_a_0.router.inner.DefaultIRouterImpl;
 import com.wsdc.io.IOUtils;
 
 import java.io.File;
@@ -75,6 +77,9 @@ public class Starter{
     private File apkJson;
     private File apkFiles;
 
+    private XInfoAll infoAll;
+    private IRouter router;
+
     /*
      *  全局插件
      *  <li>    这个插件不参与路由，用于全局的数据投递
@@ -88,7 +93,6 @@ public class Starter{
             copyConfig();
         }
         loadingConfig();
-        parseConfig();
         asyncToggle();
     }
 
@@ -118,8 +122,15 @@ public class Starter{
         return instance;
     }
 
+    /*
+     *  如果没有下面的文件夹
+     *  <li>    第一次使用
+     *  <li>    用户清空了缓存
+     *
+     *  <li>    此时需要在assets下复制内容
+     */
     private boolean checkConfig(){
-        rootFile = new File(context.getFilesDir(),"starter_wsdc");
+        rootFile = new File(context.getFilesDir(),"start_wsdc");
         if(!rootFile.exists()){
             return false;
         }
@@ -132,6 +143,9 @@ public class Starter{
     /*
      *  apk.json
      *  apks    下的所有apk文件
+     *
+     *  <li>    不管怎么样 apk.json文件是一定要有的
+     *  <li>    如果没有存放插件 那么apks下面是可以没有有效的文件的
      */
     private void copyConfig(){
         try{
@@ -159,12 +173,18 @@ public class Starter{
         }
     }
 
+    /*
+     *  加载配置信息
+     *  <li>    加载apk.json获取一个  XInfoAll 实例
+     */
     private void loadingConfig(){
-
-    }
-
-    private void parseConfig(){
-
+        try {
+            byte[] data = IOUtils.read(FileUtils.inputStream(apkJson));
+            infoAll = JSON.parseObject(new String(data,"utf-8"),XInfoAll.class);
+            router = new DefaultIRouterImpl(infoAll,context);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void asyncToggle(){
@@ -179,10 +199,22 @@ public class Starter{
     }
 
     /*
+     *  下载数据
+     */
+    private void download(){
+
+    }
+
+    /*
      *  重启APP
      */
     private void restart(){
 
+    }
+
+
+    public IRouter getRouter(){
+        return router;
     }
 
 }
