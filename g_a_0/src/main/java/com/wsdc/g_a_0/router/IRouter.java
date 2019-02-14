@@ -15,6 +15,10 @@ import com.wsdc.g_a_0.plugin.IPlugin;
 public interface IRouter{
     IRouterMap map();
 
+    /*
+     *  路由操作
+     *  <li>    mode    需要携带
+     */
     IPlugin go(String key,int mode);
 
     //  后退一步
@@ -22,6 +26,16 @@ public interface IRouter{
 
     //  到主页
     IPlugin home();
+
+    /*
+     *  如果需要主动关闭插件
+     *  <li>    go函数工作的时候，如果需要关闭前一个插件   (前一个插件不添加到路由中)
+     *  <li>    因为一级插件重复
+     *          <li>    下面均有二级插件
+     *          <li>    此时，需要关闭之前的一级插件
+     *          <li>    如果一级插件独立工作，那么是允许重复的  只有在一级插件充当容器的时候，只能存在一个
+     */
+    void close(IPlugin plugin);
 
     /*
      *  当前路由中，是否存在对应的一级路由

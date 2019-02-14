@@ -2,8 +2,9 @@ package com.wsdchigh.plugin_test;
 
 import android.app.Activity;
 import android.content.res.Resources;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.view.Window;
 
 import com.wsdc.g_a_0.ResourceProxy1;
 import com.wsdc.g_a_0.Starter;
@@ -12,6 +13,12 @@ import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.plugin.IProxy;
 import com.wsdc.g_a_0.plugin.IViewHolder;
 
+/*
+ *  为了统一化
+ *  <li>    所有的activity均继承自FragmentActivity
+ *  <li>    requestWindowFeature(Window.FEATURE_NO_TITLE);
+ *          <li>    去掉title (如果需要title，在布局中定义一个即可)
+ */
 public class MainActivity extends FragmentActivity {
     IPlugin<Activity,Integer> plugin;
     private IProxy proxy;
@@ -30,17 +37,9 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-        setTheme(R.style.AppTheme);
         setContentView(plugin.viewHolder().install(this,this));
-
-        //  获取插件信息
-        proxy = plugin.proxy();
-        data = plugin.data();
-        viewHolder = plugin.viewHolder();
-
-        //  数据中心注册观察者
-        data.register(viewHolder);
     }
 
 
@@ -56,8 +55,6 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        //  数据中心取消注册观察者
-        data.unregister(viewHolder);
+        plugin.uninstall();
     }
 }

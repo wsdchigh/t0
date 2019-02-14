@@ -83,17 +83,17 @@ public class DefaultMainIData implements IData<Integer> {
         lock.unlock();
 
         //  所有注册者注册期间，均会通知一次
-        final IDataChangeListener l = listener;
+        final IDataChangeListener<IData,Integer> l = listener;
 
         if(Looper.myLooper() != Looper.getMainLooper()){
             plugin.handler().post(new Runnable() {
                 @Override
                 public void run() {
-                    l.notify0(IData.TYPE_INIT,"",this);
+                    l.notify0(IData.TYPE_INIT,-1,DefaultMainIData.this);
                 }
             });
         }else{
-            l.notify0(IData.TYPE_INIT,"",this);
+            l.notify0(IData.TYPE_INIT,-1,this);
         }
     }
 
@@ -115,7 +115,7 @@ public class DefaultMainIData implements IData<Integer> {
                     Lock lock = lock0.readLock();
                     lock.lock();
                     for (IDataChangeListener listener : listeners) {
-                        listener.notify0(IData.TYPE_SINGLE,key0,this);
+                        listener.notify0(IData.TYPE_SINGLE,key0,DefaultMainIData.this);
                     }
                     lock.unlock();
                 }

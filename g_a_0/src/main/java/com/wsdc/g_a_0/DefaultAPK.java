@@ -2,9 +2,7 @@ package com.wsdc.g_a_0;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.util.DisplayMetrics;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -18,7 +16,7 @@ public class DefaultAPK implements APK {
     DexClassLoader classLoader;
     Resources resources;
 
-    public DefaultAPK(XInfo info,Context context) {
+    public DefaultAPK(XInfo info,Context context,ClassLoader parent) {
         this.info = info;
 
         //  标识为自身APK携带的模块
@@ -31,7 +29,7 @@ public class DefaultAPK implements APK {
 
         String filePath = new File(context.getFilesDir()+"start_wsdc/"+info.local_url).getAbsolutePath();
         classLoader = new DexClassLoader(filePath,
-                optimizedDirectoryFile.getAbsolutePath(),null,getClass().getClassLoader());
+                optimizedDirectoryFile.getAbsolutePath(),null,parent);
 
         try{
             AssetManager assetManager = AssetManager.class.newInstance();   // 创建AssetManager实例

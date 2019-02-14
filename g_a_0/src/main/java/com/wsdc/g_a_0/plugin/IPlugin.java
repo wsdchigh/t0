@@ -95,10 +95,6 @@ public interface IPlugin<T,K> extends ILInk0<IPlugin>,IContainer0<IPlugin,K> {
      *  <li>    我们在create的时候创建路由，destroy的时候卸载路由
      *
      *  <li>    卸载并不代表，数据的回收
-     *          <li>    路由中保存了数据插件信息，跟context无关的数据均会保存
-     *                  <li>    View的一些特征会消失，(因为View会重新加载)
-     *                  <li>    View的所有特征回归到初始值，如果需要保存，那么离开的时候，在数据中心保存，再次打开的时候读取出数据
-     *          <li>    如果路由释放了插件，那么数据将消失
      */
     void install(Context context,int container_id,T t);
 
@@ -134,4 +130,12 @@ public interface IPlugin<T,K> extends ILInk0<IPlugin>,IContainer0<IPlugin,K> {
      *  所处的APK位置
      */
     APK apk();
+
+    /*
+     *  系统在运行的过程中保存的信息
+     *  <li>    保存数据使用  保存数据 保存数据 保存数据
+     */
+    void setTag(Object o);
+
+    Object getTag();
 }

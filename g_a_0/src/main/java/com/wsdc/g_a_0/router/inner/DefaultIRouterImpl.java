@@ -39,12 +39,20 @@ public class DefaultIRouterImpl implements IRouter {
         return routerMap;
     }
 
+    /*
+     *  路由规则
+     *  <li>    一个Activity视为大的插件
+     *  <li>    activity的启动使用普通模式   (为任何插件启动一个Activity)
+     *          <li>    但是插件不能重复，如果插件一旦重复，那么会关闭之前的插件
+     *                  <li>    所处的activity关闭
+     *                  <li>    路由别表相关的插件一律移除
+     */
     @Override
     public IPlugin go(String key, int mode) {
         final IPlugin plugin = routerMap.getRouterPlugin(key,mode);
         final IPlugin origin = currentIPlugin;
         if(plugin != null){
-            switch (mode){
+            switch (mode & IPlugin.STATUS_START_SELF_MODE_MASK){
                 case IPlugin.START_COMMON:
                     //  添加到栈里面
                     pluginStack.add(plugin);
@@ -84,6 +92,7 @@ public class DefaultIRouterImpl implements IRouter {
                     transaction.show(wrap);
                     transaction.commit();
                 }
+
             }else{
                 /*
                  *  <li>    如果涉及到的是两个Activity之间的切换
@@ -92,21 +101,40 @@ public class DefaultIRouterImpl implements IRouter {
                  *  <li>    如果是涉及一个Activity的fragment切换
                  *          <li>    让fragment执行切换特效
                  *
-                 *
+                 *  <li>    之所以携带一个父插件的启动参数
+                 *          <li>    如果涉及到两个activity的跳转
+                 *          <li>    如果此时是二级路由，那么需要判断前一个activity是否需要关闭   (根据父插件启动参数决定)
+                 *                  <li>    父插件启动参数，只有第一个设置的有效，之后的设置均无效
                  */
                 if((plugin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
                     if((origin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
-                        //
+
                         Activity activity = (Activity) origin.wrap();
                         Activity activityGo = (Activity) plugin.wrap();
                         Intent intent = new Intent(activity,activityGo.getClass());
                         activity.startActivity(intent);
+
+                        //  是否需要关闭activity
+                        if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
+                            //  插件没有入栈 只需要引导退出即可
+                            activity.finish();
+                        }
                     }else{
                         IPlugin parent = (IPlugin) origin.wrap();
                         Activity activity = (Activity) parent.wrap();
                         Activity activityGo = (Activity) plugin.wrap();
                         Intent intent = new Intent(activity,activityGo.getClass());
                         activity.startActivity(intent);
+
+                        //  是否需要关闭activity
+                        if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
+                            /*
+                             *  一级插件不入栈，但是下面的二级插件可能入栈  所以需要清除对应插件信息
+                             *  <li>    引导activity的退出
+                             *  <li>    插件在卸载的时候自动清除栈中信息
+                             */
+                            activity.finish();
+                        }
                     }
                 }else{
                     //
@@ -117,6 +145,12 @@ public class DefaultIRouterImpl implements IRouter {
 
                         Intent intent = new Intent(originActivity,goActivity.getClass());
                         originActivity.startActivity(intent);
+
+                        //  是否需要关闭activity
+                        if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
+                            //  插件没有入栈 只需要引导退出即可
+                            originActivity.finish();
+                        }
 
                     }else{
                         IPlugin originParent = (IPlugin) origin.parent();
@@ -141,28 +175,81 @@ public class DefaultIRouterImpl implements IRouter {
                             //  使用activity执行过渡特效
                             Intent intent = new Intent(originActivity,goActivity.getClass());
                             originActivity.startActivity(intent);
+
+                            //  是否需要关闭activity
+                            if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
+                                //  插件没有入栈 只需要引导退出即可
+                                originActivity.finish();
+                            }
                         }
                     }
                 }
             }
 
+            //  更新当前插件
             currentIPlugin = plugin;
+            //  插件是否需要入栈
+            if((plugin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_COMMON){
+                pluginStack.add(plugin);
+            }
         }
         return currentIPlugin;
     }
 
     @Override
     public IPlugin back() {
+        /*
+         *  路由后退一步
+         */
         return null;
     }
 
     @Override
     public IPlugin home() {
+        /*
+         *  只留下栈中的第一个插件，其他的均清空
+         *  <li>    收集所有的activity   集体引导finish
+         *          <li>    除了第一个activity和最后一个activity，集体引导销毁   (finish)
+         *          <li>    调用一次back，此时就能够正常的抵达首个Activity之中
+         *
+         *          <li>    此时，插件的tag打上标记
+         *                  <li>    pause函数时候，验证tag标记，执行Fragment的事务操作
+         */
         return null;
     }
 
     @Override
+    public void close(IPlugin plugin) {
+        /*
+         *   close函数的工作意义
+         *   <li>    这里是路由，只需要管理好路由的事情就好了
+         *           <li>    超出路由的事情就不需要负责了 (比如父插件和子插件之间的互动)
+         *
+         *
+         */
+        List<IPlugin> tmp = new LinkedList<>();
+        for (IPlugin p0 : pluginStack) {
+            if(p0 == plugin || p0 == plugin.parent()){
+                tmp.add(p0);
+            }
+        }
+        pluginStack.removeAll(tmp);
+    }
+
+    @Override
     public IPlugin getExistsPluginLevel1(String key) {
+        for (IPlugin plugin : pluginStack) {
+            if((plugin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
+                if(plugin.key().equals(key)){
+                    return plugin;
+                }
+            }else{
+                IPlugin parent = (IPlugin) plugin.parent();
+                if(parent.key().equals(key)){
+                    return parent;
+                }
+            }
+        }
         return null;
     }
 

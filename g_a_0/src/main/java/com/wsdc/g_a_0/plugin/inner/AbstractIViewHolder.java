@@ -14,8 +14,7 @@ public abstract class AbstractIViewHolder<T> implements IViewHolder<T> {
     public IPlugin<T,Integer> plugin;
     public View rootView;
 
-    public AbstractIViewHolder(IPlugin<T,Integer> plugin,Context context) {
-        this.context = context;
+    public AbstractIViewHolder(IPlugin<T,Integer> plugin) {
         this.wrap = plugin.wrap();
         this.plugin = plugin;
     }
@@ -39,4 +38,21 @@ public abstract class AbstractIViewHolder<T> implements IViewHolder<T> {
     public T wrap() {
         return wrap;
     }
+
+    @Override
+    public void uninstall() {
+        context = null;
+        rootView = null;
+
+        View view = null;
+
+        clear();
+    }
+
+    /*
+     *   移除跟context相关的资源
+     *   <li>    View 持有context
+     *   <li>    避免内存泄漏
+     */
+    protected abstract void clear();
 }

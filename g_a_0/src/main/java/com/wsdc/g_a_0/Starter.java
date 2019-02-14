@@ -5,9 +5,7 @@ import android.content.res.AssetManager;
 
 import com.alibaba.fastjson.JSON;
 import com.wsdc.file.FileUtils;
-import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
-import com.wsdc.g_a_0.plugin.inner.DefaultMainIData;
 import com.wsdc.g_a_0.router.IRouter;
 import com.wsdc.g_a_0.router.inner.DefaultIRouterImpl;
 import com.wsdc.io.IOUtils;
@@ -215,6 +213,10 @@ public class Starter{
 
     public IRouter getRouter(){
         return router;
+    }
+
+    public IPlugin globalPlugin(){
+        return globalPlugin;
     }
 
 }

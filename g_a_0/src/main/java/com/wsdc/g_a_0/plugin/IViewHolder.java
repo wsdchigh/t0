@@ -22,4 +22,6 @@ public interface IViewHolder<T> extends IPeriod0<Context>,IDataChangeListener<ID
     IPlugin plugin();
 
     T wrap();
+
+    void uninstall();
 }

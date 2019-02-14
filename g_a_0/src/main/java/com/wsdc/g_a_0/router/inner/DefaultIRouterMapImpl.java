@@ -30,9 +30,25 @@ public class DefaultIRouterMapImpl implements IRouterMap {
 
         //  预先加载所有的APK信息
         List<XInfo> infos = infoAll.infos;
+
+
+        /*
+         *  如果存在依赖模块
+         *  <li>    如果存在模块，那么使用依赖模块作为其他模块的父 ClassLoader
+         *          <li>    避免公共模块多次加载  (如果存在多个插件的话)
+         */
+        APK rely = null;
         for (XInfo info : infos) {
-            APK apk = new DefaultAPK(info,context);
-            apkMap.put(info.module_name,apk);
+            if("rely".equals(info.module_name)){
+                rely = new DefaultAPK(info,context,this.getClass().getClassLoader());
+            }
+        }
+        ClassLoader parent = rely == null? getClass().getClassLoader() : rely.classLoader();
+        for (XInfo info : infos) {
+            if(!"rely".equals(info.module_name)){
+                APK apk = new DefaultAPK(info,context,parent);
+                apkMap.put(info.module_name,apk);
+            }
         }
     }
 
@@ -60,6 +76,11 @@ public class DefaultIRouterMapImpl implements IRouterMap {
             IPlugin parent = router.getExistsPluginLevel1(parse.router_level_1);
             if(parent == null){
                 parent = new DefaultPlugin(router,parse.module_name+parse.router_level_1,apk);
+
+                //  将传入进来的父插件启动参数 设置为父插件自身的启动参数
+                int status = parent.status();
+                status = status & ((mode & IPlugin.STATUS_START_PARENT_MODE_MASK) << 2);
+                parent.updateStatus(status);
             }
             rtn = new DefaultPlugin(router,key,apk,parent,infoAll);
         }else{

@@ -21,6 +21,7 @@ import java.util.List;
 public class XInfo {
     //  模块的名称 唯一，相同的模块只能存在一个
     //  用户模块?登录模块?
+    //  需要查询出 rely 这个模块 这个模块属于公共模块  classloader 代理其他模块
     public String module_name;
 
     //  apk的名字  用这个名字存储

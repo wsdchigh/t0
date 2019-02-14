@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.wsdc.g_a_0.APK;
+import com.wsdc.g_a_0.Starter;
 import com.wsdc.g_a_0.XInfo;
 import com.wsdc.g_a_0.XInfoAll;
 import com.wsdc.g_a_0.plugin.IData;
@@ -43,6 +44,8 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
 
     private IPlugin currentChild;
 
+    private Object tag;
+
     //  创建顶层的插件
     public DefaultPlugin(IRouter router,String key, APK apk) {
         this.router = router;
@@ -62,6 +65,9 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
         };
 
         status = status | 1;
+
+        //  一级插件是Activity，由系统去创建，我们不去创建
+        //  wrap 通过install去获取
     }
 
     /*
@@ -95,6 +101,7 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
             }
         }
 
+        //  二级路由 Fragment 根据配置文件创建一个
         DexClassLoader classLoader = apk.classLoader();
         try {
             /*
@@ -149,6 +156,16 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     @Override
     public APK apk() {
         return apk;
+    }
+
+    @Override
+    public void setTag(Object o) {
+        this.tag = o;
+    }
+
+    @Override
+    public Object getTag() {
+        return tag;
     }
 
     @Override
@@ -209,9 +226,9 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
             proxyConstructor.setAccessible(true);
             proxy = (IProxy<T>) proxyConstructor.newInstance(this,context);
 
-            Constructor viewHolderConstructor = viewHolderClz.getConstructor(IPlugin.class, Context.class);
+            Constructor viewHolderConstructor = viewHolderClz.getConstructor(IPlugin.class);
             viewHolderConstructor.setAccessible(true);
-            viewHolder = (IViewHolder<T>) viewHolderConstructor.newInstance(this,context);
+            viewHolder = (IViewHolder<T>) viewHolderConstructor.newInstance(this);
 
             if(parent != null && plugin0.userParent){
                 data = parent.data();
@@ -222,6 +239,27 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
                 data = (IData) dataConstructor.newInstance(this);
             }
 
+            //  数据中心注册观察者
+            data.register(viewHolder);
+
+            /*
+             *  如果有父插件
+             *  <li>    应该需要监听父插件的数据转换
+             */
+            if(parent != null){
+                if(data != parent.data()){
+                    parent.data().register(viewHolder);
+                }
+            }
+
+            /*
+             *  全局插件的注册信息
+             *  <li>    任何插件均自动注册到全局插件的数据中心中
+             */
+            final IPlugin globalPlugin = Starter.getInstance().globalPlugin();
+            if(globalPlugin != null){
+                globalPlugin.data().register(viewHolder);
+            }
             return ;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -240,7 +278,27 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
 
     @Override
     public void uninstall() {
+        /*
+         *  分类两级插件来处理
+         */
+        if((status & IPlugin.STATUS_LEVEL_MASK) == IPlugin.LEVEL_1){
 
+        }else{
+            /*
+             *  二级插件的卸载,只需要卸载自身即可
+             */
+            data.unregister(this);
+            if(data != parent.data()){
+                parent.data().register(this);
+            }
+            viewHolder.uninstall();
+        }
+
+        //  全局取消注册
+        final IPlugin globalPlugin = Starter.getInstance().globalPlugin();
+        if(globalPlugin != null){
+            globalPlugin.data().unregister(viewHolder);
+        }
     }
 
     @Override
