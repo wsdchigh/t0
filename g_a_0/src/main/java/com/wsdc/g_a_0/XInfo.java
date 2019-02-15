@@ -65,6 +65,12 @@ public class XInfo {
         public boolean userParent;
 
         //  根据key匹配一个或者多个Activity?Fragment
+        /*
+         *  wrap    规则
+         *  100+    Activity
+         *  200+    Fragment
+         *  300+    其他(不参与路由)
+         */
         public int wrapKey;
 
         public String getKey() {

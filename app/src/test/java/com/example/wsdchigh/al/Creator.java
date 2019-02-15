@@ -7,6 +7,7 @@ import com.example.wsdchigh.al.activity.WrapActivity3;
 import com.example.wsdchigh.al.activity.WrapActivity4;
 import com.wsdc.g_a_0.ConfigureCreator;
 import com.wsdc.g_a_0.XInfo;
+import com.wsdc.g_a_0.XInfoAll;
 
 import org.junit.Test;
 
@@ -53,5 +54,11 @@ public class Creator {
         ConfigureCreator cc = new ConfigureCreator();
 
         cc.wrapJson(infos);
+
+        XInfoAll infoAll = new XInfoAll();
+        infoAll.version = "4.4.4";
+        infoAll.versionCode = 444;
+        //  创建apk.json
+        cc.infoAllJson(infoAll);
     }
 }

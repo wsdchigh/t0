@@ -2,8 +2,8 @@
   "infos": [
     {
       "http_url": "",
-      "local": true,
-      "local_url": "",
+      "local": false,
+      "local_url": "test-4.4.4.apk",
       "module_name": "test",
       "name": "test-4.4.4.apk",
       "plugins": [
@@ -17,7 +17,7 @@
         },
         {
           "iDataPath": "com.wsdc.g_a_0.plugin.inner.DefaultMainIData",
-          "key": "/global/global_main",
+          "key": "/test/global_main",
           "proxyPath": "com.wsdchigh.plugin_test.plugin.global.GlobalProxy",
           "userParent": false,
           "viewHolderPath": "com.wsdchigh.plugin_test.plugin.global.GlobalViewHolder",

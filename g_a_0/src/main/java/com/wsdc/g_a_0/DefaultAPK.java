@@ -3,17 +3,19 @@ package com.wsdc.g_a_0;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.util.Log;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import dalvik.system.DexClassLoader;
+import dalvik.system.BaseDexClassLoader;
+import dalvik.system.PathClassLoader;
 
 public class DefaultAPK implements APK {
     XInfo info;
 
-    DexClassLoader classLoader;
+    BaseDexClassLoader classLoader;
     Resources resources;
 
     public DefaultAPK(XInfo info,Context context,ClassLoader parent) {
@@ -21,15 +23,32 @@ public class DefaultAPK implements APK {
 
         //  标识为自身APK携带的模块
         if(info.local){
-            classLoader = (DexClassLoader) context.getClassLoader();
+            classLoader = (BaseDexClassLoader) context.getClassLoader();
             resources = context.getResources();
             return;
         }
         File optimizedDirectoryFile = context.getDir("dex", Context.MODE_PRIVATE);
 
-        String filePath = new File(context.getFilesDir()+"start_wsdc/"+info.local_url).getAbsolutePath();
+        File file0 = new File(context.getFilesDir() + "/start_wsdc/apks/" + info.local_url);
+        Log.d("wsdc", "file is exists = "+file0.exists());
+        Log.d("wsdc", "file path "+file0.getAbsolutePath());
+        String filePath = file0.getAbsolutePath();
+
+        /*
         classLoader = new DexClassLoader(filePath,
                 optimizedDirectoryFile.getAbsolutePath(),null,parent);
+                */
+
+
+        classLoader = new PathClassLoader(filePath,parent);
+
+        try {
+            Class<?> clz = classLoader.loadClass("com.wsdchigh.plugin_test.plugin.global.GlobalProxy");
+            Log.d("wsdc", "class class class" );
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            Log.d("wsdc", "failure failure failure");
+        }
 
         try{
             AssetManager assetManager = AssetManager.class.newInstance();   // 创建AssetManager实例
@@ -50,7 +69,7 @@ public class DefaultAPK implements APK {
     }
 
     @Override
-    public DexClassLoader classLoader() {
+    public BaseDexClassLoader classLoader() {
         return classLoader;
     }
 

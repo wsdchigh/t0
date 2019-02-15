@@ -1,1 +1,1 @@
-[{"path":"com.wsdchigh.plugin_test.MainActivity","type":"activity","wrapKey":101}]
+[{"path":"com.example.wsdchigh.al.activity.GuideActivity","type":"activity","wrapKey":101},{"path":"com.example.wsdchigh.al.activity.WrapActivity1","type":"activity","wrapKey":102},{"path":"com.example.wsdchigh.al.activity.WrapActivity2","type":"activity","wrapKey":103},{"path":"com.example.wsdchigh.al.activity.WrapActivity3","type":"activity","wrapKey":104},{"path":"com.example.wsdchigh.al.activity.WrapActivity4","type":"activity","wrapKey":105}]

@@ -2,7 +2,6 @@
   "infos": [
     {
       "http_url": "",
-      "isLocal": false,
       "local": false,
       "local_url": "",
       "module_name": "test",
@@ -15,6 +14,14 @@
           "userParent": false,
           "viewHolderPath": "com.wsdchigh.plugin_test.plugin.GuideViewHolder",
           "wrapKey": 101
+        },
+        {
+          "iDataPath": "com.wsdc.g_a_0.plugin.inner.DefaultMainIData",
+          "key": "/test/global_main",
+          "proxyPath": "com.wsdchigh.plugin_test.plugin.global.GlobalProxy",
+          "userParent": false,
+          "viewHolderPath": "com.wsdchigh.plugin_test.plugin.global.GlobalViewHolder",
+          "wrapKey": 102
         }
       ],
       "version": "4.4.4"
@@ -24,9 +31,29 @@
   "versionCode": 444,
   "wrapInfos": [
     {
-      "path": "com.wsdchigh.plugin_test.MainActivity",
+      "path": "com.example.wsdchigh.al.activity.GuideActivity",
       "type": "activity",
       "wrapKey": 101
+    },
+    {
+      "path": "com.example.wsdchigh.al.activity.WrapActivity1",
+      "type": "activity",
+      "wrapKey": 102
+    },
+    {
+      "path": "com.example.wsdchigh.al.activity.WrapActivity2",
+      "type": "activity",
+      "wrapKey": 103
+    },
+    {
+      "path": "com.example.wsdchigh.al.activity.WrapActivity3",
+      "type": "activity",
+      "wrapKey": 104
+    },
+    {
+      "path": "com.example.wsdchigh.al.activity.WrapActivity4",
+      "type": "activity",
+      "wrapKey": 105
     }
   ]
 }

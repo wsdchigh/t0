@@ -1,6 +1,7 @@
 package com.wsdc.g_a_0.router.inner;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.wsdc.g_a_0.APK;
 import com.wsdc.g_a_0.DefaultAPK;
@@ -100,6 +101,10 @@ public class DefaultIRouterMapImpl implements IRouterMap {
         IPlugin rtn = null;
         RouterUtil.RouterBean parse = RouterUtil.parse(key);
         APK apk = apkMap.get(parse.module_name);
+        for (String s : apkMap.keySet()) {
+            Log.d("wsdc", "s = "+s);
+        }
+        Log.d("wsdc", "need key = "+parse.module_name);
         rtn = new DefaultPlugin(null,key,apk);
         return rtn;
     }

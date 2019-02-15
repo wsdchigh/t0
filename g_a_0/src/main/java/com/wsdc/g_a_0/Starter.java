@@ -2,15 +2,18 @@ package com.wsdc.g_a_0;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 import com.wsdc.file.FileUtils;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.router.IRouter;
+import com.wsdc.g_a_0.router.IRouterMap;
 import com.wsdc.g_a_0.router.inner.DefaultIRouterImpl;
 import com.wsdc.io.IOUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -156,18 +159,32 @@ public class Starter{
             apkFiles = new File(rootFile,apk_files);
             apkFiles.mkdirs();
 
+            Log.d("wsdc", "apk files   "+apkFiles.exists());
+
             OutputStream os = FileUtils.outputStream(apkJson);
             IOUtils.write(is,os);
 
             String[] apks = assets.list("apks");
             for (String fileName : apks) {
-                final String name = fileName.replace("apks/","");
-                final File tmpFile = new File(apkFiles,name);
+                final File tmpFile = new File(apkFiles,fileName);
+                Log.d("wsdc", "tmpFile path = "+tmpFile.getAbsolutePath());
+                tmpFile.createNewFile();
 
-                IOUtils.write(assets.open(fileName),FileUtils.outputStream(tmpFile));
+                IOUtils.write(assets.open("apks/"+fileName),FileUtils.outputStream(tmpFile));
+            }
+
+            Log.d("wsdc", "--------------------------------");
+            File[] files = apkFiles.listFiles();
+            Log.d("wsdc", "size = "+files.length);
+            for (File file : files) {
+                FileInputStream fis = new FileInputStream(file);
+                Log.d("wsdc", "file name = "+file.getAbsolutePath()+"   size = "+fis.available());
+                fis.close();
+
             }
         } catch (IOException e) {
             e.printStackTrace();
+            Log.d("wsdc", "IO Exception "+" msg = "+e.getMessage());
         }
     }
 
@@ -180,6 +197,8 @@ public class Starter{
             byte[] data = IOUtils.read(FileUtils.inputStream(apkJson));
             infoAll = JSON.parseObject(new String(data,"utf-8"),XInfoAll.class);
             router = new DefaultIRouterImpl(infoAll,context);
+            globalPlugin = router.map().getNormalPlugin("/test/global_main");
+            globalPlugin.install(context,-1,new Object());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -217,6 +236,10 @@ public class Starter{
 
     public IPlugin globalPlugin(){
         return globalPlugin;
+    }
+
+    public IRouterMap map(){
+        return router.map();
     }
 
 }

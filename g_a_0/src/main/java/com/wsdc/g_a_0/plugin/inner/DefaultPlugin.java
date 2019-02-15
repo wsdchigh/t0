@@ -3,6 +3,7 @@ package com.wsdc.g_a_0.plugin.inner;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.wsdc.g_a_0.APK;
 import com.wsdc.g_a_0.Starter;
@@ -15,14 +16,25 @@ import com.wsdc.g_a_0.plugin.IViewHolder;
 import com.wsdc.g_a_0.router.IRouter;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import dalvik.system.DexClassLoader;
+import dalvik.system.BaseDexClassLoader;
 
+/*
+ *  插件的key
+ *  <li>    模块 + 路由地址
+ *
+ *  <li>    指定的key有特殊含义
+ *          <li>    /global/global_plugin       全局的插件
+ *                  <li>    这个插件，全局有效
+ *
+ *          <li>    插件名字可以任意指定，可以是任意apk
+ *                  我们需要一个全局的插件处理全局数据
+ *                  <li>    在解析的时候定义好即可
+ */
 public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     private Context context;
     private IRouter router;
@@ -46,7 +58,10 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
 
     private Object tag;
 
-    //  创建顶层的插件
+    /*
+     *  创建顶级插件
+     *  <li>    非路由插件也是使用这个函数构建
+     */
     public DefaultPlugin(IRouter router,String key, APK apk) {
         this.router = router;
         this.key = key;
@@ -74,6 +89,7 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
      *  二级插件的创建
      *  <li>    Fragment
      *  <li>    Fragment的切换需要预先构建Fragment，所以，这里需要创建wrap
+     *
      */
     public DefaultPlugin(IRouter router, String key, APK apk, IPlugin parent, XInfoAll infoAll) {
         this.router = router;
@@ -102,7 +118,7 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
         }
 
         //  二级路由 Fragment 根据配置文件创建一个
-        DexClassLoader classLoader = apk.classLoader();
+        BaseDexClassLoader classLoader = apk.classLoader();
         try {
             /*
              *  只要类型匹对
@@ -204,6 +220,7 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
         /*
          *  生成 proxy data viewHolder信息
          */
+        Log.d("wsdc", "apk == null ?"+(apk == null));
         List<XInfo.XPlugin> plugins = apk.info().plugins;
         XInfo.XPlugin plugin0 = null;
         for (XInfo.XPlugin plugin : plugins) {
@@ -217,7 +234,7 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
             throw  new RuntimeException("不存在指定的插件");
         }
 
-        final DexClassLoader classLoader = apk.classLoader();
+        final BaseDexClassLoader classLoader = apk.classLoader();
         try {
             Class proxyClz = classLoader.loadClass(plugin0.proxyPath);
             Class viewHolderClz = classLoader.loadClass(plugin0.viewHolderPath);
@@ -255,22 +272,20 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
             /*
              *  全局插件的注册信息
              *  <li>    任何插件均自动注册到全局插件的数据中心中
+             *  <li>    构建全局插件的时候，是无法获取全局插件的
              */
-            final IPlugin globalPlugin = Starter.getInstance().globalPlugin();
-            if(globalPlugin != null){
-                globalPlugin.data().register(viewHolder);
+            if(Starter.getInstance() != null){
+                final IPlugin globalPlugin = Starter.getInstance().globalPlugin();
+                if(globalPlugin != null){
+                    globalPlugin.data().register(viewHolder);
+                }
             }
+
+            Log.d("wsdc", "插件是否安装");
             return ;
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            Log.d("wsdc", "exception = "+e.getClass().getName()+"   msg = "+e.getMessage());
         }
 
         throw new RuntimeException("插件安装异常");

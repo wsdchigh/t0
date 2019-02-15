@@ -6,6 +6,8 @@ import com.wsdc.g_a_0.XInfoAll;
 import com.wsdc.g_a_0.plugin.inner.DefaultMainIData;
 import com.wsdchigh.plugin_test.plugin.GuideProxy;
 import com.wsdchigh.plugin_test.plugin.GuideViewHolder;
+import com.wsdchigh.plugin_test.plugin.global.GlobalProxy;
+import com.wsdchigh.plugin_test.plugin.global.GlobalViewHolder;
 
 import org.junit.Test;
 
@@ -50,6 +52,15 @@ public class Creator {
         plugin0.proxyPath = GuideProxy.class.getName();
         plugin0.viewHolderPath = GuideViewHolder.class.getName();
         plugin0.iDataPath = DefaultMainIData.class.getName();
+
+        XInfo.XPlugin globalPlugin = new XInfo.XPlugin();
+        info.plugins.add(globalPlugin);
+        globalPlugin.key = "/global/global_main";
+        globalPlugin.wrapKey = 102;
+        globalPlugin.userParent = false;
+        globalPlugin.proxyPath = GlobalProxy.class.getName();
+        globalPlugin.viewHolderPath = GlobalViewHolder.class.getName();
+        globalPlugin.iDataPath = DefaultMainIData.class.getName();
 
         cc.infoJson(info);
 

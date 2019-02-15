@@ -1,1 +1,26 @@
-{"http_url":"","local":true,"local_url":"","module_name":"test","name":"test-4.4.4.apk","plugins":[{"iDataPath":"com.wsdc.g_a_0.plugin.inner.DefaultMainIData","key":"/test/t0","proxyPath":"com.wsdchigh.plugin_test.plugin.GuideProxy","userParent":false,"viewHolderPath":"com.wsdchigh.plugin_test.plugin.GuideViewHolder","wrapKey":101}],"version":"4.4.4"}
+{
+  "http_url": "",
+  "local": true,
+  "local_url": "",
+  "module_name": "test",
+  "name": "test-4.4.4.apk",
+  "plugins": [
+    {
+      "iDataPath": "com.wsdc.g_a_0.plugin.inner.DefaultMainIData",
+      "key": "/test/t0",
+      "proxyPath": "com.wsdchigh.plugin_test.plugin.GuideProxy",
+      "userParent": false,
+      "viewHolderPath": "com.wsdchigh.plugin_test.plugin.GuideViewHolder",
+      "wrapKey": 101
+    },
+    {
+      "iDataPath": "com.wsdc.g_a_0.plugin.inner.DefaultMainIData",
+      "key": "/global/global_main",
+      "proxyPath": "com.wsdchigh.plugin_test.plugin.global.GlobalProxy",
+      "userParent": false,
+      "viewHolderPath": "com.wsdchigh.plugin_test.plugin.global.GlobalViewHolder",
+      "wrapKey": 102
+    }
+  ],
+  "version": "4.4.4"
+}

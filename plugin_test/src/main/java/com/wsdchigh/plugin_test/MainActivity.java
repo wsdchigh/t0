@@ -45,11 +45,22 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public Resources getResources() {
-        ResourceProxy1 resources = (ResourceProxy1) plugin.apk().resources();
-        if(resources.getLocal() != super.getResources()){
-            resources.setLocal(super.getResources());
+        /*
+         *  主app中使用的是内置的Resources
+         *  <li>    插件中使用的是代理Resources
+         */
+        final Resources r0 = plugin.apk().resources();
+        if(r0 instanceof ResourceProxy1){
+            ResourceProxy1 resources = (ResourceProxy1) plugin.apk().resources();
+            if(resources.getLocal() != super.getResources()){
+                resources.setLocal(super.getResources());
+            }
+            return resources;
+        }else{
+            return super.getResources();
         }
-        return resources;
+
+
     }
 
     @Override
