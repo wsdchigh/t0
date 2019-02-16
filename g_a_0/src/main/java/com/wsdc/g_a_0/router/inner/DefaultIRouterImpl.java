@@ -1,11 +1,14 @@
 package com.wsdc.g_a_0.router.inner;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 
 import com.wsdc.g_a_0.XInfoAll;
 import com.wsdc.g_a_0.plugin.IData;
@@ -20,8 +23,15 @@ import java.util.List;
  *  默认路由实现
  *  <li>    路由走的都是底层的插件
  *          <li>    插件下面不在有子插件
+ *
+ *  <li>    监听Activity的周期
+ *          <li>    在Activity类中的onCreate函数自动通知application，发送信息
+ *          <li>    所以关于插件的获取一定要在Activity.onCreate()之前，推荐使用代码块的方式去获取当前的插件信息
+ *                  <li>    那么在onCreate()中就可以正常的使用插件了
+ *
+ *          <li>    也可以选择在回调中去获取插件信息    (后期会考虑这个)
  */
-public class DefaultIRouterImpl implements IRouter {
+public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycleCallbacks {
     IRouterMap routerMap ;
     IPlugin currentIPlugin;
     IData<Integer> data;
@@ -32,6 +42,8 @@ public class DefaultIRouterImpl implements IRouter {
     public DefaultIRouterImpl(XInfoAll infoAll, Context context) {
         this.infoAll = infoAll;
         routerMap = new DefaultIRouterMapImpl(infoAll,context,this);
+
+        ((Application) context).registerActivityLifecycleCallbacks(this);
     }
 
     @Override
@@ -46,6 +58,7 @@ public class DefaultIRouterImpl implements IRouter {
      *          <li>    但是插件不能重复，如果插件一旦重复，那么会关闭之前的插件
      *                  <li>    所处的activity关闭
      *                  <li>    路由别表相关的插件一律移除
+     *
      */
     @Override
     public IPlugin go(String key, int mode) {
@@ -76,7 +89,10 @@ public class DefaultIRouterImpl implements IRouter {
                     //  是一个Activity
                     //  可以没有任何处理
                 }else{
-                    //  是一个Fragment parent=Activity
+                    /*
+                     *  <li>    Activity暂时没有初始化
+                     *  <li>    Activity暂时没启动
+                     */
                     IPlugin<Activity,Integer> parent = (IPlugin<Activity,Integer>) plugin.parent();
                     Activity activity = parent.wrap();
                     List<IPlugin> children = parent.children();
@@ -108,6 +124,7 @@ public class DefaultIRouterImpl implements IRouter {
                  */
                 if((plugin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
                     if((origin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
+
 
                         Activity activity = (Activity) origin.wrap();
                         Activity activityGo = (Activity) plugin.wrap();
@@ -266,5 +283,61 @@ public class DefaultIRouterImpl implements IRouter {
     @Override
     public XInfoAll infoAll() {
         return infoAll;
+    }
+
+    @Override
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        /*
+         *  Activity的启动，联合当前路由所处的插件进行判断
+         *  <li>    如果当前插件是二级插件，此时需要调用Fragment进行处理
+         *  <li>    刚刚启动，是不会有任何Fragment在里面的
+         */
+        if(getLevel(currentIPlugin) == 2){
+            final FragmentActivity fa = (FragmentActivity) activity;
+            FragmentTransaction transaction = fa.getSupportFragmentManager().beginTransaction();
+
+            Fragment fragment = (Fragment) currentIPlugin.wrap();
+            IPlugin parent = (IPlugin) currentIPlugin.parent();
+            transaction.add(parent.childLayout(),fragment);
+            transaction.show(fragment);
+            transaction.commit();
+        }
+    }
+
+    @Override
+    public void onActivityStarted(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityStopped(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+
+    }
+
+    @Override
+    public void onActivityDestroyed(Activity activity) {
+
+    }
+
+
+    private int getLevel(IPlugin plugin){
+        int status = plugin.status();
+        int rtn = status & IPlugin.STATUS_LEVEL_MASK;
+        return rtn;
     }
 }

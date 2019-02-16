@@ -1,12 +1,18 @@
-package com.example.wsdchigh.al;
+package com.wsdc.g_a_0;
 
 import android.app.Application;
 
-import com.wsdc.g_a_0.Starter;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.router.IRouter;
 
-public class MainApplication extends Application {
+/*
+ *  可以继承这个Application
+ *  <li>    可以直接使用
+ *  <li>    可以复制里面的代码到自己的Application之中
+ *
+ *
+ */
+public class BaseApplication extends Application {
     Starter starter;
     IRouter router;
 
@@ -17,5 +23,6 @@ public class MainApplication extends Application {
         starter = Starter.getInstance();
         router = starter.getRouter();
         router.go("/test/t0",IPlugin.START_COMMON | (IPlugin.START_COMMON >> 2));
+
     }
 }

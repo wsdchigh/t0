@@ -14,7 +14,15 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-
+/*
+ *  data    组件数据载体
+ *  <li>    全局的data
+ *  <li>    parent的data
+ *  <li>    自身的data
+ *
+ *  <li>    除了put get函数之外，其他函数，需要在同一个线程中调用(通常是主线程)
+ *          <li>    避免不必要的并发影响
+ */
 public class DefaultMainIData implements IData<Integer> {
     IPlugin plugin;
 

@@ -64,6 +64,9 @@ public class XInfo {
         public String iDataPath;
         public boolean userParent;
 
+        //  如果下面有Fragment，那么Activity需要提供一个位置(View)
+        public int fragmentContainerID;
+
         //  根据key匹配一个或者多个Activity?Fragment
         /*
          *  wrap    规则
@@ -127,6 +130,14 @@ public class XInfo {
 
         public void setWrapKey(int wrapKey) {
             this.wrapKey = wrapKey;
+        }
+
+        public int getFragmentContainerID() {
+            return fragmentContainerID;
+        }
+
+        public void setFragmentContainerID(int fragmentContainerID) {
+            this.fragmentContainerID = fragmentContainerID;
         }
     }
 

@@ -57,6 +57,7 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     private IPlugin currentChild;
 
     private Object tag;
+    private int childContainerID;
 
     /*
      *  创建顶级插件
@@ -80,6 +81,18 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
         };
 
         status = status | 1;
+
+        //  创建实例    (Fragment)
+        List<XInfo.XPlugin> plugins = apk.info().plugins;
+        XInfo.XPlugin plugin0 = null;
+        for (XInfo.XPlugin plugin : plugins) {
+            if(plugin.key.equals(key)){
+                plugin0 = plugin;
+                break;
+            }
+        }
+
+        childContainerID = plugin0.fragmentContainerID;
 
         //  一级插件是Activity，由系统去创建，我们不去创建
         //  wrap 通过install去获取
@@ -167,6 +180,11 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     @Override
     public int id() {
         return container_id;
+    }
+
+    @Override
+    public int childLayout() {
+        return childContainerID;
     }
 
     @Override

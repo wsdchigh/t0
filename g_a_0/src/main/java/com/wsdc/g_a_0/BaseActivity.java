@@ -3,6 +3,7 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Window;
 
 import com.wsdc.g_a_0.plugin.IPlugin;
@@ -17,9 +18,9 @@ import com.wsdc.g_a_0.plugin.IPlugin;
  *  <li>    为了方便操作，建议activity集成这个Activity
  *          <li>    如果没有要求，只要简单继承即可
  */
-public class GuideActivity extends FragmentActivity {
+public class BaseActivity extends FragmentActivity {
     //  占位10M的内存，用于测试的时候，检测内存是否泄漏   打包的时候删除即可
-    byte[] testMemory = new byte[1024 * 1024 * 10];
+    //  byte[] testMemory = new byte[1024 * 1024 * 10];
     IPlugin<Activity,Integer> plugin;
 
     {

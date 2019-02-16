@@ -21,7 +21,7 @@
           "proxyPath": "com.wsdchigh.plugin_test.plugin.global.GlobalProxy",
           "userParent": false,
           "viewHolderPath": "com.wsdchigh.plugin_test.plugin.global.GlobalViewHolder",
-          "wrapKey": 102
+          "wrapKey": 300
         }
       ],
       "version": "4.4.4"

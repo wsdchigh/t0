@@ -101,6 +101,8 @@ public interface IPlugin<T,K> extends ILInk0<IPlugin>,IContainer0<IPlugin,K> {
     void uninstall();
 
     //  获取服务的对象
+    //  在没有安装期间  Activity Service是空的  不能调用这个函数去执行跳转
+    //  根据 wrapKey 获取对应的路径
     T wrap();
 
     //  唯一标识的key
@@ -125,6 +127,14 @@ public interface IPlugin<T,K> extends ILInk0<IPlugin>,IContainer0<IPlugin,K> {
      *  如果是fragment，需要一个fragment的ID
      */
     int id();
+
+    /*
+     *   如果是Activity+Fragment的组合路由
+     *   <li>    Activity需要一个ID，用于添加Fragment
+     *   <li>    R.id.container     这是一个Activity的View的ID，用于填充Fragment使用
+     *   <li>    这里直接保存为一个数字就好了
+     */
+    int childLayout();
 
     /*
      *  所处的APK位置
