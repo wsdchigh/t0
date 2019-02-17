@@ -8,8 +8,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 
+import com.wsdc.g_a_0.RouterUtil;
+import com.wsdc.g_a_0.XInfo;
 import com.wsdc.g_a_0.XInfoAll;
 import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
@@ -18,6 +19,8 @@ import com.wsdc.g_a_0.router.IRouterMap;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import dalvik.system.BaseDexClassLoader;
 
 /*
  *  默认路由实现
@@ -34,15 +37,20 @@ import java.util.List;
 public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycleCallbacks {
     IRouterMap routerMap ;
     IPlugin currentIPlugin;
+
+    //  记录上一次的插件
+    IPlugin lastPlugin;
     IData<Integer> data;
 
     List<IPlugin> pluginStack = new LinkedList<>();
     XInfoAll infoAll;
 
+    Context context;
+
     public DefaultIRouterImpl(XInfoAll infoAll, Context context) {
         this.infoAll = infoAll;
         routerMap = new DefaultIRouterMapImpl(infoAll,context,this);
-
+        this.context = context;
         ((Application) context).registerActivityLifecycleCallbacks(this);
     }
 
@@ -82,114 +90,149 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
              *  只有一种情况会触发   (origin)
              *  <li>    APP启动的时候，会等于null
              *          <li>    其余情况一律不会
+             *
+             *  <li>    只处理Activity之中两个Fragment的处理
+             *          <li>    其他一律是两个Activity之间处理
+             *          <li>    Activity没有实例化，针对plugin内部的处理，没有多大的操作空间
+             *
+             *  <li>    比对路由信息
              */
             if(origin == null){
-                //  因为前面没有，所以不需要对前面进行处理
-                if((plugin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
-                    //  是一个Activity
-                    //  可以没有任何处理
-                }else{
-                    /*
-                     *  <li>    Activity暂时没有初始化
-                     *  <li>    Activity暂时没启动
-                     */
-                    IPlugin<Activity,Integer> parent = (IPlugin<Activity,Integer>) plugin.parent();
-                    Activity activity = parent.wrap();
-                    List<IPlugin> children = parent.children();
 
-                    FragmentActivity activity0 = (FragmentActivity) activity;
-                    //  开启activity事务
-                    FragmentTransaction transaction = activity0.getSupportFragmentManager().beginTransaction();
+                if(false){
+                    //  因为前面没有，所以不需要对前面进行处理
+                    if((plugin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
+                        //  是一个Activity
+                        //  可以没有任何处理
+                    }else{
+                        /*
+                         *  <li>    Activity暂时没有初始化
+                         *  <li>    Activity暂时没启动
+                         */
+                        IPlugin<Activity,Integer> parent = (IPlugin<Activity,Integer>) plugin.parent();
+                        Activity activity = parent.wrap();
+                        List<IPlugin> children = parent.children();
 
-                    //  只有自己
-                    IPlugin<Fragment,Integer> iPlugin = children.get(0);
-                    Fragment wrap = iPlugin.wrap();
-                    transaction.add(iPlugin.id(),wrap);
-                    transaction.show(wrap);
-                    transaction.commit();
+                        FragmentActivity activity0 = (FragmentActivity) activity;
+                        //  开启activity事务
+                        FragmentTransaction transaction = activity0.getSupportFragmentManager().beginTransaction();
+
+                        //  只有自己
+                        IPlugin<Fragment,Integer> iPlugin = children.get(0);
+                        Fragment wrap = iPlugin.wrap();
+                        transaction.add(iPlugin.id(),wrap);
+                        transaction.show(wrap);
+                        transaction.commit();
+                    }
                 }
 
             }else{
+                RouterUtil.RouterBean originInfo = RouterUtil.parse(origin.key());
+                RouterUtil.RouterBean newInfo = RouterUtil.parse(plugin.key());
+
                 /*
-                 *  <li>    如果涉及到的是两个Activity之间的切换
-                 *          <li>    让两个Activity执行过渡特效
-                 *
-                 *  <li>    如果是涉及一个Activity的fragment切换
-                 *          <li>    让fragment执行切换特效
-                 *
-                 *  <li>    之所以携带一个父插件的启动参数
-                 *          <li>    如果涉及到两个activity的跳转
-                 *          <li>    如果此时是二级路由，那么需要判断前一个activity是否需要关闭   (根据父插件启动参数决定)
-                 *                  <li>    父插件启动参数，只有第一个设置的有效，之后的设置均无效
+                 *  一个Activity里两个Fragment的切换
                  */
-                if((plugin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
-                    if((origin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
+                if(originInfo.level ==2 &&
+                        originInfo.level == newInfo.level &&
+                        originInfo.module_name.equals(newInfo.module_name) &&
+                        originInfo.router_level_1.equals(newInfo.router_level_1)){
 
+                    IPlugin parentPlugin = (IPlugin) origin.parent();
+                    FragmentActivity fa = (FragmentActivity) parentPlugin.wrap();
 
-                        Activity activity = (Activity) origin.wrap();
-                        Activity activityGo = (Activity) plugin.wrap();
-                        Intent intent = new Intent(activity,activityGo.getClass());
-                        activity.startActivity(intent);
+                    Fragment of = (Fragment) origin.wrap();
+                    Fragment nf = (Fragment) plugin.wrap();
 
-                        //  是否需要关闭activity
-                        if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
-                            //  插件没有入栈 只需要引导退出即可
-                            activity.finish();
-                        }
-                    }else{
-                        IPlugin parent = (IPlugin) origin.wrap();
-                        Activity activity = (Activity) parent.wrap();
-                        Activity activityGo = (Activity) plugin.wrap();
-                        Intent intent = new Intent(activity,activityGo.getClass());
-                        activity.startActivity(intent);
-
-                        //  是否需要关闭activity
-                        if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
-                            /*
-                             *  一级插件不入栈，但是下面的二级插件可能入栈  所以需要清除对应插件信息
-                             *  <li>    引导activity的退出
-                             *  <li>    插件在卸载的时候自动清除栈中信息
-                             */
-                            activity.finish();
-                        }
-                    }
+                    FragmentTransaction transaction = fa.getSupportFragmentManager().beginTransaction();
+                    transaction.remove(of)
+                            .add(parentPlugin.childLayout(),nf)
+                            .show(nf)
+                            .commit();
                 }else{
-                    //
-                    if((origin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
-                        Activity originActivity = (Activity) origin.wrap();
-                        IPlugin goParent = (IPlugin) plugin.parent();
-                        Activity goActivity = (Activity) goParent.wrap();
-
-                        Intent intent = new Intent(originActivity,goActivity.getClass());
-                        originActivity.startActivity(intent);
-
-                        //  是否需要关闭activity
-                        if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
-                            //  插件没有入栈 只需要引导退出即可
-                            originActivity.finish();
-                        }
-
+                    /*
+                     *  Activity的跳转
+                     */
+                    Activity act = null;
+                    if(getLevel(origin) == 1){
+                        act = (Activity) origin.wrap();
                     }else{
-                        IPlugin originParent = (IPlugin) origin.parent();
-                        Activity originActivity = (Activity) originParent.wrap();
-                        IPlugin goParent = (IPlugin) plugin.parent();
-                        Activity goActivity = (Activity) goParent.wrap();
+                        IPlugin parentPlugin = (IPlugin) origin.parent();
+                        act = (Activity) parentPlugin.wrap();
+                    }
 
-                        if(originActivity == goActivity){
-                            //  使用fragment执行过渡特效
-                            final FragmentActivity act = (FragmentActivity) originActivity;
-                            FragmentTransaction transaction = act.getSupportFragmentManager().beginTransaction();
+                    XInfo.WrapInfo info = (XInfo.WrapInfo) plugin.getTag("wrapInfo");
+                    if(info == null){
+                        throw new RuntimeException("info is null ");
+                    }
 
-                            Fragment originFragment = (Fragment) origin.wrap();
-                            Fragment nowFragment = (Fragment) plugin.wrap();
+                    Class clz = null;
+                    try{
+                        BaseDexClassLoader classLoader = plugin.apk().classLoader();
+                        clz = classLoader.loadClass(info.path);
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
 
-                            transaction.add(goParent.id(),nowFragment);
-                            transaction.remove(originFragment);
-                            transaction.show(nowFragment);
+                    if(clz == null){
+                        throw new RuntimeException(" clz == null");
+                    }
+                    Intent intent = new Intent(context,clz);
+                    context.startActivity(intent);
+                }
 
-                            transaction.commit();
+
+                if(false){
+                    /*
+                     *  <li>    如果涉及到的是两个Activity之间的切换
+                     *          <li>    让两个Activity执行过渡特效
+                     *
+                     *  <li>    如果是涉及一个Activity的fragment切换
+                     *          <li>    让fragment执行切换特效
+                     *
+                     *  <li>    之所以携带一个父插件的启动参数
+                     *          <li>    如果涉及到两个activity的跳转
+                     *          <li>    如果此时是二级路由，那么需要判断前一个activity是否需要关闭   (根据父插件启动参数决定)
+                     *                  <li>    父插件启动参数，只有第一个设置的有效，之后的设置均无效
+                     */
+                    if((plugin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
+                        if((origin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
+
+
+                            Activity activity = (Activity) origin.wrap();
+                            Activity activityGo = (Activity) plugin.wrap();
+                            Intent intent = new Intent(activity,activityGo.getClass());
+                            activity.startActivity(intent);
+
+                            //  是否需要关闭activity
+                            if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
+                                //  插件没有入栈 只需要引导退出即可
+                                activity.finish();
+                            }
                         }else{
-                            //  使用activity执行过渡特效
+                            IPlugin parent = (IPlugin) origin.wrap();
+                            Activity activity = (Activity) parent.wrap();
+                            Activity activityGo = (Activity) plugin.wrap();
+                            Intent intent = new Intent(activity,activityGo.getClass());
+                            activity.startActivity(intent);
+
+                            //  是否需要关闭activity
+                            if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
+                                /*
+                                 *  一级插件不入栈，但是下面的二级插件可能入栈  所以需要清除对应插件信息
+                                 *  <li>    引导activity的退出
+                                 *  <li>    插件在卸载的时候自动清除栈中信息
+                                 */
+                                activity.finish();
+                            }
+                        }
+                    }else{
+                        //
+                        if((origin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
+                            Activity originActivity = (Activity) origin.wrap();
+                            IPlugin goParent = (IPlugin) plugin.parent();
+                            Activity goActivity = (Activity) goParent.wrap();
+
                             Intent intent = new Intent(originActivity,goActivity.getClass());
                             originActivity.startActivity(intent);
 
@@ -198,12 +241,44 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
                                 //  插件没有入栈 只需要引导退出即可
                                 originActivity.finish();
                             }
+
+                        }else{
+                            IPlugin originParent = (IPlugin) origin.parent();
+                            Activity originActivity = (Activity) originParent.wrap();
+                            IPlugin goParent = (IPlugin) plugin.parent();
+                            Activity goActivity = (Activity) goParent.wrap();
+
+                            if(originActivity == goActivity){
+                                //  使用fragment执行过渡特效
+                                final FragmentActivity act = (FragmentActivity) originActivity;
+                                FragmentTransaction transaction = act.getSupportFragmentManager().beginTransaction();
+
+                                Fragment originFragment = (Fragment) origin.wrap();
+                                Fragment nowFragment = (Fragment) plugin.wrap();
+
+                                transaction.add(goParent.id(),nowFragment);
+                                transaction.remove(originFragment);
+                                transaction.show(nowFragment);
+
+                                transaction.commit();
+                            }else{
+                                //  使用activity执行过渡特效
+                                Intent intent = new Intent(originActivity,goActivity.getClass());
+                                originActivity.startActivity(intent);
+
+                                //  是否需要关闭activity
+                                if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
+                                    //  插件没有入栈 只需要引导退出即可
+                                    originActivity.finish();
+                                }
+                            }
                         }
                     }
                 }
             }
 
             //  更新当前插件
+            lastPlugin = currentIPlugin;
             currentIPlugin = plugin;
             //  插件是否需要入栈
             if((plugin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_COMMON){
@@ -306,12 +381,38 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
 
     @Override
     public void onActivityStarted(Activity activity) {
-
+        /*
+         *  如果需要后退到首页   (第一个路由)
+         *  <li>    需要在这里清空路由信息 (可以能是fragment管理)
+         *          <li>    清空fragment信息，只保留指定的一个
+         */
     }
 
     @Override
     public void onActivityResumed(Activity activity) {
+        /*
+         *  是否需要引导Activity的退出
+         *  <li>    等新的Activity显示的时候，才引导就得Activity退出
+         *          <li>    不会出现黑屏
+         *
+         *  <li>    如果前一个插件的Activity不参与路由，那么引导Activity退出
+         */
+        if(lastPlugin != null){
+            Activity act = null;
+            IPlugin tmpPlugin = null;
+            if(getLevel(lastPlugin) == 1){
+                act = (Activity) lastPlugin.wrap();
+                tmpPlugin = lastPlugin;
+            }else{
+                tmpPlugin = (IPlugin) lastPlugin.parent();
+                act = (Activity) tmpPlugin.wrap();
+            }
 
+            if((tmpPlugin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
+                act.finish();
+            }
+
+        }
     }
 
     @Override

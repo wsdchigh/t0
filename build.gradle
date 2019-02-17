@@ -1,4 +1,8 @@
+import java.util.function.BiConsumer
+//apply from: 'script/ssh0.gradle'
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+apply plugin: 'org.hidetake.ssh'
+
 
 buildscript {
     
@@ -14,6 +18,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.2.0'
         //  如果想要向java那样引入架包，就在这里做
         classpath 'com.alibaba:fastjson:1.2.55'
+        classpath 'org.hidetake:gradle-ssh-plugin:2.9.0'
         
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -34,4 +39,202 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+
+//  没有用   暂时丢弃
+task test0 << {
+
+    Map<String,Project> projects = rootProject.childProjects;
+
+    List<String> urls = new ArrayList<>();
+    List<String> classNames = new ArrayList<>();
+    String mainModule = "com.wsdc.pluin_test";
+
+    /*
+     *  通过main函数会导致 ""丢失 ，所以选择通过文件的方式发送
+     */
+    File tmpFile = rootProject.file("configure_file1")
+
+    delete tmpFile;
+    tmpFile.mkdirs();
+    new File(tmpFile,"apks");
+    new File(tmpFile,"json");
+
+    String destPath = tmpFile.absolutePath
+
+    //  限制class文件必须是 com.wsdc 开头  .class结尾
+    String classSuffxi = "com.wsdc"
+    String buildClassPath = "intermediates\\javac\\debug\\compileDebugJavaWithJavac\\classes";
+
+    projects.forEach(new BiConsumer<String, Project>() {
+        @Override
+        void accept(String s, Project project) {
+            //println("name = "+s+"    project = "+project.name+"     file path = "+project.path+"    build path = "+project.buildDir)
+
+            File rootFile0 = new File(project.buildDir,buildClassPath);
+            String rootPath0 = rootFile0.absolutePath+"\\";
+            urls.add(rootFile0.absolutePath);
+
+            List<File>[] array = new List<File>[2];
+            array[0] = new ArrayList<>();
+            array[1] = new ArrayList<>();
+
+            List<String> tmp = new ArrayList<>();
+
+            listFiles(array,rootFile0);
+
+            def size = array[1].size();
+            for(def i= 0;i < size;i++){
+                File file = array[1].get(i);
+                String filePath0 = file.absolutePath.replace(rootPath0,"");
+                if(filePath0.endsWith(".class")){
+                    filePath0 = filePath0.replace(".class","");
+                    filePath0 = filePath0.replace("\\",".");
+
+                    if(filePath0.startsWith(classSuffxi)){
+                        if(filePath0.contains("alibaba")){
+
+                        }
+                        tmp.add(filePath0)
+                    }
+                }
+            }
+
+            classNames.addAll(tmp);
+
+
+
+        }
+    })
+
+    //println classNames.size()
+    classNames.forEach {
+        //println it
+    }
+
+    urls.forEach {
+        //println it
+    }
+
+    Bean0 b0 = new Bean0(urls,classNames,mainModule,destPath);
+
+    println destPath
+
+    //  使用 g_a_0目录下面的解析器去 执行注解
+    String mainPath = null;
+    urls.forEach {
+        if(it.contains("g_a_0")){
+            mainPath = it;
+        }
+    }
+
+    def string = com.alibaba.fastjson.JSON.toJSONString(b0);
+
+    File file = new File(tmpFile,"tmp.json");
+    OutputStream os = new FileOutputStream(file);
+    os.write(string.getBytes());
+    os.flush();
+    os.close()
+
+    javaexec {
+        classpath mainPath
+        main "com.wsdc.g_a_0.annotation.PluginProcessor"
+        args file.absolutePath,"E:\\al\\jars\\fastjson-1.2.55.jar"
+    }
+
+    println "结束"
+
+    println string
+    /*
+   javaexec {
+       classpath "E:\\al\\g_a_0\\build\\intermediates\\javac\\debug\\compileDebugJavaWithJavac\\classes"
+       main "com.wsdc.g_a_0.annotation.PluginProcessor"
+       args "a","b","c","d"
+   }
+
+   exec {
+       workingDir new File("E:\\abc")
+       commandLine "git","init"
+   }
+   */
+
+}
+
+remotes {
+
+}
+
+task test1 << {
+
+}
+
+
+def listFiles(array,file){
+    if(file.isDirectory()){
+        array[0].add(file)
+        File[] files = file.listFiles()
+        for (File f1 : files) {
+            listFiles(array,f1)
+        }
+    }else{
+        array[1].add(file)
+    }
+}
+
+class Bean0{
+    List<String> urls;
+    List<String> classNames;
+    String wrapMain;
+    String destPath;
+
+    Bean0() {
+    }
+
+    Bean0(List<String> urls, List<String> classNames, String wrapMain, String destPath) {
+        this.urls = urls
+        this.classNames = classNames
+        this.wrapMain = wrapMain
+        this.destPath = destPath
+    }
+
+    public List<String> getUrls() {
+        return urls;
+    }
+
+    public void setUrls(List<String> urls) {
+        this.urls = urls;
+    }
+
+    public List<String> getClassNames() {
+        return classNames;
+    }
+
+    public void setClassNames(List<String> classNames) {
+        this.classNames = classNames;
+    }
+
+    public String getWrapMain() {
+        return wrapMain;
+    }
+
+    public void setWrapMain(String wrapMain) {
+        this.wrapMain = wrapMain;
+    }
+
+    public String getDestPath() {
+        return destPath;
+    }
+
+    public void setDestPath(String destPath) {
+        this.destPath = destPath;
+    }
+}
+
+task task11 <<{
+    def s = "a \r\nb";
+    println s
+
+    s.replace("\r\n","");
+    println s
 }

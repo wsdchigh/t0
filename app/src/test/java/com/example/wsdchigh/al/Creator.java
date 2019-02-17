@@ -1,10 +1,11 @@
 package com.example.wsdchigh.al;
 
-import com.example.wsdchigh.al.activity.GuideActivity;
-import com.example.wsdchigh.al.activity.WrapActivity1;
-import com.example.wsdchigh.al.activity.WrapActivity2;
-import com.example.wsdchigh.al.activity.WrapActivity3;
-import com.example.wsdchigh.al.activity.WrapActivity4;
+
+import com.wsdc.app.activity.GuideActivity;
+import com.wsdc.app.activity.WrapActivity1;
+import com.wsdc.app.activity.WrapActivity2;
+import com.wsdc.app.activity.WrapActivity3;
+import com.wsdc.app.activity.WrapActivity4;
 import com.wsdc.g_a_0.ConfigureCreator;
 import com.wsdc.g_a_0.XInfo;
 import com.wsdc.g_a_0.XInfoAll;

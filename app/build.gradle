@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 apply from: '../rely0.gradle'
+//apply from: '../script/ssh0.gradle'
+
+
 
 android {
     compileSdkVersion 28
@@ -36,3 +39,5 @@ dependencies {
 
     implementation project(':g_a_0')
 }
+
+

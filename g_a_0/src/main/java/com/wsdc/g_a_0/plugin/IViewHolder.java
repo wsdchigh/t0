@@ -2,6 +2,7 @@ package com.wsdc.g_a_0.plugin;
 
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.wsdc.g_j_0.IPeriod0;
 
@@ -13,7 +14,11 @@ import com.wsdc.g_j_0.IPeriod0;
  *  <li>    T
  */
 public interface IViewHolder<T> extends IPeriod0<Context>,IDataChangeListener<IData,Integer>{
-    View install(Context context,T t);
+    /*
+     *  Fragment需要一个parent
+     *  <li>    这个就是Activity中的容器View
+     */
+    View install(Context context, T t, ViewGroup parent);
 
     IData data();
 

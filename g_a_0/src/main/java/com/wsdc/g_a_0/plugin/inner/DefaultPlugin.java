@@ -18,6 +18,8 @@ import com.wsdc.g_a_0.router.IRouter;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -55,15 +57,16 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     private APK apk;
 
     private IPlugin currentChild;
-
-    private Object tag;
+    private Map<String,Object> tagMap = new TreeMap<>();
     private int childContainerID;
+
+    private XInfo.WrapInfo wInfo;
 
     /*
      *  创建顶级插件
      *  <li>    非路由插件也是使用这个函数构建
      */
-    public DefaultPlugin(IRouter router,String key, APK apk) {
+    public DefaultPlugin(IRouter router,String key, APK apk,XInfoAll infoAll) {
         this.router = router;
         this.key = key;
         this.apk = apk;
@@ -92,6 +95,16 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
             }
         }
 
+        List<XInfo.WrapInfo> wrapInfos = infoAll.wrapInfos;
+        XInfo.WrapInfo wrapInfo0 = null;
+        for (XInfo.WrapInfo wrapInfo : wrapInfos) {
+            if(wrapInfo.wrapKey == plugin0.wrapKey){
+                wrapInfo0 = wrapInfo;
+            }
+        }
+        wInfo = wrapInfo0;
+        setTag("wrapInfo",wInfo);
+
         childContainerID = plugin0.fragmentContainerID;
 
         //  一级插件是Activity，由系统去创建，我们不去创建
@@ -111,7 +124,8 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
         this.handler = parent.handler();
         this.apk = apk;
         parent.register(this);
-        status = status | ((parent.status() & STATUS_LEVEL_MASK) + 1);
+        Log.d("wsdc", "等级值  = "+((parent.status() & STATUS_LEVEL_MASK) + 1)+"   parent = "+parent.status());
+        status = status | 2;
 
         //  创建实例    (Fragment)
         List<XInfo.XPlugin> plugins = apk.info().plugins;
@@ -125,10 +139,15 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
         List<XInfo.WrapInfo> wrapInfos = infoAll.wrapInfos;
         XInfo.WrapInfo wrapInfo0 = null;
         for (XInfo.WrapInfo wrapInfo : wrapInfos) {
+            Log.d("wsdc", "wrap = "+wrapInfo.wrapKey+"      plugin = "+plugin0.wrapKey);
             if(wrapInfo.wrapKey == plugin0.wrapKey){
                 wrapInfo0 = wrapInfo;
             }
         }
+
+        Log.d("wsdc", "wrapInfo == null = "+(wrapInfo0 == null)+"   key = ");
+        wInfo = wrapInfo0;
+        setTag("wrapInfo",wInfo);
 
         //  二级路由 Fragment 根据配置文件创建一个
         BaseDexClassLoader classLoader = apk.classLoader();
@@ -193,13 +212,13 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     }
 
     @Override
-    public void setTag(Object o) {
-        this.tag = o;
+    public void setTag(String key, Object value) {
+        tagMap.put(key,value);
     }
 
     @Override
-    public Object getTag() {
-        return tag;
+    public Object getTag(String key) {
+        return tagMap.get(key);
     }
 
     @Override
@@ -274,6 +293,20 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
                 data = (IData) dataConstructor.newInstance(this);
             }
 
+            if(proxy == null){
+                throw new RuntimeException("proxy == null");
+            }
+
+            if(viewHolder == null){
+                throw new RuntimeException("viewHolder == null");
+            }
+
+            if(data == null){
+                throw new RuntimeException("data == null");
+            }
+
+            Log.d("wsdc", "hash = "+hashCode());
+
             //  数据中心注册观察者
             data.register(viewHolder);
 
@@ -283,6 +316,8 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
              */
             if(parent != null){
                 if(data != parent.data()){
+                    Log.d("wsdc", "parent hash = "+parent.hashCode()+"  self key = "+hashCode()+"  parent key = "+parent.key());
+                    Log.d("wsdc", "parent = "+(parent == null)+"    data = "+(parent.data() == null));
                     parent.data().register(viewHolder);
                 }
             }
@@ -298,8 +333,6 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
                     globalPlugin.data().register(viewHolder);
                 }
             }
-
-            Log.d("wsdc", "插件是否安装");
             return ;
         } catch (Exception e) {
             e.printStackTrace();
@@ -390,5 +423,4 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
     public void notify0(int type, Integer key) {
 
     }
-
 }

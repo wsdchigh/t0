@@ -145,7 +145,7 @@ public interface IPlugin<T,K> extends ILInk0<IPlugin>,IContainer0<IPlugin,K> {
      *  系统在运行的过程中保存的信息
      *  <li>    保存数据使用  保存数据 保存数据 保存数据
      */
-    void setTag(Object o);
+    void setTag(String key,Object value);
 
-    Object getTag();
+    Object getTag(String key);
 }

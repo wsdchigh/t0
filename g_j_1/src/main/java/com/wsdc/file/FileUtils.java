@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 public class FileUtils {
     public static InputStream inputStream(File file) throws FileNotFoundException {
@@ -74,7 +75,6 @@ public class FileUtils {
                 copy(file,dest,path);
             }
         }
-
     }
 
     /*
@@ -102,6 +102,25 @@ public class FileUtils {
             for (File file : files) {
                 rename(file,dest,us,ud);
             }
+        }
+    }
+
+    /*
+     *  列举文件夹下面的所有文件和文件夹
+     *  <li>    里面的文件夹数据
+     *  <li>    文件数据
+     *
+     *  <li>    需要手动传入返回值
+     */
+    public static void listFiles(List<File>[] array,File file){
+        if(file.isDirectory()){
+            array[0].add(file);
+            File[] files = file.listFiles();
+            for (File f1 : files) {
+                listFiles(array,f1);
+            }
+        }else{
+            array[1].add(file);
         }
     }
 }

@@ -1,0 +1,33 @@
+/*
+ *  java插件的基础使用
+ *  <li>    javaexec    执行一个Main函数
+ *          <li>    org.gradle.process.JavaExecSpec     闭包代理的是这个对象
+ *          <li>    我们需要在闭包里面对参数进行设置
+ *                  <li>    String main         main函数的地址
+ *                  <li>    List<String> args   main函数中的参数  这里可以传不定数组
+ *                  <li>    String classpath    传递class的根路径
+ *
+ *
+ *  <li>    exec        执行一条指令
+ *          <li>    org.gradle.process.ExecSpec         闭包代理的是这个对象
+ *          <li>    比较复杂
+ *
+ *          <li>    参数
+ *                  <li>    List<String> commandLine    执行的命令参数
+ *                  <li>    args                        参数
+ *                  <li>    InputStream standardInput   输入流
+ *                  <li>    OutputStream standardOutput 输出流
+ *                  <li>    File workingDir             工作目录
+ *
+ *                  <li>    其他参数，查看具体的代理类
+ *
+ */
+
+
+task exec0 << {
+    javaexec {
+        classpath "E:\\al\\g_a_0\\build\\intermediates\\javac\\debug\\compileDebugJavaWithJavac\\classes"
+        main "com.wsdc.g_a_0.annotation.PluginProcessor"
+        args "a","b","c","d"
+    }
+}

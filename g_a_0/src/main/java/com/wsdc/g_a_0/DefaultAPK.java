@@ -43,7 +43,7 @@ public class DefaultAPK implements APK {
         classLoader = new PathClassLoader(filePath,parent);
 
         try {
-            Class<?> clz = classLoader.loadClass("com.wsdchigh.plugin_test.plugin.global.GlobalProxy");
+            Class<?> clz = classLoader.loadClass("com.wsdc.plugin_test.plugin.global.GlobalProxy");
             Log.d("wsdc", "class class class" );
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
