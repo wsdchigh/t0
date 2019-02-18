@@ -1,1 +1,1 @@
-[{"path":"com.wsdc.plugin_test.MainActivity","type":"activity","wrapKey":101},{"path":"com.wsdc.g_a_0.base.BaseFragment","type":"fragment","wrapKey":200}]
+[{"path":"com.wsdc.plugin_test.MainActivity","type":"activity","wrapKey":101},{"path":"com.wsdc.plugin_test.wrap.acitivity.HomeActivity","type":"activity","wrapKey":102},{"path":"com.wsdc.g_a_0.base.BaseFragment","type":"fragment","wrapKey":200}]

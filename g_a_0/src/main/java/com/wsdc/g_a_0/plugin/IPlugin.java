@@ -22,6 +22,14 @@ import com.wsdc.g_j_0.ILInk0;
  *          <li>    Activity充当容器，Fragment负载功能
  *                  <li>    Activity可以有部分功能
  *
+ *
+ *  <li>    内存泄漏问题
+ *          <li>    插件是服务一个对象，除了vh会被父和全局插件持有之外，其他并不会暴露
+ *                  <li>    所以，只需要正确的释放掉 vh
+ *                          <li>    自身释放不释放，没有关系    (整体移除)
+ *                          <li>    如果有父插件，一定要释放
+ *                          <li>    如果有全局插件，一定要释放
+ *
  */
 public interface IPlugin<T,K> extends ILInk0<IPlugin>,IContainer0<IPlugin,K> {
     /*

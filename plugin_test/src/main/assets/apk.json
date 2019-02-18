@@ -44,7 +44,7 @@
           "wrapKey": 400
         },
         {
-          "fragmentContainerID": 2131165317,
+          "fragmentContainerID": 2131165319,
           "iDataPath": "com.wsdc.g_a_0.plugin.inner.DefaultMainIData",
           "key": "/test/home",
           "proxyPath": "com.wsdc.plugin_test.plugin.home.HomeProxy",
@@ -99,6 +99,11 @@
       "path": "com.wsdc.plugin_test.MainActivity",
       "type": "activity",
       "wrapKey": 101
+    },
+    {
+      "path": "com.wsdc.plugin_test.wrap.acitivity.HomeActivity",
+      "type": "activity",
+      "wrapKey": 102
     },
     {
       "path": "com.wsdc.g_a_0.base.BaseFragment",

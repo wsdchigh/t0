@@ -1,6 +1,7 @@
 package com.wsdc.g_a_0.router.inner;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.wsdc.g_a_0.APK;
 import com.wsdc.g_a_0.DefaultAPK;
@@ -73,14 +74,20 @@ public class DefaultIRouterMapImpl implements IRouterMap {
         APK apk = apkMap.get(parse.module_name);
 
         if(parse.level == 2){
-            IPlugin parent = router.getExistsPluginLevel1(parse.router_level_1);
+            //  注意  格式的匹配
+            IPlugin parent = router.getExistsPluginLevel1("/"+parse.module_name+parse.router_level_1);
+            Log.d("wsdc", "parent path = "+"/"+parse.module_name+parse.router_level_1);
             if(parent == null){
                 parent = new DefaultPlugin(router,"/"+parse.module_name+parse.router_level_1,apk,infoAll);
 
                 //  将传入进来的父插件启动参数 设置为父插件自身的启动参数
                 int status = parent.status();
-                status = status & ((mode & IPlugin.STATUS_START_PARENT_MODE_MASK) << 2);
+                status = status | ((mode & IPlugin.STATUS_START_PARENT_MODE_MASK) << 2);
                 parent.updateStatus(status);
+
+                Log.d("wsdc", "没有找到父插件");
+            }else{
+                Log.d("wsdc", "找到父插件");
             }
             rtn = new DefaultPlugin(router,key,apk,parent,infoAll);
         }else{

@@ -25,6 +25,7 @@ import com.wsdc.plugin_test.plugin.home.home0.Home0Proxy;
 import com.wsdc.plugin_test.plugin.home.home0.Home0ViewHolder;
 import com.wsdc.plugin_test.plugin.home.user.UserProxy;
 import com.wsdc.plugin_test.plugin.home.user.UserViewHolder;
+import com.wsdc.plugin_test.wrap.acitivity.HomeActivity;
 
 import org.junit.Test;
 
@@ -46,6 +47,12 @@ public class Creator {
         XInfo.WrapInfo info0 = new XInfo.WrapInfo();
         info0.path = MainActivity.class.getName();
         info0.wrapKey = 101;
+        info0.type = "activity";
+        wrapInfos.add(info0);
+
+        info0 = new XInfo.WrapInfo();
+        info0.path = HomeActivity.class.getName();
+        info0.wrapKey = 102;
         info0.type = "activity";
         wrapInfos.add(info0);
 

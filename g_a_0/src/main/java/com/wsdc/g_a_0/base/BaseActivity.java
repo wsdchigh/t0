@@ -10,6 +10,7 @@ import android.view.Window;
 import com.wsdc.g_a_0.ResourceProxy1;
 import com.wsdc.g_a_0.Starter;
 import com.wsdc.g_a_0.plugin.IPlugin;
+import com.wsdc.g_a_0.router.IRouter;
 
 /*
  *  为了统一化
@@ -44,6 +45,7 @@ public class BaseActivity extends FragmentActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(plugin.viewHolder().install(this,this,null));
+        plugin.viewHolder().init(this);
     }
 
 
@@ -63,13 +65,47 @@ public class BaseActivity extends FragmentActivity {
         }else{
             return super.getResources();
         }
+    }
 
+    @Override
+    public void onBackPressed() {
+        IRouter router = Starter.getInstance().getRouter();
 
+        if(router.size() <= 1){
+            /*
+             *  如果插件根本没有添加到路由表中
+             *  <li>    当前插件并没有在路由表中   == 0
+             *
+             *  如果插件在路由表中，当前插件是最后一个插件
+             *  <li>    == 1
+             *
+             *  上述两种情况已经无法在继续后退了
+             *  <li>    此时路由的back函数会清空路由中的所有数据
+             *  <li>    此时可以提供一个在按一次退出的功能
+             */
+            router.back();
+            super.onBackPressed();
+            return;
+        }else{
+            /*
+             *  如果只是fragment的切换，返回不会为null
+             *  <li>    如果是最后一个fragment，需要切换到其他的Activity   == null
+             */
+            IPlugin plugin0 = router.back();
+            if(plugin0 == null){
+                super.onBackPressed();
+            }
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        plugin.uninstall();
+
+        IPlugin globalPlugin = Starter.getInstance().globalPlugin();
+        plugin.data().unregister(plugin.viewHolder());
+        if(globalPlugin != null){
+            globalPlugin.data().unregister(plugin.viewHolder());
+        }
     }
 }

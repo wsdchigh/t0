@@ -124,7 +124,6 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
         this.handler = parent.handler();
         this.apk = apk;
         parent.register(this);
-        Log.d("wsdc", "等级值  = "+((parent.status() & STATUS_LEVEL_MASK) + 1)+"   parent = "+parent.status());
         status = status | 2;
 
         //  创建实例    (Fragment)
@@ -344,27 +343,7 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
 
     @Override
     public void uninstall() {
-        /*
-         *  分类两级插件来处理
-         */
-        if((status & IPlugin.STATUS_LEVEL_MASK) == IPlugin.LEVEL_1){
 
-        }else{
-            /*
-             *  二级插件的卸载,只需要卸载自身即可
-             */
-            data.unregister(this);
-            if(data != parent.data()){
-                parent.data().register(this);
-            }
-            viewHolder.uninstall();
-        }
-
-        //  全局取消注册
-        final IPlugin globalPlugin = Starter.getInstance().globalPlugin();
-        if(globalPlugin != null){
-            globalPlugin.data().unregister(viewHolder);
-        }
     }
 
     @Override

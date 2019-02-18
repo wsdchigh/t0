@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 
 import com.wsdc.g_a_0.RouterUtil;
 import com.wsdc.g_a_0.XInfo;
@@ -43,6 +44,17 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
     IData<Integer> data;
 
     List<IPlugin> pluginStack = new LinkedList<>();
+
+    /*
+     *  二级插件对应的一级插件，不存在于路由之中
+     *  <li>    activity创建，并且安装插件
+     *  <li>    第一个fragment不添加到路由，导致路由表中无法找到这个一级插件的信息
+     *
+     *  <li>    第二个fragment如果没有插件安装，那么会导致空指针异常
+     *
+     *  <li>    所以，针对，没有进入路由的二级路由   提供一个额外的存储
+     */
+    List<IPlugin> pluginsLevel1NotInStack = new LinkedList<>();
     XInfoAll infoAll;
 
     Context context;
@@ -70,8 +82,21 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
      */
     @Override
     public IPlugin go(String key, int mode) {
-        final IPlugin plugin = routerMap.getRouterPlugin(key,mode);
-        final IPlugin origin = currentIPlugin;
+        /*
+         *  如果系统中存在着这个路由，那么选择复用这个路由
+         */
+        IPlugin plugin = null;
+        for (IPlugin plugin1 : pluginStack) {
+            if(plugin1.key().equals(key)){
+                plugin = plugin1;
+                break;
+            }
+        }
+
+        if(plugin == null){
+            plugin = routerMap.getRouterPlugin(key,mode);
+        }
+        IPlugin origin = currentIPlugin;
         if(plugin != null){
             switch (mode & IPlugin.STATUS_START_SELF_MODE_MASK){
                 case IPlugin.START_COMMON:
@@ -81,6 +106,9 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
 
                 case IPlugin.START_NOT_STACK:
                     //  不添加到栈里面
+                    if(getLevel(plugin) == 2){
+                        pluginsLevel1NotInStack.add((IPlugin) plugin.parent());
+                    }
                     break;
 
                 default:
@@ -98,33 +126,6 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
              *  <li>    比对路由信息
              */
             if(origin == null){
-
-                if(false){
-                    //  因为前面没有，所以不需要对前面进行处理
-                    if((plugin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
-                        //  是一个Activity
-                        //  可以没有任何处理
-                    }else{
-                        /*
-                         *  <li>    Activity暂时没有初始化
-                         *  <li>    Activity暂时没启动
-                         */
-                        IPlugin<Activity,Integer> parent = (IPlugin<Activity,Integer>) plugin.parent();
-                        Activity activity = parent.wrap();
-                        List<IPlugin> children = parent.children();
-
-                        FragmentActivity activity0 = (FragmentActivity) activity;
-                        //  开启activity事务
-                        FragmentTransaction transaction = activity0.getSupportFragmentManager().beginTransaction();
-
-                        //  只有自己
-                        IPlugin<Fragment,Integer> iPlugin = children.get(0);
-                        Fragment wrap = iPlugin.wrap();
-                        transaction.add(iPlugin.id(),wrap);
-                        transaction.show(wrap);
-                        transaction.commit();
-                    }
-                }
 
             }else{
                 RouterUtil.RouterBean originInfo = RouterUtil.parse(origin.key());
@@ -161,7 +162,16 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
                         act = (Activity) parentPlugin.wrap();
                     }
 
-                    XInfo.WrapInfo info = (XInfo.WrapInfo) plugin.getTag("wrapInfo");
+                    XInfo.WrapInfo info = null;
+
+                    if(getLevel(plugin) == 1){
+                        info = (XInfo.WrapInfo) plugin.getTag("wrapInfo");
+                    }else{
+                        IPlugin parentPlugin = (IPlugin) plugin.parent();
+                        info = (XInfo.WrapInfo) parentPlugin.getTag("wrapInfo");
+                        Log.d("wsdc", "parent = "+parentPlugin.key());
+                    }
+
                     if(info == null){
                         throw new RuntimeException("info is null ");
                     }
@@ -178,108 +188,21 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
                         throw new RuntimeException(" clz == null");
                     }
                     Intent intent = new Intent(context,clz);
+                    Log.d("wsdc", "activity name = "+clz.getName());
                     context.startActivity(intent);
                 }
 
-
-                if(false){
-                    /*
-                     *  <li>    如果涉及到的是两个Activity之间的切换
-                     *          <li>    让两个Activity执行过渡特效
-                     *
-                     *  <li>    如果是涉及一个Activity的fragment切换
-                     *          <li>    让fragment执行切换特效
-                     *
-                     *  <li>    之所以携带一个父插件的启动参数
-                     *          <li>    如果涉及到两个activity的跳转
-                     *          <li>    如果此时是二级路由，那么需要判断前一个activity是否需要关闭   (根据父插件启动参数决定)
-                     *                  <li>    父插件启动参数，只有第一个设置的有效，之后的设置均无效
-                     */
-                    if((plugin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
-                        if((origin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
-
-
-                            Activity activity = (Activity) origin.wrap();
-                            Activity activityGo = (Activity) plugin.wrap();
-                            Intent intent = new Intent(activity,activityGo.getClass());
-                            activity.startActivity(intent);
-
-                            //  是否需要关闭activity
-                            if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
-                                //  插件没有入栈 只需要引导退出即可
-                                activity.finish();
-                            }
-                        }else{
-                            IPlugin parent = (IPlugin) origin.wrap();
-                            Activity activity = (Activity) parent.wrap();
-                            Activity activityGo = (Activity) plugin.wrap();
-                            Intent intent = new Intent(activity,activityGo.getClass());
-                            activity.startActivity(intent);
-
-                            //  是否需要关闭activity
-                            if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
-                                /*
-                                 *  一级插件不入栈，但是下面的二级插件可能入栈  所以需要清除对应插件信息
-                                 *  <li>    引导activity的退出
-                                 *  <li>    插件在卸载的时候自动清除栈中信息
-                                 */
-                                activity.finish();
-                            }
-                        }
-                    }else{
-                        //
-                        if((origin.status() & IPlugin.STATUS_LEVEL_MASK) == 1){
-                            Activity originActivity = (Activity) origin.wrap();
-                            IPlugin goParent = (IPlugin) plugin.parent();
-                            Activity goActivity = (Activity) goParent.wrap();
-
-                            Intent intent = new Intent(originActivity,goActivity.getClass());
-                            originActivity.startActivity(intent);
-
-                            //  是否需要关闭activity
-                            if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
-                                //  插件没有入栈 只需要引导退出即可
-                                originActivity.finish();
-                            }
-
-                        }else{
-                            IPlugin originParent = (IPlugin) origin.parent();
-                            Activity originActivity = (Activity) originParent.wrap();
-                            IPlugin goParent = (IPlugin) plugin.parent();
-                            Activity goActivity = (Activity) goParent.wrap();
-
-                            if(originActivity == goActivity){
-                                //  使用fragment执行过渡特效
-                                final FragmentActivity act = (FragmentActivity) originActivity;
-                                FragmentTransaction transaction = act.getSupportFragmentManager().beginTransaction();
-
-                                Fragment originFragment = (Fragment) origin.wrap();
-                                Fragment nowFragment = (Fragment) plugin.wrap();
-
-                                transaction.add(goParent.id(),nowFragment);
-                                transaction.remove(originFragment);
-                                transaction.show(nowFragment);
-
-                                transaction.commit();
-                            }else{
-                                //  使用activity执行过渡特效
-                                Intent intent = new Intent(originActivity,goActivity.getClass());
-                                originActivity.startActivity(intent);
-
-                                //  是否需要关闭activity
-                                if((origin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
-                                    //  插件没有入栈 只需要引导退出即可
-                                    originActivity.finish();
-                                }
-                            }
-                        }
-                    }
-                }
             }
 
             //  更新当前插件
             lastPlugin = currentIPlugin;
             currentIPlugin = plugin;
+
+            //  如果复用插件  需要移除
+            if(pluginStack.contains(plugin)){
+                pluginStack.remove(plugin);
+            }
+
             //  插件是否需要入栈
             if((plugin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_COMMON){
                 pluginStack.add(plugin);
@@ -292,7 +215,51 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
     public IPlugin back() {
         /*
          *  路由后退一步
+         *  <li>    路由表中取出上一个路由
+         *          <li>    如果最后一个插件 == 当前插件
+         *          <li>    如果最后一个插件 != 当前插件
+         *
+         *
          */
+        if(size() <= 1){
+            return null;
+        }
+
+        IPlugin tmpPlugin = null;
+        IPlugin plugin0 = pluginStack.get(pluginStack.size() - 1);
+        if(plugin0 != currentIPlugin){
+            tmpPlugin = plugin0;
+        }else{
+            tmpPlugin = pluginStack.get(pluginStack.size() - 2);
+        }
+
+        RouterUtil.RouterBean rbC = RouterUtil.parse(currentIPlugin.key());
+        RouterUtil.RouterBean rbL = RouterUtil.parse(tmpPlugin.key());
+
+        if((rbC.module_name+rbC.router_level_1).equals(rbL.module_name+rbL.router_level_1)){
+            //  fragment之间的切换
+            if(rbL.level == 2){
+                IPlugin pluginParent = (IPlugin) tmpPlugin.parent();
+                FragmentActivity fa = (FragmentActivity) pluginParent.wrap();
+
+                Fragment fraOrigin = (Fragment) currentIPlugin.wrap();
+                Fragment fraNow = (Fragment) tmpPlugin.wrap();
+
+                FragmentTransaction transaction = fa.getSupportFragmentManager().beginTransaction();
+                transaction.add(pluginParent.childLayout(),fraNow)
+                        .remove(fraOrigin)
+                        .show(fraNow)
+                        .commit();
+
+                pluginStack.remove(currentIPlugin);
+                currentIPlugin = tmpPlugin;
+
+                return tmpPlugin;
+            }
+        }
+
+        pluginStack.remove(currentIPlugin);
+        currentIPlugin = tmpPlugin;
         return null;
     }
 
@@ -342,6 +309,12 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
                 }
             }
         }
+
+        for (IPlugin parent : pluginsLevel1NotInStack) {
+            if(parent.key().equals(key)){
+                return parent;
+            }
+        }
         return null;
     }
 
@@ -358,6 +331,19 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
     @Override
     public XInfoAll infoAll() {
         return infoAll;
+    }
+
+    @Override
+    public int size() {
+        return pluginStack.size();
+    }
+
+    @Override
+    public void clear() {
+        lastPlugin = null;
+        currentIPlugin = null;
+        pluginStack.clear();
+        pluginsLevel1NotInStack.clear();
     }
 
     @Override
@@ -409,10 +395,18 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
             }
 
             if((tmpPlugin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
+                Log.d("wsdc", "上一个activity退出");
                 act.finish();
-            }
 
+                /*
+                 *  如果插件在 没有入栈的插件表中，需要移除
+                 */
+                pluginsLevel1NotInStack.remove(tmpPlugin);
+            }
         }
+
+        //  清空lastPlugin    (内存问题)
+        lastPlugin = null;
     }
 
     @Override

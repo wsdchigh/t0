@@ -17,18 +17,22 @@
         android:layout_gravity="bottom"
         android:orientation="horizontal">
         <RadioButton
+            android:id="@+id/test_home_rb_home0"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:checked="true"
             android:text="首页"/>
 
         <RadioButton
+            android:id="@+id/test_home_rb_category"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="分类"/>
 
         <RadioButton
+            android:id="@+id/test_home_rb_cart"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -36,6 +40,7 @@
 
 
         <RadioButton
+            android:id="@+id/test_home_rb_user"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"

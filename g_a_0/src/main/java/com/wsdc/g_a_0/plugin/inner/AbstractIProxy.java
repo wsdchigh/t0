@@ -27,6 +27,9 @@ public abstract class AbstractIProxy<T> implements IProxy<T> {
 
     @Override
     public boolean containKey(Integer key) {
+        if(keys == null){
+            keys = keys();
+        }
         return keys.contains(key);
     }
 
@@ -37,8 +40,15 @@ public abstract class AbstractIProxy<T> implements IProxy<T> {
 
     @Override
     public boolean proxy(Integer key, Object... args) {
+        boolean rtn = false;
+
+        /*
+         *  如果当前proxy支持指定key的处理
+         *  <li>    返回值不用来是否处理，而是有些函数需要一个boolean类型的返回值
+         */
         if(containKey(key)){
-            return proxy0(key,args);
+            rtn = proxy0(key, args);
+            return rtn;
         }
         return plugin().proxy().proxy(key,args);
     }

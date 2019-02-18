@@ -23,7 +23,7 @@ public class BaseApplication extends Application {
         Starter.install(this);
         starter = Starter.getInstance();
         router = starter.getRouter();
-        router.go("/test/guide/guide0",IPlugin.START_COMMON | (IPlugin.START_COMMON >> 2));
+        router.go("/test/guide/guide0",IPlugin.START_NOT_STACK | (IPlugin.START_NOT_STACK >> 2));
 
     }
 }
