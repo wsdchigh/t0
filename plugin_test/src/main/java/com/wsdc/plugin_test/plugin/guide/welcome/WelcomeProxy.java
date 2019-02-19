@@ -22,7 +22,12 @@ public class WelcomeProxy extends AbstractIProxy<Fragment> {
 
     @Override
     public boolean proxy0(Integer key, Object... args) {
-        plugin().router().go(GK.ROUTE_HOME_HOME0,IPlugin.START_NOT_STACK | (IPlugin.START_NOT_STACK >> 2));
+        switch (key){
+            case GK.WELCOME_TO_HOME:
+                plugin().router().go(GK.ROUTE_HOME_HOME0,IPlugin.START_COMMON);
+
+                break;
+        }
         return false;
     }
 

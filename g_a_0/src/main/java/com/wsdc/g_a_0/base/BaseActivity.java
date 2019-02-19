@@ -21,20 +21,34 @@ import com.wsdc.g_a_0.router.IRouter;
  *
  *  <li>    为了方便操作，建议activity集成这个Activity
  *          <li>    如果没有要求，只要简单继承即可
+ *
+ *
+ *  <li>    工作责任
+ *          <li>    create的时候注册插件
+ *          <li>    destroy的时候取消注册插件
+ *
+ *          <li>    create的时候持有插件   (初始化好插件)
+ *
+ *  <li>    关于全局插件引导
+ *          <li>    运行时权限的申请
+ *          <li>    文件权限的申请
+ *          <li>    服务的开启
+ *          <li>    全局的数据引导 (登录的用户)
+ *          <li>    全局的缓存
  */
 public class BaseActivity extends FragmentActivity {
     //  占位10M的内存，用于测试的时候，检测内存是否泄漏   打包的时候删除即可
     //  byte[] testMemory = new byte[1024 * 1024 * 10];
     IPlugin<Activity,Integer> plugin;
+    IRouter router = Starter.getInstance().getRouter();
 
     {
-        IPlugin plugin0 = Starter.getInstance().getRouter().currentPlugin();
+        doWork(router);
+        IPlugin plugin0 = router.currentPlugin();
         if((plugin0.status() & IPlugin.STATUS_LEVEL_MASK) == 2){
             plugin = (IPlugin<Activity, Integer>) plugin0.parent();
-            Log.d("wsdc", "获取等级2插件·");
         }else{
             plugin = plugin0;
-            Log.d("wsdc", "获取等级1 插件");
         }
         Log.d("wsdc", "key in activity = "+plugin0.key());
         plugin.install(this,-1,this);
@@ -46,8 +60,39 @@ public class BaseActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(plugin.viewHolder().install(this,this,null));
         plugin.viewHolder().init(this);
+        Log.d("wsdc1", "activity create");
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("wsdc1", "activity start");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d("wsdc1", "activity restart");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IRouter router = Starter.getInstance().getRouter();
+        Log.d("wsdc1", "base resume path = "+this.getClass().getName()+"    router size = "+router.size()+"     path = "+router.currentPlugin().key());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("wsdc1", "activity pause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("wsdc1", "activity stop");
+    }
 
     @Override
     public Resources getResources() {
@@ -70,42 +115,29 @@ public class BaseActivity extends FragmentActivity {
     @Override
     public void onBackPressed() {
         IRouter router = Starter.getInstance().getRouter();
+        int rtn = router.back0();
+        Log.d("wsdc1", "back = "+rtn);
 
-        if(router.size() <= 1){
-            /*
-             *  如果插件根本没有添加到路由表中
-             *  <li>    当前插件并没有在路由表中   == 0
-             *
-             *  如果插件在路由表中，当前插件是最后一个插件
-             *  <li>    == 1
-             *
-             *  上述两种情况已经无法在继续后退了
-             *  <li>    此时路由的back函数会清空路由中的所有数据
-             *  <li>    此时可以提供一个在按一次退出的功能
-             */
-            router.back();
+        if(rtn != IRouter.ROUTER_BACK_FRAGMENT){
             super.onBackPressed();
-            return;
-        }else{
-            /*
-             *  如果只是fragment的切换，返回不会为null
-             *  <li>    如果是最后一个fragment，需要切换到其他的Activity   == null
-             */
-            IPlugin plugin0 = router.back();
-            if(plugin0 == null){
-                super.onBackPressed();
-            }
         }
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-
         IPlugin globalPlugin = Starter.getInstance().globalPlugin();
         plugin.data().unregister(plugin.viewHolder());
         if(globalPlugin != null){
             globalPlugin.data().unregister(plugin.viewHolder());
         }
+        super.onDestroy();
+    }
+
+    /*
+     *  暴露这个函数
+     *  <li>    如果路由是空的
+     */
+    protected void doWork(IRouter router){
+
     }
 }

@@ -10,15 +10,16 @@ public class GK {
     private static int base = 1000;
 
     //  引导模块
-    public static final int GUIDE0_TO_WELCOME = ++base;
-    public static final int GUIDE0_TO_HOME = ++base;
-    public static final int WELCOME_TO_HOME = ++base;
+    public static final int GUIDE0_TO_WELCOME = 401;
+    public static final int GUIDE0_TO_HOME = 402;
+    public static final int WELCOME_TO_HOME = 400;
 
     //  首页模块
-    public static final int HOME_TO_HOME0 = ++base;
-    public static final int HOME_TO_CATEGORY = ++base;
-    public static final int HOME_TO_CART = ++base;
-    public static final int HOME_TO_USER = ++base;
+    public static final int HOME_TO_HOME0 =403;
+    public static final int HOME_TO_CATEGORY = 404;
+    public static final int HOME_TO_CART = 405;
+    public static final int HOME_TO_USER = 406;
+
 
 
     //  路由信息定义表

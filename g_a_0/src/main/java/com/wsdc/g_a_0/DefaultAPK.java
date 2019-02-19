@@ -10,7 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import dalvik.system.BaseDexClassLoader;
-import dalvik.system.PathClassLoader;
+import dalvik.system.DexClassLoader;
 
 public class DefaultAPK implements APK {
     XInfo info;
@@ -34,13 +34,13 @@ public class DefaultAPK implements APK {
         Log.d("wsdc", "file path "+file0.getAbsolutePath());
         String filePath = file0.getAbsolutePath();
 
-        /*
+
         classLoader = new DexClassLoader(filePath,
                 optimizedDirectoryFile.getAbsolutePath(),null,parent);
-                */
 
 
-        classLoader = new PathClassLoader(filePath,parent);
+
+        //classLoader = new PathClassLoader(filePath,parent);
 
         try {
             Class<?> clz = classLoader.loadClass("com.wsdc.plugin_test.plugin.global.GlobalProxy");

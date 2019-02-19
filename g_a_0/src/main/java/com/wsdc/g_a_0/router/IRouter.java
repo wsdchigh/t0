@@ -22,7 +22,20 @@ public interface IRouter{
     IPlugin go(String key,int mode);
 
     //  后退一步
+    @Deprecated
     IPlugin back();
+
+
+    public static final int ROUTER_BACK_FRAGMENT = 1;
+    public static final int ROUTER_BACK_ACTIVITY = 2;
+    public static final int ROUTER_BACK_EMPTY = 3;
+    /*
+     *  后退
+     *  <li>    1       activity里面的fragment后退切换
+     *  <li>    2       activity的后退切换
+     *  <li>    3       已经空栈了
+     */
+    int back0();
 
     /*
      *  清空路由表   (非路由插件表)

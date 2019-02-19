@@ -7,10 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.wsdc.plugin_test.GK;
 import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.plugin.inner.AbstractIViewHolder;
+import com.wsdc.plugin_test.GK;
 import com.wsdc.plugin_test.R;
 
 public class Guide0ViewHolder extends AbstractIViewHolder<Fragment> implements View.OnClickListener {

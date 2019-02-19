@@ -89,6 +89,7 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
         for (IPlugin plugin1 : pluginStack) {
             if(plugin1.key().equals(key)){
                 plugin = plugin1;
+                pluginStack.remove(plugin);
                 break;
             }
         }
@@ -150,6 +151,9 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
                             .add(parentPlugin.childLayout(),nf)
                             .show(nf)
                             .commit();
+
+                    Log.d("wsdc1", "go go "+origin.key()+"  ->  "+plugin.key());
+
                 }else{
                     /*
                      *  Activity的跳转
@@ -169,7 +173,6 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
                     }else{
                         IPlugin parentPlugin = (IPlugin) plugin.parent();
                         info = (XInfo.WrapInfo) parentPlugin.getTag("wrapInfo");
-                        Log.d("wsdc", "parent = "+parentPlugin.key());
                     }
 
                     if(info == null){
@@ -188,7 +191,6 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
                         throw new RuntimeException(" clz == null");
                     }
                     Intent intent = new Intent(context,clz);
-                    Log.d("wsdc", "activity name = "+clz.getName());
                     context.startActivity(intent);
                 }
 
@@ -197,32 +199,25 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
             //  更新当前插件
             lastPlugin = currentIPlugin;
             currentIPlugin = plugin;
-
-            //  如果复用插件  需要移除
-            if(pluginStack.contains(plugin)){
-                pluginStack.remove(plugin);
-            }
-
-            //  插件是否需要入栈
-            if((plugin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_COMMON){
-                pluginStack.add(plugin);
-            }
         }
         return currentIPlugin;
     }
 
     @Override
     public IPlugin back() {
-        /*
-         *  路由后退一步
-         *  <li>    路由表中取出上一个路由
-         *          <li>    如果最后一个插件 == 当前插件
-         *          <li>    如果最后一个插件 != 当前插件
-         *
-         *
-         */
+        return null;
+    }
+
+    @Override
+    public int back0() {
+        //  这个变量是用来记录前进时的  前一个当前路由      如果一旦后退，清空不记录
+        lastPlugin = null;
+
         if(size() <= 1){
-            return null;
+            currentIPlugin = null;
+            pluginStack.clear();
+            pluginsLevel1NotInStack.clear();
+            return ROUTER_BACK_EMPTY;
         }
 
         IPlugin tmpPlugin = null;
@@ -245,34 +240,31 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
                 Fragment fraOrigin = (Fragment) currentIPlugin.wrap();
                 Fragment fraNow = (Fragment) tmpPlugin.wrap();
 
+                Log.d("wsdc1", "back back "+currentIPlugin.key()+"    ->    "+tmpPlugin.key());
                 FragmentTransaction transaction = fa.getSupportFragmentManager().beginTransaction();
-                transaction.add(pluginParent.childLayout(),fraNow)
+                transaction
                         .remove(fraOrigin)
+                        .add(pluginParent.childLayout(),fraNow)
                         .show(fraNow)
                         .commit();
 
                 pluginStack.remove(currentIPlugin);
                 currentIPlugin = tmpPlugin;
 
-                return tmpPlugin;
+                return ROUTER_BACK_FRAGMENT;
             }
         }
 
         pluginStack.remove(currentIPlugin);
         currentIPlugin = tmpPlugin;
-        return null;
+        return ROUTER_BACK_ACTIVITY;
     }
 
     @Override
     public IPlugin home() {
         /*
-         *  只留下栈中的第一个插件，其他的均清空
-         *  <li>    收集所有的activity   集体引导finish
-         *          <li>    除了第一个activity和最后一个activity，集体引导销毁   (finish)
-         *          <li>    调用一次back，此时就能够正常的抵达首个Activity之中
-         *
-         *          <li>    此时，插件的tag打上标记
-         *                  <li>    pause函数时候，验证tag标记，执行Fragment的事务操作
+         *  借助Activity的新建栈
+         *  <li>    系统会引导activity的退出
          */
         return null;
     }

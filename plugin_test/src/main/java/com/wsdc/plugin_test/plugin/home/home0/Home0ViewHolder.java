@@ -2,9 +2,11 @@ package com.wsdc.plugin_test.plugin.home.home0;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ViewFlipper;
 
 import com.wsdc.g_a_0.annotation.APlugin;
 import com.wsdc.g_a_0.annotation.PluginSign;
@@ -15,6 +17,9 @@ import com.wsdc.plugin_test.R;
 
 @APlugin(key="/test/home/home0",sign=PluginSign.VIEW_HOLDER)
 public class Home0ViewHolder extends AbstractIViewHolder<Fragment> {
+    ViewFlipper vf;
+    ViewPager vp;
+
     public Home0ViewHolder(IPlugin<Fragment, Integer> plugin) {
         super(plugin);
     }
@@ -26,6 +31,7 @@ public class Home0ViewHolder extends AbstractIViewHolder<Fragment> {
 
     @Override
     public View install(Context context, Fragment fragment, ViewGroup parent) {
+        this.context = context;
         rootView = LayoutInflater.from(context).inflate(R.layout.home_home0,parent,false);
         return rootView;
     }

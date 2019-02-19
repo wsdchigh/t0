@@ -7,10 +7,17 @@
         android:id="@+id/test_home_act_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="50dp">
+        android:layout_marginBottom="56dp">
 
     </FrameLayout>
 
+    <View android:layout_height="2dp"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="54dp"
+        android:background="#c9c9c9">
+
+    </View>
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="50dp"
@@ -22,6 +29,9 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:checked="true"
+            android:drawableTop="@drawable/test_home_home0_menu_checked"
+            android:button="@null"
+            android:gravity="center"
             android:text="首页"/>
 
         <RadioButton
@@ -29,6 +39,9 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:drawableTop="@drawable/test_home_home0_menu_not_checked"
+            android:button="@null"
+            android:gravity="center"
             android:text="分类"/>
 
         <RadioButton
@@ -36,6 +49,9 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:drawableTop="@drawable/test_home_home0_menu_not_checked"
+            android:button="@null"
+            android:gravity="center"
             android:text="购物车"/>
 
 
@@ -44,6 +60,9 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:drawableTop="@drawable/test_home_home0_menu_not_checked"
+            android:button="@null"
+            android:gravity="center"
             android:text="用户"/>
     </RadioGroup>
 
