@@ -21,6 +21,10 @@ public class GK {
     public static final int HOME_TO_USER = 406;
 
 
+    //  关于fragment的后退切换，需要发送下来
+    public static final int BACK_PRESS = 500;
+
+
 
     //  路由信息定义表
     public static final String ROUTE_GUIDE_GUIDE0 = "/test/guide/guide0";

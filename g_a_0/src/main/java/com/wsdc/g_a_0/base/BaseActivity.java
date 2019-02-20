@@ -120,6 +120,8 @@ public class BaseActivity extends FragmentActivity {
 
         if(rtn != IRouter.ROUTER_BACK_FRAGMENT){
             super.onBackPressed();
+        }else{
+            plugin.proxy().proxy(500);
         }
     }
 

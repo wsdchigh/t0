@@ -25,6 +25,7 @@ public class HomeProxy extends AbstractIProxy<Activity> {
         keys.add(GK.HOME_TO_CATEGORY);
         keys.add(GK.HOME_TO_CART);
         keys.add(GK.HOME_TO_USER);
+        keys.add(GK.BACK_PRESS);
     }
 
     public HomeProxy(IPlugin<Activity, Integer> plugin, Context context) {
@@ -49,6 +50,10 @@ public class HomeProxy extends AbstractIProxy<Activity> {
 
             case GK.HOME_TO_USER:
                 router.go(GK.ROUTE_HOME_USER,IPlugin.START_COMMON);
+                break;
+
+            case GK.BACK_PRESS:
+                
                 break;
         }
         return false;

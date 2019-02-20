@@ -14,6 +14,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void doWork(IRouter router) {
         super.doWork(router);
+        router.check();
         router.go("/test/guide/guide0",IPlugin.START_NOT_STACK | (IPlugin.START_NOT_STACK >> 2));
     }
 }

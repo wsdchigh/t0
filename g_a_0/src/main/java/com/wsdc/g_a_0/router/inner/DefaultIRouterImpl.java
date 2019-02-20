@@ -85,6 +85,7 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
         /*
          *  如果系统中存在着这个路由，那么选择复用这个路由
          */
+        Log.d("wsdc1", "where to go  = "+key);
         IPlugin plugin = null;
         for (IPlugin plugin1 : pluginStack) {
             if(plugin1.key().equals(key)){
@@ -213,6 +214,8 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
         //  这个变量是用来记录前进时的  前一个当前路由      如果一旦后退，清空不记录
         lastPlugin = null;
 
+        //check();
+
         if(size() <= 1){
             currentIPlugin = null;
             pluginStack.clear();
@@ -336,6 +339,17 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
         currentIPlugin = null;
         pluginStack.clear();
         pluginsLevel1NotInStack.clear();
+    }
+
+    @Override
+    public void check() {
+        Log.d("wsdc1", "-------------------------------------------");
+        Log.d("wsdc1", "router size = "+pluginStack.size());
+        for (IPlugin plugin : pluginStack) {
+            Log.d("wsdc1", "key = "+plugin.key());
+        }
+        Log.d("wsdc1", "not router size = "+pluginsLevel1NotInStack.size());
+        Log.d("wsdc1", "status is null  "+(currentIPlugin == null)+"    "+(lastPlugin == null));
     }
 
     @Override

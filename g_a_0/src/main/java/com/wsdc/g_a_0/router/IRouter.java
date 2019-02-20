@@ -69,4 +69,11 @@ public interface IRouter{
      */
     void clear();
 
+
+    /*
+     *  这个函数仅仅用于测试路由中的数据
+     *  <li>    检测可能出现的泄漏情况
+     */
+    void check();
+
 }

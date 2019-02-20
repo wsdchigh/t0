@@ -2,7 +2,6 @@ package com.wsdc.plugin_test.plugin.guide.guide0;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.plugin.inner.AbstractIProxy;
@@ -27,10 +26,7 @@ public class Guide0Proxy extends AbstractIProxy<Fragment> {
         //  fragment activity 均不需要添加到路由之中
         switch (key){
             case GK.GUIDE0_TO_WELCOME:
-                Log.d("wsdc1", "is null :"+(plugin() == null)+"     "+(plugin().router() == null));
-                Log.d("wsdc1", ""+plugin().router().getClass().getName());
-                plugin().router().go(GK.ROUTE_GUIDE_WELCOME,IPlugin.START_NOT_STACK | (IPlugin.START_NOT_STACK >> 2));
-                Log.d("wsdc1", "点击去欢迎界面");
+                plugin().router().go(GK.ROUTE_GUIDE_WELCOME, IPlugin.START_NOT_STACK | (IPlugin.START_NOT_STACK >> 2));
                 break;
         }
         return false;

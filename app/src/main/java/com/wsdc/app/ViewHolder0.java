@@ -39,7 +39,7 @@ public class ViewHolder0 {
 
 
         for (int i1 = 0; i1 < 18; i1++) {
-            data.add("ksv"+i++);
+            data.add("check"+i++);
         }
 
         adapter.setData(data);
@@ -54,7 +54,7 @@ public class ViewHolder0 {
                     public void run() {
                         data.clear();
                         for (int i1 = 0; i1 < 18; i1++) {
-                            data.add("ksv"+i++);
+                            data.add("check"+i++);
                         }
 
                         adapter.setData(data);
@@ -72,7 +72,7 @@ public class ViewHolder0 {
                     public void run() {
                         data.clear();
                         for (int i1 = 0; i1 < 18; i1++) {
-                            data.add("ksv"+i++);
+                            data.add("check"+i++);
                         }
 
                         adapter.setData(data);
