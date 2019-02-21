@@ -24,6 +24,9 @@ public class GK {
     //  关于fragment的后退切换，需要发送下来
     public static final int BACK_PRESS = 500;
 
+    //  home页面，后退切换的vh标记
+    public static final int HOME_BACK_SWITCH = 407;
+
 
 
     //  路由信息定义表

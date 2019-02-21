@@ -25,6 +25,10 @@ public class HomeViewHolder extends AbstractIViewHolder<Activity> implements Rad
     IRouter router = Starter.getInstance().getRouter();
     RadioButton lastRB;
 
+    //  rg的切换是否需要操作路由
+    //  主动点击需要带动路由，路由的后退驱动rg，此时不需要再次操作路由
+    boolean shouldRouter = true;
+
     public HomeViewHolder(IPlugin<Activity, Integer> plugin) {
         super(plugin);
     }
@@ -43,7 +47,42 @@ public class HomeViewHolder extends AbstractIViewHolder<Activity> implements Rad
 
     @Override
     public void notify0(int type, Integer key, IData iData) {
+        switch (type){
+            case IData.TYPE_INIT:
 
+                break;
+
+            case IData.TYPE_SINGLE:
+                switch (key){
+                    /*
+                     *  后退需要响应底层的RadioGroup的切换
+                     *  <li>    此时标记为不需要驱动路由
+                     *  <li>    设置具体的rb为选中  驱动监听做出选择
+                     */
+                    case GK.HOME_BACK_SWITCH:
+                        String s = (String) plugin().data().get(key);
+                        shouldRouter = false;
+                        switch (s){
+                            case GK.ROUTE_HOME_HOME0:
+                                rbHome0.setChecked(true);
+                                break;
+
+                            case GK.ROUTE_HOME_CATEGORY:
+                                rbCategory.setChecked(true);
+                                break;
+
+                            case GK.ROUTE_HOME_CART:
+                                rbCart.setChecked(true);
+                                break;
+
+                            case GK.ROUTE_HOME_USER:
+                                rbUser.setChecked(true);
+                                break;
+                        }
+                        break;
+                }
+                break;
+        }
     }
 
     @Override
@@ -69,22 +108,41 @@ public class HomeViewHolder extends AbstractIViewHolder<Activity> implements Rad
         switch (checkedId){
             case R.id.test_home_rb_home0:
                 update0(rbHome0);
-                proxy().proxy(GK.HOME_TO_HOME0);
+                if(shouldRouter){
+                    proxy().proxy(GK.HOME_TO_HOME0);
+                }else{
+                    shouldRouter = !shouldRouter;
+                }
+
                 break;
 
             case R.id.test_home_rb_category:
                 update0(rbCategory);
-                proxy().proxy(GK.HOME_TO_CATEGORY);
+                if(shouldRouter){
+                    proxy().proxy(GK.HOME_TO_CATEGORY);
+                }else{
+                    shouldRouter = !shouldRouter;
+                }
                 break;
 
             case R.id.test_home_rb_cart:
                 update0(rbCart);
-                proxy().proxy(GK.HOME_TO_CART);
+                if(shouldRouter){
+                    proxy().proxy(GK.HOME_TO_CART);
+                }else{
+                    shouldRouter = !shouldRouter;
+                }
+
                 break;
 
             case R.id.test_home_rb_user:
                 update0(rbUser);
-                proxy().proxy(GK.HOME_TO_USER);
+                if(shouldRouter){
+                    proxy().proxy(GK.HOME_TO_USER);
+                }else{
+                    shouldRouter = !shouldRouter;
+                }
+
                 break;
 
         }
@@ -93,7 +151,7 @@ public class HomeViewHolder extends AbstractIViewHolder<Activity> implements Rad
     private void update0(RadioButton now){
         if(lastRB != null){
             lastRB.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.drawable.test_home_home0_menu_not_checked),null,null);
-            lastRB.setTextColor(0xffc9c9c9);
+            lastRB.setTextColor(0xff000000);
             lastRB.invalidate();
         }
         now.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.drawable.test_home_home0_menu_checked),null,null);

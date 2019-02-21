@@ -52,5 +52,7 @@ public class BaseFragment extends Fragment {
         if(globalPlugin != null){
             globalPlugin.data().unregister(vh);
         }
+
+        plugin.viewHolder().uninstall();
     }
 }

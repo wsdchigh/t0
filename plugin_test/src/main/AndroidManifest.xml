@@ -3,6 +3,8 @@
     package="com.wsdc.plugin_test"
     android:sharedUserId="com.wsdc.test">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:name="com.wsdc.g_a_0.base.BaseApplication"
         android:allowBackup="true"

@@ -6,6 +6,7 @@ import android.content.Context;
 import com.wsdc.g_a_0.Starter;
 import com.wsdc.g_a_0.annotation.APlugin;
 import com.wsdc.g_a_0.annotation.PluginSign;
+import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.plugin.inner.AbstractIProxy;
 import com.wsdc.g_a_0.router.IRouter;
@@ -53,7 +54,9 @@ public class HomeProxy extends AbstractIProxy<Activity> {
                 break;
 
             case GK.BACK_PRESS:
-                
+                //Log.d("wsdc1", "路由切换    "+Starter.getInstance().getRouter().currentPlugin().key());
+                plugin().data().put(GK.HOME_BACK_SWITCH,Starter.getInstance().getRouter().currentPlugin().key());
+                plugin().data().notify0(IData.TYPE_SINGLE,GK.HOME_BACK_SWITCH);
                 break;
         }
         return false;

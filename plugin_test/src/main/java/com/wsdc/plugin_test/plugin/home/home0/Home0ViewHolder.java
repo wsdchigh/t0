@@ -14,11 +14,31 @@ import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.plugin.inner.AbstractIViewHolder;
 import com.wsdc.plugin_test.R;
+import com.wsdc.plugin_test.adapters.Home0ADAdapter;
+import com.wsdc.plugin_test.entities_static.GoodsBean;
+import com.wsdc.plugin_test.view_wrap.CommonVPWrap;
+
+import java.util.LinkedList;
+import java.util.List;
 
 @APlugin(key="/test/home/home0",sign=PluginSign.VIEW_HOLDER)
 public class Home0ViewHolder extends AbstractIViewHolder<Fragment> {
     ViewFlipper vf;
     ViewPager vp;
+    Home0ADAdapter adAdapter;
+    List<GoodsBean> data = new LinkedList<>();
+    CommonVPWrap vpWrap;
+
+    {
+        GoodsBean bean = new GoodsBean();
+        data.add(bean);
+
+        bean = new GoodsBean();
+        data.add(bean);
+
+        bean = new GoodsBean();
+        data.add(bean);
+    }
 
     public Home0ViewHolder(IPlugin<Fragment, Integer> plugin) {
         super(plugin);
@@ -26,7 +46,9 @@ public class Home0ViewHolder extends AbstractIViewHolder<Fragment> {
 
     @Override
     protected void clear() {
-
+        if(vpWrap != null){
+            vpWrap.close();
+        }
     }
 
     @Override
@@ -43,6 +65,14 @@ public class Home0ViewHolder extends AbstractIViewHolder<Fragment> {
 
     @Override
     public void init(Context context) {
+        vp = rootView.findViewById(R.id.test_home_home0_vp);
+        vf = rootView.findViewById(R.id.test_home_home0_vf);
+
+        adAdapter = new Home0ADAdapter(context);
+        vp.setAdapter(adAdapter);
+        adAdapter.setData(data);
+
+        vpWrap = new CommonVPWrap(vp,plugin.handler());
 
     }
 

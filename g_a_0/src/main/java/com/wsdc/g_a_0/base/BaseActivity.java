@@ -121,6 +121,7 @@ public class BaseActivity extends FragmentActivity {
         if(rtn != IRouter.ROUTER_BACK_FRAGMENT){
             super.onBackPressed();
         }else{
+
             plugin.proxy().proxy(500);
         }
     }
@@ -132,6 +133,8 @@ public class BaseActivity extends FragmentActivity {
         if(globalPlugin != null){
             globalPlugin.data().unregister(plugin.viewHolder());
         }
+
+        plugin.viewHolder().uninstall();
         super.onDestroy();
     }
 
