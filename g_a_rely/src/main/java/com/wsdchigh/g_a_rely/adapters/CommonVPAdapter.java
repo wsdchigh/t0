@@ -1,4 +1,4 @@
-package com.wsdc.plugin_test.adapters.inner;
+package com.wsdchigh.g_a_rely.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -12,6 +12,14 @@ public abstract class CommonVPAdapter<T> extends PagerAdapter {
     private List<T> data;
     private Context context;
     private OnItemClickListener<T> onItemClickListener;
+    private boolean allowMax = false;
+
+    /*
+     *  允许无限切换
+     */
+    public void allowMax(boolean value){
+        allowMax = value;
+    }
 
     public CommonVPAdapter(Context context) {
         this.context = context;
@@ -34,7 +42,7 @@ public abstract class CommonVPAdapter<T> extends PagerAdapter {
         if(data == null || data.size() == 0){
             return 0;
         }
-        return Integer.MAX_VALUE;
+        return allowMax?Integer.MAX_VALUE:data.size();
     }
 
     @Override

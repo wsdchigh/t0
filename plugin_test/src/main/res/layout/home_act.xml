@@ -6,6 +6,7 @@
     <FrameLayout
         android:id="@+id/test_home_act_container"
         android:layout_width="match_parent"
+        android:orientation="vertical"
         android:layout_height="match_parent"
         android:layout_marginBottom="56dp">
 
@@ -22,6 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_gravity="bottom"
+        android:clipChildren="false"
         android:orientation="horizontal">
         <RadioButton
             android:id="@+id/test_home_rb_home0"
@@ -29,7 +31,9 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:checked="true"
-            android:drawableTop="@drawable/test_home_home0_menu_checked"
+            android:textColor="#f00"
+            android:drawableTop="@mipmap/icon_home_home0_checked"
+            android:textSize="12sp"
             android:button="@null"
             android:gravity="center"
             android:text="首页"/>
@@ -39,7 +43,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawableTop="@drawable/test_home_home0_menu_not_checked"
+            android:drawableTop="@mipmap/icon_home_category"
+            android:textSize="12sp"
             android:button="@null"
             android:gravity="center"
             android:text="分类"/>
@@ -49,7 +54,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawableTop="@drawable/test_home_home0_menu_not_checked"
+            android:drawableTop="@mipmap/icon_home_cart"
+            android:textSize="12sp"
             android:button="@null"
             android:gravity="center"
             android:text="购物车"/>
@@ -60,7 +66,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawableTop="@drawable/test_home_home0_menu_not_checked"
+            android:drawableTop="@mipmap/icon_home_person"
+            android:textSize="12sp"
             android:button="@null"
             android:gravity="center"
             android:text="用户"/>

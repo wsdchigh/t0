@@ -41,4 +41,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     implementation project(':g_a_0')
+    implementation project(':g_a_rely')
+    implementation project(':g_a_rely_static')
+    implementation project(':myfresh')
 }

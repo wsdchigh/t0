@@ -1,4 +1,4 @@
-package com.wsdc.plugin_test.view_wrap;
+package com.wsdchigh.g_a_rely.wraps;
 
 import android.os.Handler;
 import android.support.v4.view.ViewPager;

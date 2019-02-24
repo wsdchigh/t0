@@ -31,4 +31,8 @@ public interface IFrameDo {
     IExecutor executor();
 
     IData data();
+
+    ICueDo header();
+
+    ICueDo tail();
 }

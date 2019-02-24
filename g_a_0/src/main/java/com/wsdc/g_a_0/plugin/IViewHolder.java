@@ -28,5 +28,5 @@ public interface IViewHolder<T> extends IPeriod0<Context>,IDataChangeListener<ID
 
     T wrap();
 
-    void uninstall();
+    //void uninstall();
 }

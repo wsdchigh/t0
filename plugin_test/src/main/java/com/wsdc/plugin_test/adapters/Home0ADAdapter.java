@@ -6,8 +6,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.wsdc.plugin_test.adapters.inner.CommonVPAdapter;
-import com.wsdc.plugin_test.entities_static.GoodsBean;
+import com.wsdchigh.g_a_rely.adapters.CommonVPAdapter;
+import com.wsdchigh.g_a_rely.beans.GoodsBean;
 
 public class Home0ADAdapter extends CommonVPAdapter<GoodsBean> {
 

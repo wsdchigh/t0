@@ -20,11 +20,6 @@ public class GuideViewHolder extends AbstractIViewHolder<Activity> {
     }
 
     @Override
-    protected void clear() {
-
-    }
-
-    @Override
     public View install(Context context, Activity activity, ViewGroup parent) {
         rootView = LayoutInflater.from(context).inflate(R.layout.activity_main, null);
         return rootView;

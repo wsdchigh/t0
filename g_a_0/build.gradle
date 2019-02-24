@@ -39,6 +39,6 @@ dependencies {
 
     implementation project(":g_j_0")
     implementation project(":g_j_1")
-    //implementation project(":g_a_rely_static")
+    implementation project(":g_a_rely_static")
 
 }

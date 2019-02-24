@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.wsdc.plugin_test.MainActivity">
+    android:background="#c9c9c9">
 
     <FrameLayout
         android:id="@+id/test_guide_container"

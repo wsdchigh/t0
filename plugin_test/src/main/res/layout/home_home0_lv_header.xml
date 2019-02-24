@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.wsdchigh.g_a_rely.views.XViewPager
+        android:id="@+id/test_home_home0_vp_0"
+        android:layout_width="match_parent"
+        android:layout_height="120dp">
+
+    </com.wsdchigh.g_a_rely.views.XViewPager>
+
+    <ViewFlipper
+        android:id="@+id/test_home_home0_vf_0"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+
+    </ViewFlipper>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="新品上市"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="精品推荐"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="热销商品"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="猜你喜欢"/>
+
+</LinearLayout>

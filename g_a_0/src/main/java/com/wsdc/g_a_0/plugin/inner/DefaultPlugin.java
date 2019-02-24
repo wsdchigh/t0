@@ -304,32 +304,35 @@ public class DefaultPlugin<T> implements IPlugin<T,Integer> {
                 throw new RuntimeException("data == null");
             }
 
-            Log.d("wsdc", "hash = "+hashCode());
-
-            //  数据中心注册观察者
-            data.register(viewHolder);
-
             /*
-             *  如果有父插件
-             *  <li>    应该需要监听父插件的数据转换
+             *  数据的注册应该在View在生成之后，因为这样才能有效的显示数据
+             *  <li>    将这里面的代码移动到rootView生成值周
+             *  <li>    在activity/fragment创建View之后手动注册
              */
-            if(parent != null){
-                if(data != parent.data()){
-                    Log.d("wsdc", "parent hash = "+parent.hashCode()+"  self key = "+hashCode()+"  parent key = "+parent.key());
-                    Log.d("wsdc", "parent = "+(parent == null)+"    data = "+(parent.data() == null));
-                    parent.data().register(viewHolder);
+            if(false){
+                //  数据中心注册观察者
+                data.register(viewHolder);
+
+                /*
+                 *  如果有父插件
+                 *  <li>    应该需要监听父插件的数据转换
+                 */
+                if(parent != null){
+                    if(data != parent.data()){
+                        parent.data().register(viewHolder);
+                    }
                 }
-            }
 
-            /*
-             *  全局插件的注册信息
-             *  <li>    任何插件均自动注册到全局插件的数据中心中
-             *  <li>    构建全局插件的时候，是无法获取全局插件的
-             */
-            if(Starter.getInstance() != null){
-                final IPlugin globalPlugin = Starter.getInstance().globalPlugin();
-                if(globalPlugin != null){
-                    globalPlugin.data().register(viewHolder);
+                /*
+                 *  全局插件的注册信息
+                 *  <li>    任何插件均自动注册到全局插件的数据中心中
+                 *  <li>    构建全局插件的时候，是无法获取全局插件的
+                 */
+                if(Starter.getInstance() != null){
+                    final IPlugin globalPlugin = Starter.getInstance().globalPlugin();
+                    if(globalPlugin != null){
+                        globalPlugin.data().register(viewHolder);
+                    }
                 }
             }
             return ;

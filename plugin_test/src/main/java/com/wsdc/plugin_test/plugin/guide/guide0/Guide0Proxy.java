@@ -23,10 +23,11 @@ public class Guide0Proxy extends AbstractIProxy<Fragment> {
 
     @Override
     public boolean proxy0(Integer key, Object... args) {
-        //  fragment activity 均不需要添加到路由之中
         switch (key){
             case GK.GUIDE0_TO_WELCOME:
-                plugin().router().go(GK.ROUTE_GUIDE_WELCOME, IPlugin.START_NOT_STACK | (IPlugin.START_NOT_STACK >> 2));
+                //plugin().router().go(GK.ROUTE_GUIDE_WELCOME, IPlugin.START_NOT_STACK | (IPlugin.START_NOT_STACK >> 2));
+                //plugin().router().go(GK.ROUTE_HOME_HOME0, IPlugin.START_COMMON);
+
                 break;
         }
         return false;

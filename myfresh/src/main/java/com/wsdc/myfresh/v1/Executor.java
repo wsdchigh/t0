@@ -111,6 +111,11 @@ public class Executor implements IExecutor {
                         offsetAll = data.getOffsetAll();
                         if(offsetAll == 0){
                             if(frame.canFresh(dir)){
+                                //  暂时禁止上拉  事件下发下去
+                                if(dir < 0){
+                                    frame.superDispatchEvent(ev);
+                                    break;
+                                }
                                 cancelDown(ev);
                                 data.setFreshDirection(dir);
                                 data.setStatus(status << 1);

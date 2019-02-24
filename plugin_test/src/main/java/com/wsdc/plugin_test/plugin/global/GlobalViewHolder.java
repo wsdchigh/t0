@@ -17,11 +17,6 @@ public class GlobalViewHolder extends AbstractIViewHolder<Object> {
     }
 
     @Override
-    protected void clear() {
-
-    }
-
-    @Override
     public View install(Context context, Object o, ViewGroup parent) {
         return null;
     }

@@ -21,11 +21,6 @@ public class CategoryViewHolder extends AbstractIViewHolder<Fragment> {
     }
 
     @Override
-    protected void clear() {
-
-    }
-
-    @Override
     public View install(Context context, Fragment fragment, ViewGroup parent) {
         rootView = LayoutInflater.from(context).inflate(R.layout.home_category,parent,false);
         return rootView;

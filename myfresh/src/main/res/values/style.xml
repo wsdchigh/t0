@@ -15,7 +15,7 @@
         <!--是否支持二次事件-->
         <attr name="second_event" format="boolean"></attr>
         <!--是否支持二级刷新-->
-        <attr name="second_fresh"></attr>
+        <attr name="second_fresh" format="boolean"></attr>
         <!--触发刷新的偏移-->
         <attr name="fresh_header_dimen" format="integer"></attr>
         <!--触发二次刷新的偏移-->
@@ -30,6 +30,8 @@
 
         <!--如果使用了header 但是没有设置 是否需要使用默认的-->
         <attr name="use_default_i_cue" format="boolean"></attr>
+
+        <attr name="header_offset" format="dimension"></attr>
     </declare-styleable>
 
     <declare-styleable name="IFrame_Layout">

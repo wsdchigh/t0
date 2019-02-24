@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<View android:layout_width="match_parent"
+    android:layout_height="24dp"
+    android:id="@+id/status_bar_0"
+    android:background="@drawable/dr_shape_status_bar"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+        填充状态栏的bar
+        <li>    所有的样式均会沉浸式，填充到状态栏(不占用导航栏)
+        <li>    如果不需要，则不需要引入这个
+
+        <li>    如果不支持沉浸式，需要移除掉这个View
+    -->
+</View>

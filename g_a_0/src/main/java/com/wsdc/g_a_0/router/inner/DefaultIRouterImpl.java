@@ -36,8 +36,18 @@ import dalvik.system.BaseDexClassLoader;
  *          <li>    也可以选择在回调中去获取插件信息    (后期会考虑这个)
  */
 public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycleCallbacks {
+    protected int UI_CREATED = 1;
+    protected int UI_START = 2;
+    protected int UI_RESTART = 3;
+    protected int UI_RESUME = 4;
+    protected int UI_PAUSE = 5;
+    protected int UI_STOP = 6;
+    protected int UI_DESTROY = 7;
+    protected int UI_SAVE = 8;
+
     IRouterMap routerMap ;
     IPlugin currentIPlugin;
+    int uiStatus = UI_CREATED;
 
     //  记录上一次的插件
     IPlugin lastPlugin;
@@ -78,10 +88,16 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
      *          <li>    但是插件不能重复，如果插件一旦重复，那么会关闭之前的插件
      *                  <li>    所处的activity关闭
      *                  <li>    路由别表相关的插件一律移除
-     *
+     *  <li>    fragment无法在activity保存完状态之后提交事务
+     *          <li>    我们规定，resume之后的阶段不允许路由
+     *          <li>    back阶段，不需要采取这个措施
      */
     @Override
     public IPlugin go(String key, int mode) {
+        if(uiStatus == UI_SAVE){
+            Log.d("wsdc1", "status = "+uiStatus);
+            return null;
+        }
         /*
          *  如果系统中存在着这个路由，那么选择复用这个路由
          */
@@ -354,6 +370,7 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        uiStatus = UI_CREATED;
         /*
          *  Activity的启动，联合当前路由所处的插件进行判断
          *  <li>    如果当前插件是二级插件，此时需要调用Fragment进行处理
@@ -373,6 +390,7 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
 
     @Override
     public void onActivityStarted(Activity activity) {
+        uiStatus = UI_START;
         /*
          *  如果需要后退到首页   (第一个路由)
          *  <li>    需要在这里清空路由信息 (可以能是fragment管理)
@@ -382,6 +400,7 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
 
     @Override
     public void onActivityResumed(Activity activity) {
+        uiStatus = UI_RESUME;
         /*
          *  是否需要引导Activity的退出
          *  <li>    等新的Activity显示的时候，才引导就得Activity退出
@@ -401,13 +420,18 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
             }
 
             if((tmpPlugin.status() & IPlugin.STATUS_START_SELF_MODE_MASK) == IPlugin.START_NOT_STACK){
-                Log.d("wsdc", "上一个activity退出");
-                act.finish();
-
                 /*
-                 *  如果插件在 没有入栈的插件表中，需要移除
+                 *  使用home退出桌面
+                 *  <li>    再次进入的时候，act == activity 此时不要关闭自身
                  */
-                pluginsLevel1NotInStack.remove(tmpPlugin);
+                if(activity != act){
+                    Log.d("wsdc", "上一个activity退出");
+                    act.finish();
+                    /*
+                     *  如果插件在 没有入栈的插件表中，需要移除
+                     */
+                    pluginsLevel1NotInStack.remove(tmpPlugin);
+                }
             }
         }
 
@@ -417,22 +441,23 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
 
     @Override
     public void onActivityPaused(Activity activity) {
-
+        uiStatus = UI_PAUSE;
     }
 
     @Override
     public void onActivityStopped(Activity activity) {
-
+        uiStatus = UI_STOP;
     }
 
     @Override
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
+        //  如果到了这个阶段，fragment是不允许处理事务的
+        uiStatus = UI_SAVE;
     }
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-
+        uiStatus = UI_DESTROY;
     }
 
 

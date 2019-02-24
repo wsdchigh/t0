@@ -1,4 +1,4 @@
-package com.wsdc.plugin_test.entities_static;
+package com.wsdchigh.g_a_rely.beans;
 
 /*
  *  商品规格信息

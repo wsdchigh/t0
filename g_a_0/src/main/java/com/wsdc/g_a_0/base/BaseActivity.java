@@ -9,8 +9,10 @@ import android.view.Window;
 
 import com.wsdc.g_a_0.ResourceProxy1;
 import com.wsdc.g_a_0.Starter;
+import com.wsdc.g_a_0.UPlugin;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.router.IRouter;
+import com.wsdchigh.g_a_rely_static.utils.UWindow;
 
 /*
  *  为了统一化
@@ -58,15 +60,18 @@ public class BaseActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
+
+        UWindow.getInstance().setImgTransparent(this);
         setContentView(plugin.viewHolder().install(this,this,null));
         plugin.viewHolder().init(this);
-        Log.d("wsdc1", "activity create");
+        UPlugin.getInstance().register(plugin);
+        Log.d("wsdc1", "activity create     "+plugin.key());
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d("wsdc1", "activity start");
+        Log.d("wsdc1", "activity start      "+plugin.key());
     }
 
     @Override
@@ -78,8 +83,7 @@ public class BaseActivity extends FragmentActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        IRouter router = Starter.getInstance().getRouter();
-        Log.d("wsdc1", "base resume path = "+this.getClass().getName()+"    router size = "+router.size()+"     path = "+router.currentPlugin().key());
+        Log.d("wsdc", "onResume");
     }
 
     @Override
@@ -128,13 +132,8 @@ public class BaseActivity extends FragmentActivity {
 
     @Override
     protected void onDestroy() {
-        IPlugin globalPlugin = Starter.getInstance().globalPlugin();
-        plugin.data().unregister(plugin.viewHolder());
-        if(globalPlugin != null){
-            globalPlugin.data().unregister(plugin.viewHolder());
-        }
-
-        plugin.viewHolder().uninstall();
+        plugin.viewHolder().exit(this);
+        UPlugin.getInstance().unregister(plugin);
         super.onDestroy();
     }
 

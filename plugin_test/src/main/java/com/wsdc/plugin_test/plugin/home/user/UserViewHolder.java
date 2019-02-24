@@ -21,11 +21,6 @@ public class UserViewHolder extends AbstractIViewHolder<Fragment> {
     }
 
     @Override
-    protected void clear() {
-
-    }
-
-    @Override
     public View install(Context context, Fragment fragment, ViewGroup parent) {
         rootView = LayoutInflater.from(context).inflate(R.layout.home_user,parent,false);
         return rootView;

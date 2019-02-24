@@ -15,8 +15,8 @@ import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
 import com.wsdc.g_a_0.plugin.inner.AbstractIViewHolder;
 import com.wsdc.g_a_0.router.IRouter;
-import com.wsdc.plugin_test.GK;
 import com.wsdc.plugin_test.R;
+import com.wsdc.plugin_test.GK;
 
 @APlugin(key="/test/home",sign=PluginSign.VIEW_HOLDER)
 public class HomeViewHolder extends AbstractIViewHolder<Activity> implements RadioGroup.OnCheckedChangeListener {
@@ -31,11 +31,6 @@ public class HomeViewHolder extends AbstractIViewHolder<Activity> implements Rad
 
     public HomeViewHolder(IPlugin<Activity, Integer> plugin) {
         super(plugin);
-    }
-
-    @Override
-    protected void clear() {
-
     }
 
     @Override
@@ -150,12 +145,30 @@ public class HomeViewHolder extends AbstractIViewHolder<Activity> implements Rad
 
     private void update0(RadioButton now){
         if(lastRB != null){
-            lastRB.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.drawable.test_home_home0_menu_not_checked),null,null);
+
             lastRB.setTextColor(0xff000000);
+            if(lastRB ==rbHome0){
+                lastRB.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.mipmap.icon_home_home0),null,null);
+            }else if(lastRB == rbCategory){
+                lastRB.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.mipmap.icon_home_category),null,null);
+            }else if(lastRB == rbCart){
+                lastRB.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.mipmap.icon_home_cart),null,null);
+            }else if(lastRB == rbUser){
+                lastRB.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.mipmap.icon_home_person),null,null);
+            }
             lastRB.invalidate();
         }
-        now.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.drawable.test_home_home0_menu_checked),null,null);
+
         now.setTextColor(0xffff0000);
+        if(now ==rbHome0){
+            now.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.mipmap.icon_home_home0_checked),null,null);
+        }else if(now == rbCategory){
+            now.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.mipmap.icon_home_category_checked),null,null);
+        }else if(now == rbCart){
+            now.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.mipmap.icon_home_cart_checked),null,null);
+        }else if(now == rbUser){
+            now.setCompoundDrawablesWithIntrinsicBounds(null,context.getResources().getDrawable(R.mipmap.icon_home_person_checked),null,null);
+        }
         now.invalidate();
         lastRB = now;
     }

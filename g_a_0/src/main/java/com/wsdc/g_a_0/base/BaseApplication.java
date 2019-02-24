@@ -31,10 +31,15 @@ public class BaseApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        /*
+         *  建议异步处理
+         *  <li>    如果数据量非常大的话
+         *  <li>    如果没有加载完毕的话，那么在
+         */
         Starter.install(this);
         starter = Starter.getInstance();
         router = starter.getRouter();
-        //  router.go("/test/guide/guide0",IPlugin.START_NOT_STACK | (IPlugin.START_NOT_STACK >> 2));
+        starter.globalPlugin().proxy().proxy(1);
 
         Log.d("wsdc1", "创建application");
     }

@@ -10,11 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.wsdc.g_a_0.Starter;
+import com.wsdc.g_a_0.UPlugin;
 import com.wsdc.g_a_0.annotation.AWrap;
 import com.wsdc.g_a_0.annotation.EWrapType;
-import com.wsdc.g_a_0.plugin.IData;
 import com.wsdc.g_a_0.plugin.IPlugin;
-import com.wsdc.g_a_0.plugin.IViewHolder;
 
 @AWrap(type=EWrapType.FRAGMENT,wrapKey = 200)
 public class BaseFragment extends Fragment {
@@ -32,6 +31,7 @@ public class BaseFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = plugin.viewHolder().install(getContext(), this, container);
         plugin.viewHolder().init(getContext());
+        UPlugin.getInstance().register(plugin);
         return view;
     }
 
@@ -39,20 +39,7 @@ public class BaseFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        IData data = plugin.data();
-        IViewHolder<Fragment> vh = plugin.viewHolder();
-        IPlugin parent = plugin.parent();
-        IPlugin globalPlugin = Starter.getInstance().globalPlugin();
-
-        data.unregister(vh);
-        if(parent != null){
-            parent.data().unregister(vh);
-        }
-        if(globalPlugin != null){
-            globalPlugin.data().unregister(vh);
-        }
-
-        plugin.viewHolder().uninstall();
+        plugin.viewHolder().exit(getContext());
+        UPlugin.getInstance().unregister(plugin);
     }
 }

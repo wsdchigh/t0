@@ -49,6 +49,10 @@ public class IFrame extends ViewGroup implements IFrameDo {
     private ICueDo header0,tail0;
     private IData data;
 
+    //  如果允许头部有偏移的话
+    private int offset = 120;
+    private int screenHeight;
+
 
     public IFrame(Context context) {
         this(context,null);
@@ -98,8 +102,14 @@ public class IFrame extends ViewGroup implements IFrameDo {
         //  是否使用默认的设置
         data.use_default_i_cue = ta.getBoolean(R.styleable.IFrame_use_default_i_cue,true);
 
+        //  偏移
+        //offset = ta.getInteger(R.styleable.IFrame_header_offset,0);
+        offset = ta.getDimensionPixelOffset(R.styleable.IFrame_header_offset,0);
+
         ta.recycle();
         scroller = new Scroller(context);
+
+        screenHeight = context.getResources().getDisplayMetrics().heightPixels;
     }
 
     @Override
@@ -206,33 +216,63 @@ public class IFrame extends ViewGroup implements IFrameDo {
         int width = 0;
         int height = 0;
         View view = null;
-        switch (status){
-            case IFrameDo.STATUS_NULL:
+        if(offset == 0){
+            switch (status){
+                case IFrameDo.STATUS_NULL:
 
-                width = content0.getMeasuredWidth();
-                height = content0.getMeasuredHeight();
-                content0.layout(0,0,width,height);
-                break;
+                    width = content0.getMeasuredWidth();
+                    height = content0.getMeasuredHeight();
+                    content0.layout(0,0,width,height);
+                    break;
 
-            case IFrame.STATUS_HEADER:
-                view = header0.getView();
-                view.layout(0,-view.getMeasuredHeight(),view.getMeasuredWidth(),0);
+                case IFrame.STATUS_HEADER:
+                    view = header0.getView();
+                    view.layout(0,-view.getMeasuredHeight(),view.getMeasuredWidth(),0);
 
-                width = content0.getMeasuredWidth();
-                height = content0.getMeasuredHeight();
-                content0.layout(0,0,width,height);
-                break;
+                    width = content0.getMeasuredWidth();
+                    height = content0.getMeasuredHeight();
+                    content0.layout(0,0,width,height);
+                    break;
 
-            case IFrame.STATUS_TAIL:
-                view = tail0.getView();
+                case IFrame.STATUS_TAIL:
+                    view = tail0.getView();
 
-                width = content0.getMeasuredWidth();
-                height = content0.getMeasuredHeight();
-                content0.layout(0,0,width,height);
+                    width = content0.getMeasuredWidth();
+                    height = content0.getMeasuredHeight();
+                    content0.layout(0,0,width,height);
 
-                view.layout(0,height,view.getMeasuredWidth(),height+view.getMeasuredHeight());
-                break;
+                    view.layout(0,height,view.getMeasuredWidth(),height+view.getMeasuredHeight());
+                    break;
+            }
+        }else{
+            switch (status){
+                case IFrameDo.STATUS_NULL:
+                case IFrame.STATUS_HEADER:
+                    int h0 = getMeasuredHeight();
+                    view = header0.getView();
+                    int headerHeight = view.getMeasuredHeight();
+                    int headerTop = -(headerHeight-offset);
+                    view.layout(0,headerTop,view.getMeasuredWidth(),offset);
+                    //view.layout(0,-view.getMeasuredHeight(),view.getMeasuredWidth(),0);
+
+                    width = content0.getMeasuredWidth();
+                    height = content0.getMeasuredHeight()+offset;
+                    height = height>h0?h0:headerHeight;
+                    content0.layout(0,offset,width,height);
+                    break;
+
+                case IFrame.STATUS_TAIL:
+                    view = tail0.getView();
+
+                    width = content0.getMeasuredWidth();
+                    height = content0.getMeasuredHeight();
+                    content0.layout(0,0,width,height);
+
+                    view.layout(0,height,view.getMeasuredWidth(),height+view.getMeasuredHeight());
+                    break;
+            }
         }
+
 
     }
 
@@ -384,6 +424,16 @@ public class IFrame extends ViewGroup implements IFrameDo {
     @Override
     public IData data() {
         return data;
+    }
+
+    @Override
+    public ICueDo header() {
+        return header0;
+    }
+
+    @Override
+    public ICueDo tail() {
+        return tail0;
     }
 
     /*

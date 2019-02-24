@@ -6,13 +6,14 @@ package com.wsdc.plugin_test;
  *  <li>    如果key的值没有任何含义，尽量使用Integer充当key而不是String
  */
 public class GK {
-    //  基石  以此自增        不同的模块，使用基数不一样即可
-    private static int base = 1000;
+    //  app启动，会发送这个信号给全局插件，只能在全局插件中捕获
+    //  这个需要固定值 1   不要改变这个值     application会发送这个信号
+    public static final int SYSTEM_START = 1;
 
     //  引导模块
     public static final int GUIDE0_TO_WELCOME = 401;
     public static final int GUIDE0_TO_HOME = 402;
-    public static final int WELCOME_TO_HOME = 400;
+    public static final int WELCOME_TO_HOME = 409;
 
     //  首页模块
     public static final int HOME_TO_HOME0 =403;
@@ -20,6 +21,8 @@ public class GK {
     public static final int HOME_TO_CART = 405;
     public static final int HOME_TO_USER = 406;
 
+    //  guide0页面发送这个信号给global，决定是进入欢迎界面还是home界面
+    public static final int GUIDE0_GO = 407;
 
     //  关于fragment的后退切换，需要发送下来
     public static final int BACK_PRESS = 500;
