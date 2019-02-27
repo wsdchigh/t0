@@ -21,9 +21,16 @@ public class XListView extends ListView {
             int last = first + getChildCount();
             int total = getCount();
 
+            /*
+             *  3s最多触发一次
+             */
             if(last >= total - 4){
                 if(prepareLoading != null){
-                    prepareLoading.prepare();
+                    long t2 = System.currentTimeMillis();
+                    if(t2 - t1 > 3000){
+                        t1 = t2;
+                        prepareLoading.prepare();
+                    }
                 }
             }
 

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
@@ -94,10 +95,6 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
      */
     @Override
     public IPlugin go(String key, int mode) {
-        if(uiStatus == UI_SAVE){
-            Log.d("wsdc1", "status = "+uiStatus);
-            return null;
-        }
         /*
          *  如果系统中存在着这个路由，那么选择复用这个路由
          */
@@ -163,11 +160,22 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
                     Fragment of = (Fragment) origin.wrap();
                     Fragment nf = (Fragment) plugin.wrap();
 
-                    FragmentTransaction transaction = fa.getSupportFragmentManager().beginTransaction();
+                    FragmentManager manager = fa.getSupportFragmentManager();
+                    FragmentTransaction transaction = manager.beginTransaction();
                     transaction.remove(of)
                             .add(parentPlugin.childLayout(),nf)
-                            .show(nf)
-                            .commit();
+                            .show(nf);
+
+                    /*
+                     *  如果处于保存状态，此时路由先行
+                     *  <li>    在activity处于显示状态的时候，再行跳转
+                     */
+                    if(manager.isStateSaved()){
+                        //  如果处于这个状态，那么将事务存放当前插件之中
+                        plugin.setTag("transaction",transaction);
+                    }else{
+                        transaction.commit();
+                    }
 
                     Log.d("wsdc1", "go go "+origin.key()+"  ->  "+plugin.key());
 
@@ -433,6 +441,13 @@ public class DefaultIRouterImpl implements IRouter, Application.ActivityLifecycl
                     pluginsLevel1NotInStack.remove(tmpPlugin);
                 }
             }
+        }
+
+        FragmentTransaction transaction = (FragmentTransaction) currentIPlugin.getTag("transaction");
+        if(transaction != null){
+            transaction.commit();
+            currentIPlugin.setTag("transaction",null);
+            Log.d("wsdc1", "捕获  捕获  捕获");
         }
 
         //  清空lastPlugin    (内存问题)

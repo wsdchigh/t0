@@ -1,5 +1,7 @@
 package com.wsdc.myfresh;
 
+import android.view.MotionEvent;
+
 import com.wsdc.myfresh.v1.IData;
 
 /**
@@ -20,8 +22,10 @@ public interface IFrameDo {
      *  能否刷新
      *      >   ViewGroup.canScrollVertical(int value)
      *          >   负数 是否能够继续往下滑动
+     *
+     *  <li>    如果事件在一个指定的范围里面
      */
-    boolean canFresh(int value);
+    boolean canFresh(int value, MotionEvent ev);
 
     void complete();
 
@@ -35,4 +39,14 @@ public interface IFrameDo {
     ICueDo header();
 
     ICueDo tail();
+
+    void setFrameExpand(FrameExpand expand);
+
+    public interface FrameExpand{
+        /*
+         *  在触发刷新的时候，需要参考事件的位置是否需要拦截
+         *  <li>    如果子View需要拦截事件(滑动)，如果子View滑动需要滑动
+         */
+        boolean intercept(MotionEvent ev);
+    }
 }

@@ -4,35 +4,136 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.wsdchigh.g_a_rely.views.XViewPager
-        android:id="@+id/test_home_home0_vp_0"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="120dp">
+        android:layout_height="140dp">
+        <com.wsdchigh.g_a_rely.views.XViewPager
+            android:id="@+id/test_home_home0_vp_0"
+            android:layout_width="match_parent"
+            android:layout_height="140dp">
 
-    </com.wsdchigh.g_a_rely.views.XViewPager>
+        </com.wsdchigh.g_a_rely.views.XViewPager>
 
-    <ViewFlipper
-        android:id="@+id/test_home_home0_vf_0"
+        <com.wsdchigh.g_a_rely.views.XIndicate
+            android:id="@+id/test_home_home0_indicate"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="20dp">
+
+        </com.wsdchigh.g_a_rely.views.XIndicate>
+    </FrameLayout>
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp">
+        android:layout_height="180dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/dr_shape_common_bg">
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="今日头条"/>
+        <ViewFlipper
+            android:id="@+id/test_home_home0_vf_0"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="70dp">
+        </ViewFlipper>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginTop="40dp"
+            android:background="#c9c9c9"></View>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:layout_marginTop="42dp">
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"></FrameLayout>
+        </HorizontalScrollView>
+    </FrameLayout>
 
 
-    </ViewFlipper>
-
-    <TextView
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:text="新品上市"/>
+        android:layout_height="160dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/dr_shape_common_bg">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="新品上市"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:text="精品推荐"/>
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginTop="40dp"
+            android:scrollbars="none">
+            <LinearLayout
+                android:id="@+id/test_home_home0_lin_news"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
-    <TextView
+            </LinearLayout>
+        </HorizontalScrollView>
+    </FrameLayout>
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:text="热销商品"/>
+        android:layout_height="160dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/dr_shape_common_bg">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="精品推荐"/>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginTop="40dp"
+            android:scrollbars="none">
+            <LinearLayout
+                android:id="@+id/test_home_home0_lin_perfect"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+            </LinearLayout>
+        </HorizontalScrollView>
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/dr_shape_common_bg">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="热销商品"/>
+
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginTop="40dp"
+            android:scrollbars="none">
+            <LinearLayout
+                android:id="@+id/test_home_home0_lin_hots"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+            </LinearLayout>
+        </HorizontalScrollView>
+    </FrameLayout>
+
 
     <TextView
         android:layout_width="match_parent"

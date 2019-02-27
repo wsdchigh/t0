@@ -34,6 +34,12 @@ public abstract class CommonLVAdapter<X,Y,Z> extends BaseAdapter {
 
     private Context context;
 
+    private OnHeaderViewCreate headerViewCreate;
+
+    public void setHeaderViewCreate(OnHeaderViewCreate headerViewCreate) {
+        this.headerViewCreate = headerViewCreate;
+    }
+
     public CommonLVAdapter(Context context) {
         this.context = context;
     }
@@ -105,6 +111,10 @@ public abstract class CommonLVAdapter<X,Y,Z> extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        boolean shouldNotifyHeaderView = false;
+        if(position == 0 && headerViewsMap.get(position) == null){
+            shouldNotifyHeaderView = true;
+        }
         View rtn = null;
         if(position < headerSize){
             rtn = headerViewsMap.get(position);
@@ -147,6 +157,11 @@ public abstract class CommonLVAdapter<X,Y,Z> extends BaseAdapter {
             }
             rtn = tailView;
         }
+
+        //  创建监听
+        if(shouldNotifyHeaderView && headerViewCreate != null){
+            headerViewCreate.headerViewCreate(headerViewsMap.get(0));
+        }
         return rtn;
     }
 
@@ -168,5 +183,9 @@ public abstract class CommonLVAdapter<X,Y,Z> extends BaseAdapter {
         public void install1(Y y1,Y y2);
 
         View getRootView();
+    }
+
+    public interface OnHeaderViewCreate{
+        void headerViewCreate(View v);
     }
 }

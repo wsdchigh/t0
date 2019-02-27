@@ -1,5 +1,7 @@
 package com.wsdc.myfresh.v1;
 
+import android.view.MotionEvent;
+
 /*
  *  刷新的几种状态
  *      >   spare       没有触发刷新状态
@@ -226,6 +228,18 @@ public class IData {
         }
     }
 
+    /*
+     *  手指的方向
+     */
+    public int getFingerDirectionInScreen(){
+        float fa = Math.abs(lastX-curX);
+        float fb = Math.abs(lastY-curY);
+        if(fa == fb){
+            return 0;
+        }
+        return fa>fb?-1:1;
+    }
+
     public void setFreshDirection(int freshDirection){
         this.freshDirection = freshDirection;
     }
@@ -262,4 +276,40 @@ public class IData {
         orbit += (curY - lastY);
         //Log.d("wsdc", "cur = "+curY+"   last = "+lastY+"    orbit = "+orbit);
     }
+
+    float x1,y1;
+    float ox1,oy1;
+    public void down(MotionEvent ev) {
+        x1 = ev.getX();
+        y1 = ev.getY();
+
+        ox1 = 0;
+        oy1 = 0;
+    }
+
+    public void move(MotionEvent ev){
+        float x2 = ev.getX();
+        float y2 = ev.getY();
+
+        ox1 += x2 - x1;
+        oy1 += y2 - y1;
+    }
+
+    /*
+     *  解决横向纵向滑动的冲突问题
+     */
+    public int get(){
+        int k1 = (int) Math.abs(ox1);
+        int k2 = (int) Math.abs(oy1);
+        if(k1 > 20 || k2 > 20){
+            if(k1 >= k2){
+                return -1;
+            }else{
+                return 1;
+            }
+        }else{
+            return 0;
+        }
+    }
+
 }

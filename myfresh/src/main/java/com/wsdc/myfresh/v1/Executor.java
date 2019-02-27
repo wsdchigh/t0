@@ -33,11 +33,14 @@ public class Executor implements IExecutor {
     //  标记是否下发了了down事件
     private boolean dispatchDown = false;
 
+    int k = 0;
+
     public Executor(IFrame frame) {
         this.frame = frame;
         data = new IData();
         returnTime = data.getReturnTime();
     }
+
 
     public Executor(IFrame frame, View view, Context context,IData data) {
         this.frame = frame;
@@ -73,6 +76,9 @@ public class Executor implements IExecutor {
                     dispatchDown = true;
                 }
 
+                data.down(ev);
+                k = 0;
+
                 break;
 
             /*
@@ -95,7 +101,22 @@ public class Executor implements IExecutor {
                     return true;
                 }
 
+                /*
+                 *  滑动期间，在判断的时候，拦截最多10px
+                 *  <li>    从down事件开始到move事件，期间会累计x,y的偏移，直到x,y的偏移值超过10px
+                 *          低于这个值得时候，move事件全部拦截掉，不做任何处理
+                 *
+                 *  <li>    之所以设定这个阈值
+                 *          <li>    确定是横向滑动还是纵向滑动
+                 *          <li>    确定滑动的方向(正方向?负方向)
+                 *
+                 *  <li>    这个机制针对于spare周期的拦截处理
+                 *
+                 *  <li>    这里屏蔽掉横向滑动
+                 */
+
                 int dir = data.getEventDirection();
+
                 //  避开 down和scroll处在同一个点的位置
                 if(dir == IData.DIRECTION_NULL){
                     break;
@@ -107,10 +128,23 @@ public class Executor implements IExecutor {
                      *  <li>    如果有偏移，优先考虑偏移
                      */
                     case IData.STATUS_SPARE:
+                        if(k == 0){
+                            data.move(ev);
+                            k = data.get();
+
+                            if(k == 0){
+                                break;
+                            }
+                        }
+
+                        if(k == -1){
+                            frame.superDispatchEvent(ev);
+                            break;
+                        }
 
                         offsetAll = data.getOffsetAll();
                         if(offsetAll == 0){
-                            if(frame.canFresh(dir)){
+                            if(frame.canFresh(dir,ev)){
                                 //  暂时禁止上拉  事件下发下去
                                 if(dir < 0){
                                     frame.superDispatchEvent(ev);
@@ -214,7 +248,7 @@ public class Executor implements IExecutor {
                         if(offsetAll == 0){
                             //Log.d("wsdc", "fresh = "+(frame.canFresh(dir))+"    dir = "+dir);
                             //  如果滑动和刷新相反  那么需要content去处理数据
-                            if(dir != data.getFreshDirection() || !frame.canFresh(dir)){
+                            if(dir != data.getFreshDirection() || !frame.canFresh(dir,ev)){
                                 dispatchDownMotionEvent(ev);
                                 frame.superDispatchEvent(ev);
                                 // Log.d("wsdc", "o1 = "+dir+"     o2 = "+data.getFreshDirection());

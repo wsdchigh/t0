@@ -2,6 +2,7 @@ package com.wsdc.myfresh.v1;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -52,6 +53,8 @@ public class IFrame extends ViewGroup implements IFrameDo {
     //  如果允许头部有偏移的话
     private int offset = 120;
     private int screenHeight;
+
+    FrameExpand frameExpand;
 
 
     public IFrame(Context context) {
@@ -277,8 +280,11 @@ public class IFrame extends ViewGroup implements IFrameDo {
     }
 
     public boolean superDispatchEvent(MotionEvent ev){
-        return super.dispatchTouchEvent(ev);
+        boolean b = super.dispatchTouchEvent(ev);
+        return b;
     }
+
+    PointF p1,p2;
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
@@ -407,7 +413,12 @@ public class IFrame extends ViewGroup implements IFrameDo {
     }
 
     @Override
-    public boolean canFresh(int value) {
+    public boolean canFresh(int value,MotionEvent ev) {
+        if(frameExpand != null){
+            if(frameExpand.intercept(ev)){
+                return false;
+            }
+        }
         return !content0.canScrollVertically(-value);
     }
 
@@ -434,6 +445,11 @@ public class IFrame extends ViewGroup implements IFrameDo {
     @Override
     public ICueDo tail() {
         return tail0;
+    }
+
+    @Override
+    public void setFrameExpand(FrameExpand expand) {
+        this.frameExpand = expand;
     }
 
     /*
