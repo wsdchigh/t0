@@ -32,6 +32,9 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     //  标记，下一波执行的时候，需要执行这个任务
     public boolean shouldExecute = false;
 
+    //  标记是否多次执行
+    public boolean isMulti = false;
+
     @Override
     public int execute(D d) throws Exception{
         hasExecute = true;
@@ -71,6 +74,11 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     }
 
     @Override
+    public boolean isMulti() {
+        return false;
+    }
+
+    @Override
     public K getTaskKey() {
         return taskKey;
     }
@@ -85,7 +93,7 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     @Override
     public int hashCode() {
         if(taskKey instanceof Integer){
-            return (int) taskKey;
+            return (Integer) taskKey;
         }
         return taskKey.hashCode();
     }

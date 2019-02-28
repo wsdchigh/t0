@@ -2,6 +2,7 @@ package com.wsdc.g_a_0.chain;
 
 import com.wsdc.g_a_0.thread0.WorkThread;
 
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -22,10 +23,49 @@ public class DefaultIChainImpl<K,D> implements IChain<K,D> {
     //  存储未运行的任务池
     private Queue<ITask<K,D>> sparePool = new LinkedList<>();
 
-    //  内置一个线程  需要主动去关闭
+    //  主任务队列
+    //private Queue<ITask<K,D>> mainKey = new LinkedList<>();
+
+
+    private Queue<ITask<K,D>> runningQueue = new LinkedList<>();
+
+    /*
+     *  运行队列(双向队列)
+     *  <li>    如果任务已经激活，需要执行   (不一定是立即执行)
+     *  <li>    主任务，从队头添加(优先级高一点)
+     *  <li>    依赖任务的激活，从队尾添加   (优先级第一点)
+     *
+     *  <li>    poll    执行的时候一定会移除掉
+     */
+    private Deque<ITask<K,D>> runningDeque = new LinkedList<>();
+
+    /*
+     *  任务池
+     *  <li>    存放依赖任务，默认不会移除
+     *  <li>    如果需要移除，需要手动调用函数去移除
+     */
+    private List<ITask<K,D>> tasks = new LinkedList<>();
+
+    /*
+     *  通常是一个组件对应一个任务池
+     *  <li>    通常是有多个组件存放在栈中，所以，为每一个组件去创建一个线程是不可以去的
+     *  <li>    设定一个公共的线程去执行任务
+     *  <li>    如果有特殊的需要，可以去创建自己的独有线程
+     *          <li>    通常公共插件是需要这样做的
+     */
     public static WorkThread innerThread = new WorkThread();
 
     public WorkThread t1;
+
+    public DefaultIChainImpl(D d) {
+        t1 = innerThread;
+        this.d = d;
+    }
+
+    public DefaultIChainImpl(WorkThread t1,D d) {
+        this.t1 = t1;
+        this.d = d;
+    }
 
     private Lock lock = new ReentrantLock();
 
@@ -82,6 +122,11 @@ public class DefaultIChainImpl<K,D> implements IChain<K,D> {
     }
 
     @Override
+    public void remove(ITask<K, D> task) {
+
+    }
+
+    @Override
     public void start() {
         t1.addWork(new Runnable() {
             @Override
@@ -133,6 +178,11 @@ public class DefaultIChainImpl<K,D> implements IChain<K,D> {
 
     @Override
     public void exit() {
+
+    }
+
+    @Override
+    public void dispatch(K k, int rtn) {
 
     }
 

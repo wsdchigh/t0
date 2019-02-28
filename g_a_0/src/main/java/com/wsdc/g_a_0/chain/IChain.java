@@ -31,6 +31,9 @@ package com.wsdc.g_a_0.chain;
  *
  *  <li>    周期性
  *          <li>    同样是针对内存问题，提供周期性函数
+ *          <li>    任务链应该和组件是同步周期的，里面的元素通常也是同步周期的
+ *                  <li>    在周期之内，一直保存所有的任务(如果有特殊的需要，可以手动去移除)
+ *                  <li>    可以调用remove函数执行移除
  *
  *  <li>    泛型
  *          <li>    K   key 任务标识自身的key(建议是Integer，其次是String)
@@ -38,6 +41,11 @@ package com.wsdc.g_a_0.chain;
  *                  <li>    例如，如果这个任务执行成功了，那么将数据存放在Map表中，其他任务通过依赖任务的key取出数据
  *                          实现数据的流通
  *                  <li>    这是系统设计的初衷，对于数据的传递，可以通过其他方式，不一定要遵循系统的设定
+ *
+ *
+ *  <li>    原则
+ *          <li>    任务默认是多次执行
+ *          <li>    如果任务只执行一次，那么执行的时候移除任务   (如果执行多次，那么不移除即可)
  */
 public interface IChain<K,D> {
 
@@ -48,7 +56,17 @@ public interface IChain<K,D> {
 
    void cancel(ITask<K,D> task);
 
+   void remove(ITask<K,D> task);
+
     void start();
 
     void exit();
+
+
+    /*
+     *  主动发送信号
+     *  <li>    默认的行为是，任务执行完毕之后，发送信号和返回值
+     *  <li>    这里直接选择为发送信号和返回值 (忽略掉任务，执行后半部分逻辑)
+     */
+    void dispatch(K k, int rtn);
 }
