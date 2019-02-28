@@ -1,7 +1,9 @@
 package com.wsdc.g_a_0.chain;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /*
  *  <li>    自身维系所有的状态
@@ -12,7 +14,6 @@ import java.util.List;
  *          <li>    一个任务只需要一种依赖关系即可
  */
 public abstract class Task0<K,D> implements ITask<K,D>{
-    boolean hasExecute = false;
     public K taskKey;
     public K relyKey;
 
@@ -27,7 +28,7 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     public List<K> orKeys;
 
     //  标记任务运行的线程
-    public boolean runInMain = true;
+    public boolean runInMain = false;
 
     //  标记，下一波执行的时候，需要执行这个任务
     public boolean shouldExecute = false;
@@ -35,11 +36,8 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     //  标记是否多次执行
     public boolean isMulti = false;
 
-    @Override
-    public int execute(D d) throws Exception{
-        hasExecute = true;
-        return execute0(d);
-    }
+    //
+    IChain<K,D> chain;
 
     @Override
     public boolean shouldExecute() {
@@ -47,18 +45,22 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     }
 
     @Override
-    public void receive(ITask task,int rtn) {
+    public void receive(K k,int rtn) {
         /*
          *  视为命中
          */
+        //System.out.println("k = "+k+"   rtn = "+rtn +"  register = "+registerRelyRtn);
         if(registerRelyRtn == rtn){
             if(relyKey != null){
-                if(relyKey.equals(task.getTaskKey())){
+                if(relyKey.equals(k)){
                     shouldExecute = true;
                 }
             }else if(unionKeys != null){
-                int rtn0 = unionKeys.indexOf(task.getTaskKey());
+                int rtn0 = unionKeys.indexOf(k);
                 if(rtn0 != -1){
+                    if(unionResults == null){
+                        unionResults = new LinkedList<>();
+                    }
                     unionResults.add(true);
                     if(unionResults.size() == unionKeys.size()){
                         shouldExecute = true;
@@ -66,7 +68,7 @@ public abstract class Task0<K,D> implements ITask<K,D>{
                 }
 
             }else if(orKeys != null){
-                if(orKeys.contains(task.getTaskKey())){
+                if(orKeys.contains(k)){
                     shouldExecute = true;
                 }
             }
@@ -88,8 +90,6 @@ public abstract class Task0<K,D> implements ITask<K,D>{
         return runInMain;
     }
 
-    protected abstract int execute0(D d) throws Exception;
-
     @Override
     public int hashCode() {
         if(taskKey instanceof Integer){
@@ -98,52 +98,72 @@ public abstract class Task0<K,D> implements ITask<K,D>{
         return taskKey.hashCode();
     }
 
-    private static class TaskInner<K,D> extends Task0<K,D>{
-        TaskProxy t0;
+    @Override
+    public void setIChain(IChain<K, D> chain) {
+        this.chain = chain;
+    }
 
-        public TaskInner(TaskProxy t0) {
-            this.t0 = t0;
-        }
+    @Override
+    public IChain<K, D> getIChain() {
+        return chain;
+    }
+
+
+    private static class TaskInner extends Task0<Integer,Map<Integer,Object>>{
+        TaskProxy<Map<Integer,Object>> t0;
 
         @Override
-        protected int execute0(D d)throws Exception {
+        public int execute(Map<Integer,Object> d)throws Exception {
             return t0.run(d);
         }
     }
 
-    public static<K,D> Task0<K,D> doFirst(K taskKey, int registerRelyRtn, TaskProxy t0,  boolean runInMain){
-        TaskInner ti = new TaskInner(t0);
-        ti.taskKey = taskKey;
-        ti.runInMain = runInMain;
-        ti.registerRelyRtn = registerRelyRtn;
-        return ti;
-    }
+    public static class Builder{
+        TaskInner inner = new TaskInner();
 
-    public static<K,D> Task0<K,D> doThen(K taskKey, K relyKey, int registerRelyRtn, TaskProxy t0, boolean runInMain){
-        TaskInner ti = new TaskInner(t0);
-        ti.taskKey = taskKey;
-        ti.relyKey = relyKey;
-        ti.runInMain = runInMain;
-        ti.registerRelyRtn = registerRelyRtn;
-        return ti;
-    }
+        public Builder taskKey(int taskKey){
+            inner.taskKey = taskKey;
+            return this;
+        }
 
-    public static<K,D> Task0<K,D> doUnion(K taskKey, int registerRelyRtn, TaskProxy t0,boolean runInMain, K... keys){
-        TaskInner ti = new TaskInner(t0);
-        ti.taskKey = taskKey;
-        ti.unionKeys = Arrays.asList(keys);
-        ti.runInMain = runInMain;
-        ti.registerRelyRtn = registerRelyRtn;
-        return ti;
-    }
+        public Builder thenKey(Integer relyKey){
+            inner.relyKey = relyKey;
+            return this;
+        }
 
-    public static<K,D> Task0<K,D> door(K taskKey, int registerRelyRtn, TaskProxy t0,boolean runInMain, K... keys){
-        TaskInner ti = new TaskInner(t0);
-        ti.taskKey = taskKey;
-        ti.orKeys = Arrays.asList(keys);
-        ti.runInMain = runInMain;
-        ti.registerRelyRtn = registerRelyRtn;
-        return ti;
+        public Builder unionKey(Integer... unionKeys){
+            inner.unionKeys = Arrays.asList(unionKeys);
+            return this;
+        }
+
+        public Builder orKey(Integer... orKeys){
+            inner.orKeys = Arrays.asList(orKeys);
+            return this;
+        }
+
+        public Builder runInMain(boolean runInMain){
+            inner.runInMain = runInMain;
+            return this;
+        }
+
+        public Builder registerRtnKey(int registerRtnKey){
+            inner.registerRelyRtn = registerRtnKey;
+            return this;
+        }
+
+        public Builder multi(boolean multi){
+            inner.isMulti = multi;
+            return this;
+        }
+
+        public Builder proxy(TaskProxy<Map<Integer,Object>> t0){
+            inner.t0 = t0;
+            return this;
+        }
+
+        public ITask<Integer,Map<Integer,Object>> build(){
+            return inner;
+        }
     }
 
 

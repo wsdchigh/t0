@@ -28,7 +28,7 @@ public interface ITask<K,D> {
      */
     boolean shouldExecute();
 
-    void receive(ITask task,int rtn);
+    void receive(K k,int rtn);
 
     K getTaskKey();
 
@@ -39,4 +39,8 @@ public interface ITask<K,D> {
      *  <li>    一次性还是永久性
      */
     boolean isMulti();
+
+    void setIChain(IChain<K,D> chain);
+
+    IChain<K,D> getIChain();
 }

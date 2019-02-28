@@ -7,14 +7,12 @@ package com.wsdc.g_a_0.chain;
  *  <li>    线程观念
  *          <li>    任务可以在主线程中执行，也可以在子线程中执行
  *          <li>    通常任务在IO线程中执行即可，如果main线程需要，我们才会切换到主线程中来
+ *          <li>    我们尽量选择在子线程中去处理事情，如果需要，只是将结果post到主线程 (减少主线程的压力)
  *
  *  <li>    任务观念
  *          <li>    任务有没有执行     (执行状态)
  *          <li>    任务执行结果       (成功?失败?异常?还是其他)
- *                  <li>    我们通常是希望任务是成功的，通常是在成功的基础之后才会执行下一步
- *                  <li>    成功的对立面，我们是为else 无论是异常还是错误或者是其他的状态，均调用这个函数
- *
- *                  <li>    函数执行返回之后是有返回值，如果我们针对else，可以注册指定的返回值来执行
+ *                  <li>    根据返回值判断 (依赖任务的同时还会依赖其返回值)，以下是我们默认的行为
  *                  <li>    1   success
  *                  <li>    0   failure
  *                  <li>    -1  exception
@@ -26,7 +24,7 @@ package com.wsdc.g_a_0.chain;
  *          <li>    或关系     如果A或者B执行成功，我们在执行C
  *          <li>    其他的复杂关系暂时不设定()
  *
- *  <li>    取消
+ *  <li>    取消  (移除)
  *          <li>    为了避免内存泄漏，任务是支持取消的(如果任务没有执行)
  *
  *  <li>    周期性
@@ -48,15 +46,18 @@ package com.wsdc.g_a_0.chain;
  *          <li>    如果任务只执行一次，那么执行的时候移除任务   (如果执行多次，那么不移除即可)
  */
 public interface IChain<K,D> {
+    /*
+     *  doMain0/doThen  这两个函数是添加任务，不能再IO线程中执行
+     *  remove  同上，不能再IO线程中执行
+     */
+    IChain<K,D> doMain0(ITask<K,D> task);
+    IChain<K,D> doThen(ITask<K,D> task);
+    IChain<K,D> remove(ITask<K,D> task);
 
-    void doMain(ITask<K,D> task);
-    void doIO(ITask<K,D> task);
-
-    void then(ITask<K,D> task);
-
-   void cancel(ITask<K,D> task);
-
-   void remove(ITask<K,D> task);
+    /*
+     *  IO线程post到其他线程处理任务
+     */
+    void post(ITask<K,D> task,IChain<K,D> chain);
 
     void start();
 
@@ -67,6 +68,12 @@ public interface IChain<K,D> {
      *  主动发送信号
      *  <li>    默认的行为是，任务执行完毕之后，发送信号和返回值
      *  <li>    这里直接选择为发送信号和返回值 (忽略掉任务，执行后半部分逻辑)
+     *
+     *  <li>    该函数仅仅是一个标记的功能,可以在任意线程中调用
      */
     void dispatch(K k, int rtn);
+
+    void loop();
+
+    D wrap();
 }
