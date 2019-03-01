@@ -43,4 +43,11 @@ public interface ITask<K,D> {
     void setIChain(IChain<K,D> chain);
 
     IChain<K,D> getIChain();
+
+    /*
+     *  任务执行完毕之后，会执行该函数
+     *  <li>    默认任务执行完之后，会标记为不可执行
+     *  <li>    如果是复杂的情况，复写这个函数
+     */
+    void complete(ITask<K,D> task);
 }

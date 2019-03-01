@@ -51,6 +51,19 @@ public interface IChain<K,D> {
      *  remove  同上，不能再IO线程中执行
      */
     IChain<K,D> doMain0(ITask<K,D> task);
+
+    /*
+     *  重载函数
+     *  <li>    task本身就是任务，任务执行完毕之后的k，rtn是我们判断的依据
+     *  <li>    任务复杂多样，可能存在着不同程度的阻塞
+     *  如果我们需要线程就有高效的IO，那么使用下面的函数
+     *  将阻塞的任务移动到阻塞线程之中，或者使用NIO的方式去处理，当结果处理完之后，调用这个函数发布结果
+     *  <li>    同理doThen如果需要非阻塞，task可以返回一个没有注册的值，将阻塞的任务移动到其他线程
+     *          直到任务处理完之后，调用doMain0函数发布结果
+     *
+     *  <li>    原则上面来说，涉及到同步，这个函数还是会有一定的阻塞的
+     */
+    IChain<K,D> doMain0(K k,int rtn);
     IChain<K,D> doThen(ITask<K,D> task);
     IChain<K,D> remove(ITask<K,D> task);
 
@@ -73,6 +86,9 @@ public interface IChain<K,D> {
      */
     void dispatch(K k, int rtn);
 
+    /*
+     *  任何任务执行完毕，均会轮询一次，找到激活的任务
+     */
     void loop();
 
     D wrap();

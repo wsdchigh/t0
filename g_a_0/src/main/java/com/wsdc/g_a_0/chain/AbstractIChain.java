@@ -46,6 +46,7 @@ public abstract class AbstractIChain implements IChain<Integer,Map<Integer,Objec
             /*
              *  轮到任务执行的时候
              *  <li>    此处为IO线程
+             *  <li>    chain   是允许为null的
              */
             IChain<Integer, Map<Integer, Object>> chain = task.getIChain();
             if(task.runInMain()){
@@ -53,13 +54,20 @@ public abstract class AbstractIChain implements IChain<Integer,Map<Integer,Objec
             }else{
                 int rtn = -1;
                 try {
-                    rtn = task.execute(chain.wrap());
+                    rtn = task.execute(chain==null?null:chain.wrap());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-                chain.dispatch(task.getTaskKey(),rtn);
+                if(chain != null){
+                    chain.dispatch(task.getTaskKey(),rtn);
+                }
             }
+
+            //  调用任务执行完毕的
+            //  一定要先标记自己  再去loop
+            task.complete(task);
+
             chain.loop();
         }
     };
@@ -79,10 +87,29 @@ public abstract class AbstractIChain implements IChain<Integer,Map<Integer,Objec
         this.objectMap = map;
     }
 
+    List<ITask<Integer, Map<Integer, Object>>> mainList = new LinkedList<>();
+
     @Override
     public IChain<Integer, Map<Integer, Object>> doMain0(ITask<Integer, Map<Integer, Object>> task) {
         task.setIChain(this);
-        t1.doFirst(task);
+        //t1.doFirst(task);
+        mainList.add(task);
+        return this;
+    }
+
+    @Override
+    public IChain<Integer, Map<Integer, Object>> doMain0(Integer integer, int rtn) {
+        ITask<Integer, Map<Integer, Object>> task0 = new Task0.Builder()
+                .taskKey(integer)
+                .proxy(new TaskProxy<Map<Integer, Object>>() {
+                    @Override
+                    public int run(ITask task,Map<Integer, Object> integerObjectMap) throws Exception {
+                        return rtn;
+                    }
+                })
+                .build();
+        task0.setIChain(this);
+        t1.doFirst(task0);
         return this;
     }
 
@@ -110,7 +137,8 @@ public abstract class AbstractIChain implements IChain<Integer,Map<Integer,Objec
 
     @Override
     public void start() {
-
+        t1.doAll(mainList);
+        mainList.clear();
     }
 
     @Override

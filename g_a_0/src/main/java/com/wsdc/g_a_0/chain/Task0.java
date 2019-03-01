@@ -34,7 +34,7 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     public boolean shouldExecute = false;
 
     //  标记是否多次执行
-    public boolean isMulti = false;
+    public boolean isMulti = true;
 
     //
     IChain<K,D> chain;
@@ -49,7 +49,6 @@ public abstract class Task0<K,D> implements ITask<K,D>{
         /*
          *  视为命中
          */
-        //System.out.println("k = "+k+"   rtn = "+rtn +"  register = "+registerRelyRtn);
         if(registerRelyRtn == rtn){
             if(relyKey != null){
                 if(relyKey.equals(k)){
@@ -66,7 +65,6 @@ public abstract class Task0<K,D> implements ITask<K,D>{
                         shouldExecute = true;
                     }
                 }
-
             }else if(orKeys != null){
                 if(orKeys.contains(k)){
                     shouldExecute = true;
@@ -77,7 +75,7 @@ public abstract class Task0<K,D> implements ITask<K,D>{
 
     @Override
     public boolean isMulti() {
-        return false;
+        return isMulti;
     }
 
     @Override
@@ -108,13 +106,17 @@ public abstract class Task0<K,D> implements ITask<K,D>{
         return chain;
     }
 
+    @Override
+    public void complete(ITask<K, D> task) {
+        shouldExecute = false;
+    }
 
     private static class TaskInner extends Task0<Integer,Map<Integer,Object>>{
         TaskProxy<Map<Integer,Object>> t0;
 
         @Override
         public int execute(Map<Integer,Object> d)throws Exception {
-            return t0.run(d);
+            return t0.run(this,d);
         }
     }
 
