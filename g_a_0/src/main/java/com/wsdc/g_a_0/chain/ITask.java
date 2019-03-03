@@ -13,6 +13,10 @@ package com.wsdc.g_a_0.chain;
  *                  <li>    只执行一次   (只能执行一次)
  *          <li>    依赖任务    (需要其他任务执行完毕，发送出来的信号，才能执行)
  *                  <li>
+ *
+ *  <li>    执行线程
+ *          <li>    所有任务均在IO线程中执行
+ *          <li>    post函数支持将数据传递到其他线程
  */
 public interface ITask<K,D> {
     /*
@@ -56,6 +60,8 @@ public interface ITask<K,D> {
      *   任务执行完之后，将数据跑出来
      *   <li>    可以post到其他线程
      *   <li>    如果想要在主线程中去处理数据
+     *
+     *   <li>    任务执行之后允许有一个额外的操作
      */
     void post(ITask<K,D> task,D d);
 }

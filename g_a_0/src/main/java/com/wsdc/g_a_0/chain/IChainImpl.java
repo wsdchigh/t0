@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -32,11 +31,8 @@ public class IChainImpl implements IChain<Integer,Map<Integer,Object>> {
     private Queue<Sem> sems = new LinkedList<>();
     private Lock lock = new ReentrantLock();
 
-    /*
-     *  数据中心
-     *  <li>    实现线程安全
-     */
-    private Map<Integer,Object> objectMap = new ConcurrentHashMap<>();
+    //  线程不安全
+    private Map<Integer,Object> objectMap = new TreeMap<>();
     /*
      *  通常是一个组件对应一个任务池
      *  <li>    通常是有多个组件存放在栈中，所以，为每一个组件去创建一个线程是不可取的
