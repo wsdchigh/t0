@@ -27,9 +27,6 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     //  这里不需要依赖任务结果返回池  因为只需要一个成功就可以了
     public List<K> orKeys;
 
-    //  标记任务运行的线程
-    public boolean runInMain = false;
-
     //  标记，下一波执行的时候，需要执行这个任务
     public boolean shouldExecute = false;
 
@@ -84,11 +81,6 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     }
 
     @Override
-    public boolean runInMain() {
-        return runInMain;
-    }
-
-    @Override
     public int hashCode() {
         if(taskKey instanceof Integer){
             return (Integer) taskKey;
@@ -107,11 +99,24 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     }
 
     @Override
-    public void complete(ITask<K, D> task) {
+    public void modify(ITask<K, D> task) {
         shouldExecute = false;
     }
 
+    TaskProxy<D> post;
+    @Override
+    public void post(ITask<K, D> task, D d) {
+        if(post != null){
+            try {
+                post.run(task, d);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private static class TaskInner extends Task0<Integer,Map<Integer,Object>>{
+        //  具体的任务执行的功能函数包装者
         TaskProxy<Map<Integer,Object>> t0;
 
         @Override
@@ -143,11 +148,6 @@ public abstract class Task0<K,D> implements ITask<K,D>{
             return this;
         }
 
-        public Builder runInMain(boolean runInMain){
-            inner.runInMain = runInMain;
-            return this;
-        }
-
         public Builder registerRtnKey(int registerRtnKey){
             inner.registerRelyRtn = registerRtnKey;
             return this;
@@ -160,6 +160,11 @@ public abstract class Task0<K,D> implements ITask<K,D>{
 
         public Builder proxy(TaskProxy<Map<Integer,Object>> t0){
             inner.t0 = t0;
+            return this;
+        }
+
+        public Builder post(TaskProxy<Map<Integer,Object>> post){
+            inner.post = post;
             return this;
         }
 

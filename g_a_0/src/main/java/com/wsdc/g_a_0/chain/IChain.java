@@ -46,10 +46,7 @@ package com.wsdc.g_a_0.chain;
  *          <li>    如果任务只执行一次，那么执行的时候移除任务   (如果执行多次，那么不移除即可)
  */
 public interface IChain<K,D> {
-    /*
-     *  doMain0/doThen  这两个函数是添加任务，不能再IO线程中执行
-     *  remove  同上，不能再IO线程中执行
-     */
+
     IChain<K,D> doMain0(ITask<K,D> task);
 
     /*
@@ -62,27 +59,18 @@ public interface IChain<K,D> {
      *          直到任务处理完之后，调用doMain0函数发布结果
      *
      *  <li>    原则上面来说，涉及到同步，这个函数还是会有一定的阻塞的
+     *  <li>    如果任务池已经处于停滞状态，需要调用这个函数唤醒
      */
     IChain<K,D> doMain0(K k,int rtn);
     IChain<K,D> doThen(ITask<K,D> task);
     IChain<K,D> remove(ITask<K,D> task);
 
-    /*
-     *  IO线程post到其他线程处理任务
-     */
-    void post(ITask<K,D> task,IChain<K,D> chain);
-
     void start();
 
     void exit();
 
-
     /*
-     *  主动发送信号
-     *  <li>    默认的行为是，任务执行完毕之后，发送信号和返回值
-     *  <li>    这里直接选择为发送信号和返回值 (忽略掉任务，执行后半部分逻辑)
-     *
-     *  <li>    该函数仅仅是一个标记的功能,可以在任意线程中调用
+     *  任务完成之后，会发送一个信号到信号池中
      */
     void dispatch(K k, int rtn);
 
@@ -90,6 +78,11 @@ public interface IChain<K,D> {
      *  任何任务执行完毕，均会轮询一次，找到激活的任务
      */
     void loop();
+
+    /*
+     *  通过key，检索到指定的任务
+     */
+    ITask<K,D> getTaskByKey(K k);
 
     D wrap();
 }
