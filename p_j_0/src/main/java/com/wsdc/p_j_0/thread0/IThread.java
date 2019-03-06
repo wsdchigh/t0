@@ -1,4 +1,4 @@
-package com.wsdc.g_a_0.thread0;
+package com.wsdc.p_j_0.thread0;
 
 import java.util.Collection;
 
