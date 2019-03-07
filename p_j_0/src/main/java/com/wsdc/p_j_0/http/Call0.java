@@ -7,6 +7,7 @@ public class Call0 implements ICall {
     IByteData source;
     IByteData sink;
     int tryCount = 4;
+    Segment segment;
 
     public Call0(Request0 request, Client client) {
         this.request = request;
@@ -15,6 +16,8 @@ public class Call0 implements ICall {
         response = new Response0();
         source = new ByteDataImpl(client,new ByteDataImpl(client,null));
         sink = new ByteDataImpl(client,new ByteDataImpl(client,null));
+
+        segment = client.getSegmentPool().get();
     }
 
     @Override
@@ -45,6 +48,11 @@ public class Call0 implements ICall {
     @Override
     public IByteData source() {
         return source;
+    }
+
+    @Override
+    public Segment headerSegment() {
+        return segment;
     }
 
     @Override

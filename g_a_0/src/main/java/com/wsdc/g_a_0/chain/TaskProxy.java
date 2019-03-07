@@ -15,5 +15,5 @@ public interface TaskProxy<K,D> {
      *          <li>    如果需要执行线程调度的功能，需要先将数据取出来，然后在...
      *          <li>    不要将D暴露在其他线程之中
      */
-    int run(ITask<K,D> task) throws Exception;
+    void run(ITask<K,D> task) throws Exception;
 }

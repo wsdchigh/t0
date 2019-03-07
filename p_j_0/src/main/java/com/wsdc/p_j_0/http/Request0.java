@@ -42,11 +42,11 @@ public class Request0{
     }
 
     public RequestBody0 body() {
-        return null;
+        return body;
     }
 
     public ICall call() {
-        return null;
+        return call;
     }
 
     /*
@@ -56,6 +56,8 @@ public class Request0{
      *          <li>    如果数据量非常大，这样就没有意义
      *          <li>    请求头+请求行一次性写入
      *          <li>    请求体分一次或者多次写入    (一次写入不要超过1KB)
+     *
+     *  <li>    -1表示已经写完了，其他情况表示，还能继续读取
      */
     public int write(IByteData source) {
         return -1;

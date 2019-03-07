@@ -23,7 +23,22 @@ public class Client {
     //  连接线程，专门负责连接
     IThread<Connection> connectionIThread = new AbstractWorkTread<Connection>() {
         @Override
-        public void run0(Connection connection) {
+        public void run0(Connection connection){
+            ICall call = connection.getCall();
+            if(call.try0() > 0){
+                try{
+                    boolean connect = connection.connect();
+                    if(connect){
+                        connection.setStatus(Connection.STATUS_CONNECTED_OK);
+                        looper.register(connection);
+                        return;
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                connection.setStatus(Connection.STATUS_CONNECTED_FAILURE);
+                connection.close();
+            }
 
         }
     } ;

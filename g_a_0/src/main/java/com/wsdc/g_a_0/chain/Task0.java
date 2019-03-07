@@ -34,7 +34,7 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     //
     IChain<K,D> chain;
 
-    int status;
+    int status = -1;
 
     @Override
     public boolean shouldExecute() {
@@ -42,14 +42,7 @@ public abstract class Task0<K,D> implements ITask<K,D>{
     }
 
     @Override
-    public void receive(ITask<K,D> task) {
-        K k = task.getTaskKey();
-
-        if(k instanceof Integer){
-
-        }else{
-
-        }
+    public void receive(K k) {
         if(relyKey != null){
             if(relyKey.equals(k)){
                 shouldExecute = true;
@@ -124,23 +117,28 @@ public abstract class Task0<K,D> implements ITask<K,D>{
         return status;
     }
 
+    @Override
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     private static class TaskInner extends Task0<Integer,Map<Integer,Object>>{
         //  具体的任务执行的功能函数包装者
-        TaskProxy<Map<Integer,Object>> t0;
+        TaskProxy<Integer,Map<Integer,Object>> t0;
 
-        TaskProxy<Map<Integer,Object>> tFailure;
+        TaskProxy<Integer,Map<Integer,Object>> tFailure;
 
         @Override
-        public void execute0(Integer integer, Map<Integer, Object> integerObjectMap) throws Exception {
+        public void execute0() throws Exception {
             if(t0 != null){
-                return t0.run(this,integerObjectMap);
+               t0.run(this);
             }
         }
 
         @Override
-        public void exception(ITask<Integer,Map<Integer,Object>> task, Exception why) throws Exception {
+        public void exception(Exception why) throws Exception {
             if(tFailure != null){
-                tFailure.run(this,integerObjectMap);
+                tFailure.run(this);
             }
         }
     }
@@ -168,27 +166,22 @@ public abstract class Task0<K,D> implements ITask<K,D>{
             return this;
         }
 
-        public Builder registerRtnKey(int registerRtnKey){
-            inner.registerRelyRtn = registerRtnKey;
-            return this;
-        }
-
         public Builder multi(boolean multi){
             inner.isMulti = multi;
             return this;
         }
 
-        public Builder proxy(TaskProxy<Map<Integer,Object>> t0){
+        public Builder proxy(TaskProxy<Integer,Map<Integer,Object>> t0){
             inner.t0 = t0;
             return this;
         }
 
-        public Builder rely(Integer rely){
-            inner.relyKey = rely;
+        public Builder failure(TaskProxy<Integer,Map<Integer,Object>> tFailure){
+            inner.tFailure = tFailure;
             return this;
         }
 
-        public Builder post(TaskProxy<Map<Integer,Object>> post){
+        public Builder post(TaskProxy<Integer,Map<Integer,Object>> post){
             inner.post = post;
             return this;
         }

@@ -28,8 +28,9 @@ public class Segment {
 
     //  最大容量    缓存设置为1KB
     //int capacity = 1024;
-    int capacity = 40;
-    byte[] cache = new byte[capacity];
+    int capacity = 1024;
+    byte[] data0 = new byte[capacity];
+    //byte[] cache = new byte[64];
 
 
     public void recycle(){
@@ -53,7 +54,7 @@ public class Segment {
         //  fl  final length    最终取值(最小)
         int fl = nl>ol?ol:nl;
 
-        System.arraycopy(origin,start,cache,write,fl);
+        System.arraycopy(origin,start, data0,write,fl);
         write += fl;
 
         return fl;
@@ -66,7 +67,7 @@ public class Segment {
      */
     public int write(int i){
         if(write < capacity){
-            cache[write++] = (byte)(i & 0xff);
+            data0[write++] = (byte)(i & 0xff);
             return 1;
         }
         return 0;
@@ -74,7 +75,7 @@ public class Segment {
 
     public int read(){
         if(read < write){
-            return cache[read++] & 0xff;
+            return data0[read++] & 0xff;
         }
         return -1;
     }
@@ -84,12 +85,55 @@ public class Segment {
         int ol = end - start;
         int nl = write - read;
         int fl = nl>ol?ol:nl;
-        System.arraycopy(cache,read,dest,start,fl);
+        System.arraycopy(data0,read,dest,start,fl);
         read += fl;
         return fl;
     }
 
+
+    public int charAt(char c){
+        int index = read;
+        for(;index<write;index++){
+            if(data0[index] == c){
+                return index-read;
+            }
+        }
+        return -1;
+    }
+
+    /*
+     *  将当前一行读取到另外一个Segment
+     *  <li>    最多读取64个字节
+     *  <li>    如果没有遇到\n字符，表示成功读取到完整字符串，返回-1
+     *          如果读到了\n，表示成功读取到字符串，停止读取，并且返回1
+
+    public int readLine0(Segment segment){
+        int size = write-read;
+        if(size == 0){
+            return -1;
+        }
+
+        size = size>64?64:size;
+        for (int i = 0; i < size; i++) {
+            int read0 = read();
+            segment.write(read0);
+            if(read0 == '\n'){
+                return 1;
+            }
+        }
+        return -1;
+    }
+    */
+
     public int available(){
         return write-read;
+    }
+
+    public byte[] reset(){
+        int size = write-read;
+        byte[] rtn = new byte[size];
+        System.arraycopy(rtn,0,data0,read,size);
+        read = write = 0;
+        return rtn;
     }
 }

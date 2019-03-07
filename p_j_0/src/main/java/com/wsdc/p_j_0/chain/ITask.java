@@ -1,4 +1,4 @@
-package com.wsdc.g_a_0.chain;
+package com.wsdc.p_j_0.chain;
 
 /*
  *  任务自身持有所有的状态值
@@ -40,6 +40,9 @@ public interface ITask<K,D> {
 
     /*
      *  是否可以执行
+     *  <li>    分发一次信号，就会询问一次
+     *  <li>    询问之后，一定要将值设定为false  (需要等待下一次的分发信号)
+     *          <li>    避免一次响应，之后一直响应
      */
     boolean shouldExecute();
 
@@ -57,7 +60,7 @@ public interface ITask<K,D> {
      */
     boolean isMulti();
 
-    void setIChain(IChain<K,D> chain);
+    void setIChain(IChain<K, D> chain);
 
     IChain<K,D> getIChain();
 

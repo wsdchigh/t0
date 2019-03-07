@@ -35,7 +35,7 @@ public abstract class AbstractWorkTread<A> implements IThread<A>{
 
                         //  可能会炸CPU
                         Thread.currentThread().sleep(2);
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }

@@ -1,7 +1,7 @@
-package com.wsdc.g_a_0.chain;
+package com.wsdc.p_j_0.chain;
 
-import com.wsdc.g_a_0.thread0.AbstractWorkTread;
-import com.wsdc.g_a_0.thread0.IThread;
+import com.wsdc.p_j_0.thread0.AbstractWorkTread;
+import com.wsdc.p_j_0.thread0.IThread;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -71,7 +71,6 @@ public class IChainImpl implements IChain<Integer,Map<Integer,Object>> {
             }
             //  调用任务执行完毕的
             //  一定要先标记自己  再去loop
-            task.modify();
             task.post();
 
             chain.loop();
@@ -143,11 +142,14 @@ public class IChainImpl implements IChain<Integer,Map<Integer,Object>> {
         List<ITask> tmpTasks = new LinkedList<>();
         lock.lock();
         for (ITask<Integer, Map<Integer, Object>> task : tasks) {
+            //System.out.println("origin = "+task.getTaskKey()+"  now = "+integer);
             if(task.getTaskKey().intValue() == integer.intValue()){
                 tmpTasks.add(task);
             }
         }
+        //System.out.println("size = "+tasks.size());
         tasks.removeAll(tmpTasks);
+        //System.out.println("size = "+tasks.size());
         lock.unlock();
         return this;
     }
@@ -214,9 +216,16 @@ public class IChainImpl implements IChain<Integer,Map<Integer,Object>> {
             }
             t1.doAll(addList);
             tasks.removeAll(removeList);
+            /*
+            System.out.println("size0 = "+addList.size());
+            for (ITask<Integer, Map<Integer, Object>> t0 : addList) {
+                System.out.println(t0.getTaskKey());
+            }
+            System.out.println("size1 = "+removeList.size());
+            */
             addList.clear();
             removeList.clear();
-            //System.out.println("size = "+tmpList.size());
+
         }catch (Exception e){
             e.printStackTrace();
         }finally {

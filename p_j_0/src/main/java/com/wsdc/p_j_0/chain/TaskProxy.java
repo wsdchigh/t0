@@ -2,11 +2,10 @@ package com.wsdc.p_j_0.chain;
 
 /*
  *  给Task提供代理功能
- *  <li>    具体的封装函数 (功能的执行者)
  */
-public interface TaskProxy<D> {
+public interface TaskProxy<K,D> {
     /*
-     *  Task   任务
+     *  ITask   任务
      *  <li>    之所以携带这个参数，这个参数携带了IChain参数
      *          提供更多可能的操作
      *  <li>    保存一条完整的调用链
@@ -16,5 +15,5 @@ public interface TaskProxy<D> {
      *          <li>    如果需要执行线程调度的功能，需要先将数据取出来，然后在...
      *          <li>    不要将D暴露在其他线程之中
      */
-    int run(Task task, D d) throws Exception;
+    void run(ITask<K, D> task) throws Exception;
 }

@@ -1,22 +1,18 @@
 package com.wsdc.p_j_0.chain;
 
+import java.util.List;
+
 /*
  *  事件调用链
  *  <li>    任何任务均维系一个key，通常是Integer(不分大小的)
  *
  *  <li>    线程观念
- *          <li>    任务可以在主线程中执行，也可以在子线程中执行
- *          <li>    通常任务在IO线程中执行即可，如果main线程需要，我们才会切换到主线程中来
- *          <li>    我们尽量选择在子线程中去处理事情，如果需要，只是将结果post到主线程 (减少主线程的压力)
+ *          <li>    所有任务均在一个独立的线程中执行,这个线程是自己独立创建的，或者多个Chain共享一个默认的
+ *          <li>    提供一个post函数，这个函数用于数据不同线程的切换
  *
  *  <li>    任务观念
- *          <li>    任务有没有执行     (执行状态)
- *          <li>    任务执行结果       (成功?失败?异常?还是其他)
- *                  <li>    根据返回值判断 (依赖任务的同时还会依赖其返回值)，以下是我们默认的行为
- *                  <li>    1   success
- *                  <li>    0   failure
- *                  <li>    -1  exception
- *                  <li>    其他，可以自行定义
+ *          <li>    任务执行，要么成功，要么失败
+ *          <li>    任务可以执行一次或者多次
  *
  *  <li>    关系表
  *          <li>    单链关系，如果A执行完毕，那么B执行
@@ -25,7 +21,8 @@ package com.wsdc.p_j_0.chain;
  *          <li>    其他的复杂关系暂时不设定()
  *
  *  <li>    取消  (移除)
- *          <li>    为了避免内存泄漏，任务是支持取消的(如果任务没有执行)
+ *          <li>    为了避免内存泄漏，允许任务在任务表中移除
+ *          <li>    线程中的任务只会执行一次
  *
  *  <li>    周期性
  *          <li>    同样是针对内存问题，提供周期性函数
@@ -45,9 +42,9 @@ package com.wsdc.p_j_0.chain;
  *          <li>    任务默认是多次执行
  *          <li>    如果任务只执行一次，那么执行的时候移除任务   (如果执行多次，那么不移除即可)
  */
-public interface Chain<K,D> {
+public interface IChain<K,D> {
 
-    Chain<K,D> doMain0(Task<K, D> task);
+    IChain<K,D> doMain0(ITask<K, D> task);
 
     /*
      *  重载函数
@@ -61,9 +58,12 @@ public interface Chain<K,D> {
      *  <li>    原则上面来说，涉及到同步，这个函数还是会有一定的阻塞的
      *  <li>    如果任务池已经处于停滞状态，需要调用这个函数唤醒
      */
-    Chain<K,D> doMain0(K k, int rtn);
-    Chain<K,D> doThen(Task<K, D> task);
-    Chain<K,D> remove(Task<K, D> task);
+    IChain<K,D> doMain0(K k);
+    IChain<K,D> doThen(ITask<K, D> task);
+    IChain<K,D> remove(ITask<K, D> task);
+
+    IChain<K,D> remove(K k);
+    IChain<K,D> remove(List<K> ks);
 
     void start();
 
@@ -72,7 +72,7 @@ public interface Chain<K,D> {
     /*
      *  任务完成之后，会发送一个信号到信号池中
      */
-    void dispatch(K k, int rtn);
+    void dispatch(ITask<K, D> task);
 
     /*
      *  任何任务执行完毕，均会轮询一次，找到激活的任务
@@ -82,7 +82,7 @@ public interface Chain<K,D> {
     /*
      *  通过key，检索到指定的任务
      */
-    Task<K,D> getTaskByKey(K k);
+    ITask<K,D> getTaskByKey(K k);
 
     D wrap();
 }

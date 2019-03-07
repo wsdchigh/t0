@@ -3,13 +3,10 @@ package com.wsdc.p_j_0.http;
 import com.wsdc.p_j_0.looper.LCall;
 import com.wsdc.p_j_0.looper.Looper;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-
-import javax.net.ssl.SSLSocket;
 
 /*
  *  链接
@@ -22,14 +19,20 @@ import javax.net.ssl.SSLSocket;
  */
 public class Connection implements LCall {
     private String host;
-    private String port;
+    private int port;
     private Socket socket;
     private ICall call;
     private Looper looper;
     private Client client;
+    private InputStream inputStream;
+    private OutputStream outputStream;
+
+    private ConnectionPool.Address address;
 
     //  记录缓存的空闲时间
     long spareTime = 0l;
+
+    byte[] cache = new byte[256];
 
     /*
      *  标记状态值
@@ -50,24 +53,27 @@ public class Connection implements LCall {
     public static final int STATUS_CONNECTED_IO = 3;
     public static final int STATUS_CONNECTED_IO_END = -3;
 
-    public Connection(Client client) {
+    public Connection(Client client, ConnectionPool.Address address) {
         this.client = client;
+        this.address = address;
         looper = client.looper;
     }
 
-    public InputStream inputStream() throws IOException{
-        return socket.getInputStream();
+    public InputStream inputStream() throws IOException {
+        return inputStream;
     }
 
-    public OutputStream outputStream() throws IOException{
-        return socket.getOutputStream();
+    public OutputStream outputStream() throws IOException {
+        return outputStream;
     }
 
-    public void setCall(ICall call){
+    public void setCall(ICall call) {
         this.call = call;
+        host = call.request().host;
+        port = call.request().port;
     }
 
-    public ICall getCall(){
+    public ICall getCall() {
         return call;
     }
 
@@ -81,7 +87,7 @@ public class Connection implements LCall {
      *          <li>    在需要些数据的时候ping一次即可
      *          <li>    尽量别ping
      */
-    public boolean ping(){
+    public boolean ping() {
         boolean rtn = false;
         try {
             socket.sendUrgentData(0xff);
@@ -96,48 +102,69 @@ public class Connection implements LCall {
      *  连接需要使用连接线程
      *  <li>    使用连接线程去连接
      *  <li>    连接线程可以是IO线程 (尽量不要这样)
+     *
+     *  <li>    根据是否为ssl决定使用哪个socket
      */
-    public boolean connect(){
+    public boolean connect() throws IOException {
+        socket = new Socket(host, port);
+        inputStream = socket.getInputStream();
+        outputStream = socket.getOutputStream();
         return false;
     }
 
-    public int status(){
+    public int status() {
         return status;
     }
 
-    /*
-     *  连接是可以复用的
-     *  <li>    该函数标识一次使用完结，处于空闲状态
-     *  <li>    轮询中移除自身
-     */
-    public void complete(){
-
-    }
-
-    /*
-     *  标记此次连接开始工作
-     *  <li>    注册到轮询中
-     */
-    public void start(){
-
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     @Override
     public void toQueue() throws Exception {
-
+        status = STATUS_CONNECTED_IO;
     }
 
-    /*
-     *  两个线程均会调用这个函数
-     */
+
     @Override
     public boolean loop() throws Exception {
-        return false;
+        if(call != null){
+            write0();
+            read0();
+            parse0();
+            return true;
+        }
+       return false;
+    }
+
+    private void read0() throws IOException{
+        if(inputStream.available() > 0){
+            int read = inputStream.read(cache);
+            call.sink().write(cache,0,read);
+        }
+    }
+
+    private void write0() throws IOException{
+        int write = call.request().write(call.source());
+        int read = call.source().read(cache);
+        if(read != -1){
+            outputStream.write(cache,0,read);
+            outputStream.flush();
+        }
+    }
+
+    private void parse0() throws Exception{
+        Segment segment = call.headerSegment();
+        int read0 = call.sink().readLine(segment);
+        if(read0 != -1){
+            byte[] reset = segment.reset();
+            //String s =
+        }
     }
 
     @Override
-    public void exception(int status, Exception e) {
-
+    public void exception(int status0, Exception e) {
+        status = STATUS_CONNECTED_IO_END;
     }
 
     /*
@@ -152,8 +179,39 @@ public class Connection implements LCall {
 
     @Override
     public void exitQueue() throws Exception {
-        inputStream().close();
-        outputStream().close();
-        socket.close();
+        if (status == STATUS_CONNECTED_IO) {
+            if (address.queue.size() < address.capacity) {
+                address.queue.offer(this);
+                spareTime = System.currentTimeMillis();
+            }
+
+            call = null;
+        } else {
+            close();
+        }
+    }
+
+    public void close() {
+        try {
+            if (inputStream != null) {
+                inputStream().close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (outputStream != null) {
+                outputStream().close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

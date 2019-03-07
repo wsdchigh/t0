@@ -13,12 +13,10 @@ import java.util.Map;
  *          <li>    orKeys      再者
  *          <li>    一个任务只需要一种依赖关系即可
  */
-public abstract class Task0<K,D> implements Task<K,D> {
+public abstract class Task0<K,D> implements ITask<K,D>{
     public K taskKey;
     public K relyKey;
 
-    //  注册依赖任务的返回值
-    public int registerRelyRtn;
     public List<K> unionKeys;
 
     //  如果是联合多个任务，那么如果任务在执行完毕之后，在这里面标记  直到所有的标记均为true的时候才执行
@@ -34,40 +32,40 @@ public abstract class Task0<K,D> implements Task<K,D> {
     public boolean isMulti = true;
 
     //
-    Chain<K,D> chain;
+    IChain<K,D> chain;
+
+    int status = -1;
 
     @Override
     public boolean shouldExecute() {
-        return shouldExecute;
+        boolean rtn = shouldExecute;
+        shouldExecute = false;
+        return rtn;
     }
 
     @Override
-    public void receive(K k,int rtn) {
-        /*
-         *  视为命中
-         */
-        if(registerRelyRtn == rtn){
-            if(relyKey != null){
-                if(relyKey.equals(k)){
-                    shouldExecute = true;
+    public void receive(K k) {
+        if(relyKey != null){
+            if(relyKey.equals(k)){
+                shouldExecute = true;
+            }
+        }else if(unionKeys != null){
+            int rtn0 = unionKeys.indexOf(k);
+            if(rtn0 != -1){
+                if(unionResults == null){
+                    unionResults = new LinkedList<>();
                 }
-            }else if(unionKeys != null){
-                int rtn0 = unionKeys.indexOf(k);
-                if(rtn0 != -1){
-                    if(unionResults == null){
-                        unionResults = new LinkedList<>();
-                    }
-                    unionResults.add(true);
-                    if(unionResults.size() == unionKeys.size()){
-                        shouldExecute = true;
-                    }
-                }
-            }else if(orKeys != null){
-                if(orKeys.contains(k)){
+                unionResults.add(true);
+                if(unionResults.size() == unionKeys.size()){
                     shouldExecute = true;
                 }
             }
+        }else if(orKeys != null){
+            if(orKeys.contains(k)){
+                shouldExecute = true;
+            }
         }
+
     }
 
     @Override
@@ -88,40 +86,62 @@ public abstract class Task0<K,D> implements Task<K,D> {
         return taskKey.hashCode();
     }
 
+
     @Override
-    public void setIChain(Chain<K, D> chain) {
+    public void setIChain(IChain<K, D> chain) {
         this.chain = chain;
     }
 
     @Override
-    public Chain<K, D> getIChain() {
+    public IChain<K, D> getIChain() {
         return chain;
     }
 
     @Override
-    public void modify(Task<K, D> task) {
+    public void modify() {
         shouldExecute = false;
     }
 
-    TaskProxy<D> post;
+    TaskProxy<K,D> post;
     @Override
-    public void post(Task<K, D> task, D d) {
+    public void post() {
         if(post != null){
             try {
-                post.run(task, d);
+                post.run(this);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
+    @Override
+    public int status() {
+        return status;
+    }
+
+    @Override
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     private static class TaskInner extends Task0<Integer,Map<Integer,Object>>{
         //  具体的任务执行的功能函数包装者
-        TaskProxy<Map<Integer,Object>> t0;
+        TaskProxy<Integer,Map<Integer,Object>> t0;
+
+        TaskProxy<Integer,Map<Integer,Object>> tFailure;
 
         @Override
-        public int execute(Map<Integer,Object> d)throws Exception {
-            return t0.run(this,d);
+        public void execute0() throws Exception {
+            if(t0 != null){
+               t0.run(this);
+            }
+        }
+
+        @Override
+        public void exception(Exception why) throws Exception {
+            if(tFailure != null){
+                tFailure.run(this);
+            }
         }
     }
 
@@ -148,27 +168,31 @@ public abstract class Task0<K,D> implements Task<K,D> {
             return this;
         }
 
-        public Builder registerRtnKey(int registerRtnKey){
-            inner.registerRelyRtn = registerRtnKey;
-            return this;
-        }
-
         public Builder multi(boolean multi){
             inner.isMulti = multi;
             return this;
         }
 
-        public Builder proxy(TaskProxy<Map<Integer,Object>> t0){
+        public Builder proxy(TaskProxy<Integer,Map<Integer,Object>> t0){
             inner.t0 = t0;
             return this;
         }
 
-        public Builder post(TaskProxy<Map<Integer,Object>> post){
+        public Builder exception(TaskProxy<Integer,Map<Integer,Object>> tFailure){
+            inner.tFailure = tFailure;
+            return this;
+        }
+
+        public Builder post(TaskProxy<Integer,Map<Integer,Object>> post){
             inner.post = post;
             return this;
         }
 
-        public Task<Integer,Map<Integer,Object>> build(){
+        public ITask<Integer,Map<Integer,Object>> build(){
+            if(inner.taskKey == null){
+                throw new RuntimeException("taskKey is null");
+            }
+
             return inner;
         }
     }

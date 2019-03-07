@@ -28,7 +28,7 @@ public abstract class ConnectionPool {
         Address address0 = addressMap.get(key);
 
         if(address0 == null){
-            address0 = new Address(address,port);
+            address0 = new Address(address,port,client);
             address0.queue = new LinkedList<>();
             address0.capacity = client.addressCacheSize;
         }
@@ -36,10 +36,13 @@ public abstract class ConnectionPool {
         Connection poll = address0.queue.poll();
 
         if(poll == null){
-            poll = new Connection(client);
+            poll = new Connection(client,address0);
+            poll.setCall(call);
+            client.connectionIThread.doLast(poll);
+        }else{
+            poll.setCall(call);
+            client.looper.register(poll);
         }
-
-        poll.setCall(call);
 
         return poll;
     }
@@ -47,18 +50,19 @@ public abstract class ConnectionPool {
 
 
     //  存储地址信息
-    private static class Address{
+    static class Address{
         String host;
         int port;
 
         //  连接host+key      根据这个key缓存address
         String key;
-        int capacity = 4;
+        int capacity;
 
-        public Address(String host, int port) {
+        public Address(String host, int port,Client client) {
             this.host = host;
             this.port = port;
             key = String.format(host,port);
+            capacity = client.addressCacheSize;
         }
 
         Queue<Connection> queue = new LinkedList<>();

@@ -14,6 +14,7 @@ public interface IByteData {
     OutputStream outputStream();
 
     void write(byte[] data) throws IOException;
+    void write(byte[] data,int start,int end) throws IOException;
     int read(byte[] data) throws IOException;
 
 
@@ -29,4 +30,6 @@ public interface IByteData {
     byte[] bytes(int size) throws IOException;
     String string(int size) throws IOException;
     String readLine() throws IOException;
+
+    int readLine(Segment segment) throws IOException;
 }

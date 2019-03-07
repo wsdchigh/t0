@@ -37,6 +37,11 @@ public class ByteDataImpl implements IByteData {
     }
 
     @Override
+    public void write(byte[] data, int start, int end) throws IOException {
+        os.write(data,start,end-start);
+    }
+
+    @Override
     public int read(byte[] data) throws IOException {
         return is.read(data);
     }
@@ -84,6 +89,19 @@ public class ByteDataImpl implements IByteData {
         //String rtn = inner.string();
         //return rtn;
         return "ok";
+    }
+
+    @Override
+    public int readLine(Segment segment) throws IOException {
+        int size = use>64?64:use;
+        for (int i = 0; i < size; i++) {
+            int read = inputStream().read();
+            segment.write(read);
+            if(read == '\n'){
+                return 1;
+            }
+        }
+        return -1;
     }
 
     private final class InputStream0 extends InputStream{

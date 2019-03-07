@@ -32,6 +32,8 @@ public interface IThread<A> {
 
     /*
      *  主要执行线程
+     *  <li>    这里不要抛异常
+     *  <li>    这里需要try异常
      */
     void run0(A a);
 }
