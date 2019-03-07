@@ -8,12 +8,18 @@ import com.wsdc.p_j_0.looper.LCall;
  *  <li>    response
  *  <li>    connection
  */
-public interface ICall extends LCall {
+public interface ICall{
     Request0 request();
     Response0 response();
     Client client();
-    IConnection connection();
+    Connection connection();
 
     IByteData sink();
     IByteData source();
+
+    /*
+     *  尝试次数
+     *  <li>    通常一个Call会尝试连接4次
+     */
+    int try0();
 }

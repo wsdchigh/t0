@@ -2,6 +2,7 @@ package com.wsdc.g_a_0.base;
 
 import android.app.Activity;
 import android.content.res.Resources;
+import android.graphics.Camera;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;

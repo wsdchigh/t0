@@ -1,5 +1,7 @@
 package com.wsdc.g_a_0.chain;
 
+import java.util.List;
+
 /*
  *  事件调用链
  *  <li>    任何任务均维系一个key，通常是Integer(不分大小的)
@@ -64,6 +66,9 @@ public interface IChain<K,D> {
     IChain<K,D> doMain0(K k,int rtn);
     IChain<K,D> doThen(ITask<K,D> task);
     IChain<K,D> remove(ITask<K,D> task);
+
+    IChain<K,D> remove(K k);
+    IChain<K,D> remove(List<K> ks);
 
     void start();
 

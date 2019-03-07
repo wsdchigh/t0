@@ -20,19 +20,34 @@ package com.wsdc.g_a_0.chain;
  */
 public interface ITask<K,D> {
     /*
-     *  执行结果
-     *  <li>    1   成功
-     *  <li>    0   失败
-     *  <li>    -1  异常
+     *   执行的具体函数
+     *   <li>    我们侧重在于or/union的执行力，并不是成功的多种可能性
+     *          <li>    如果需要给成功定义一个结果，可以存放在D中进行处理
+     *
+     *  <li>    捕获或者自身判断，均自由抛出异常
+     *          <li>    chain在执行任务的时候，自己会捕获异常，然后调用exception函数抛出
      */
-    int execute(D d) throws Exception;
+    void execute0() throws Exception;
+
+    /*
+     *  失败
+     *  <li>    自身任务在执行的时候，出现的错误(捕获到的异常)
+     *  <li>    此时视为失败，不会下发任何信号
+     *          <li>    在这里解决自身失败所需要进行的处理   (清理数据，重新开始之类)
+     *  <li>    如果自身出现了错误，任务将不再往下分发信号
+     */
+    void exception(Exception e) throws Exception;
 
     /*
      *  是否可以执行
      */
     boolean shouldExecute();
 
-    void receive(K k,int rtn);
+    /*
+     *  如果任务执行完之后，均会调用队列中的待处理任务的该函数
+     *  <li>    判断自身是否需要执行
+     */
+    void receive(ITask<K,D> task);
 
     K getTaskKey();
 
@@ -54,7 +69,7 @@ public interface ITask<K,D> {
      *  <li>    其他任务的执行完毕之后，可能会影响都这个任务的属性
      *          <li>    调用这个函数去修改其他task
      */
-    void modify(ITask<K,D> task);
+    void modify();
 
     /*
      *   任务执行完之后，将数据跑出来
@@ -63,5 +78,12 @@ public interface ITask<K,D> {
      *
      *   <li>    任务执行之后允许有一个额外的操作
      */
-    void post(ITask<K,D> task,D d);
+    void post();
+
+    /*
+     *  用于判断任务的执行情况
+     *  <li>    -1  失败
+     *  <li>    其他  成功
+     */
+    int status();
 }

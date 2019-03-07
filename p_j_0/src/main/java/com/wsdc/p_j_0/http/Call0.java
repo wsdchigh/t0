@@ -6,6 +6,7 @@ public class Call0 implements ICall {
     Client client;
     IByteData source;
     IByteData sink;
+    int tryCount = 4;
 
     public Call0(Request0 request, Client client) {
         this.request = request;
@@ -32,7 +33,7 @@ public class Call0 implements ICall {
     }
 
     @Override
-    public IConnection connection() {
+    public Connection connection() {
         return null;
     }
 
@@ -47,27 +48,7 @@ public class Call0 implements ICall {
     }
 
     @Override
-    public void toQueue() throws Exception {
-
-    }
-
-    @Override
-    public boolean loop() throws Exception {
-        return false;
-    }
-
-    @Override
-    public void exception(int status, Exception e) {
-
-    }
-
-    @Override
-    public void requestExit() {
-
-    }
-
-    @Override
-    public void exitQueue() throws Exception {
-
+    public int try0() {
+        return tryCount--;
     }
 }

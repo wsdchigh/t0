@@ -52,6 +52,10 @@ public class Request0{
     /*
      *  这个函数可以使用多次
      *  <li>    如果请求体比较大，那么需要多次调用这个函数
+     *  <li>    不要一次性的将请求中的数据写入
+     *          <li>    如果数据量非常大，这样就没有意义
+     *          <li>    请求头+请求行一次性写入
+     *          <li>    请求体分一次或者多次写入    (一次写入不要超过1KB)
      */
     public int write(IByteData source) {
         return -1;

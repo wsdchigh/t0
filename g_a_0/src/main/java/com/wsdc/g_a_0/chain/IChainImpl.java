@@ -52,7 +52,8 @@ public class IChainImpl implements IChain<Integer,Map<Integer,Object>> {
             IChain<Integer, Map<Integer, Object>> chain = task.getIChain();
             int rtn = -1;
             try {
-                rtn = task.execute(chain==null?null:chain.wrap());
+                //rtn = task.execute(chain.wrap());
+                rtn = task.execute0()
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -72,7 +73,7 @@ public class IChainImpl implements IChain<Integer,Map<Integer,Object>> {
     public IThread<ITask<Integer,Map<Integer,Object>>> t1;
 
     public IChainImpl() {
-        this(new TreeMap<>());
+        this(new TreeMap<Integer,Object>());
     }
 
     public IChainImpl(Map<Integer,Object> map) {
@@ -129,6 +130,37 @@ public class IChainImpl implements IChain<Integer,Map<Integer,Object>> {
 
 
 
+        return this;
+    }
+
+    @Override
+    public IChain<Integer, Map<Integer, Object>> remove(Integer integer) {
+        List<ITask> tmpTasks = new LinkedList<>();
+        lock.lock();
+        for (ITask<Integer, Map<Integer, Object>> task : tasks) {
+            if(task.getTaskKey().intValue() == integer.intValue()){
+                tmpTasks.add(task);
+            }
+        }
+        tasks.removeAll(tmpTasks);
+        lock.unlock();
+        return this;
+    }
+
+    @Override
+    public IChain<Integer, Map<Integer, Object>> remove(List<Integer> integers) {
+        List<ITask> tmpTasks = new LinkedList<>();
+        lock.unlock();
+        for (ITask<Integer, Map<Integer, Object>> task : tasks) {
+            for (Integer integer : integers) {
+                if(task.getTaskKey().intValue() == integer.intValue()){
+                    tmpTasks.add(task);
+                    break;
+                }
+            }
+        }
+        tasks.removeAll(tmpTasks);
+        lock.unlock();
         return this;
     }
 

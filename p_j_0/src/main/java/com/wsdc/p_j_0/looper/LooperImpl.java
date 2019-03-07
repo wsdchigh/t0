@@ -30,12 +30,23 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class LooperImpl implements Looper {
     //  提供一个默认的轮询器  方便操作
-    private static final Looper instance = new LooperImpl(10);
+    private static Looper instance ;
 
-    static{
-        instance.work();
-    }
+    static Lock l = new ReentrantLock();
+
     public static Looper getDefault(){
+        if(instance == null){
+            l.lock();
+            if(instance == null){
+                instance = new LooperImpl(10);
+                try{
+                    instance.work();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+            l.unlock();
+        }
         return instance;
     }
 

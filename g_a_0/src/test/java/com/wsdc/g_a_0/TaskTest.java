@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.util.Map;
 
 public class TaskTest {
+    /*
     @Test
     public void testThen() {
         IChainImpl chain = new IChainImpl();
@@ -195,4 +196,5 @@ public class TaskTest {
     public void t0(){
 
     }
+    */
 }

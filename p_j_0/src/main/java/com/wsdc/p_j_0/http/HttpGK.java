@@ -2,6 +2,9 @@ package com.wsdc.p_j_0.http;
 
 /*
  *  公共数据常量池
+ *  <li>    不使用枚举
+ *  <li>    不使用枚举
+ *  <li>    不使用枚举
  */
 public class HttpGK {
     public static final String GET = "GET";
