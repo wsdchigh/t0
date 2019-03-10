@@ -1,7 +1,12 @@
 package com.wsdc.p_j_0.http;
 
+import com.wsdc.p_j_0.http.io.IO;
+
+import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /*
  *  描述一个完整的请求
@@ -16,6 +21,9 @@ import java.util.Map;
  *          <li>    请求体有两种格式
  *          <li>    请求头中携带contentType
  *          <li>    请求头中携带分块编码
+ *
+ *  <li>    默认设置
+ *          <li>
  */
 public class Request0{
     String url;
@@ -28,6 +36,10 @@ public class Request0{
     ICall call;
     RequestBody0 body;
     String path;
+
+    Boolean isAuto;
+
+    int step = 0;
 
     public void header(String key, String value) {
         headers.put(key,value);
@@ -49,18 +61,88 @@ public class Request0{
         return call;
     }
 
+    public void prepare(ICall call){
+        this.call = call;
+    }
+
     /*
-     *  这个函数可以使用多次
-     *  <li>    如果请求体比较大，那么需要多次调用这个函数
-     *  <li>    不要一次性的将请求中的数据写入
-     *          <li>    如果数据量非常大，这样就没有意义
-     *          <li>    请求头+请求行一次性写入
-     *          <li>    请求体分一次或者多次写入    (一次写入不要超过1KB)
-     *
-     *  <li>    -1表示已经写完了，其他情况表示，还能继续读取
+     *  网络访问之前的调用
+     *  <li>    true    表示已经处理，那么将不会走网络了
      */
-    public int write(IByteData source) {
+    public boolean doBeforeNet(){
+        //  暂时丢弃
+        return false;
+    }
+
+    public int write(IO source) throws IOException{
+        if("GET".equalsIgnoreCase(method)){
+            //  get请求不需要请求体 一次性写入数据
+            return writeGet(source);
+        }else{
+            return writePost(source);
+        }
+
+    }
+
+    private int writeGet(IO source) throws IOException{
+        if(step++ == 0){
+            //IO buffer = call.buffer();
+            StringBuilder sb = new StringBuilder();
+            sb.append(requestLine)
+                    .append("\r\n");
+
+            Set<String> set = headers.keySet();
+            for (String s : set) {
+                String value = header(s);
+                if(value != null){
+                    sb.append(s)
+                            .append(":")
+                            .append(value)
+                            .append("\r\n");
+                }
+            }
+
+            sb.append("\r\n");
+            byte[] bytes = sb.toString().getBytes();
+            source.source(bytes);
+
+            return 0;
+        }
         return -1;
+    }
+
+    private int writePost(IO source) throws IOException{
+        if(step++ == 0){
+            //IO buffer = call.buffer();
+            StringBuilder sb = new StringBuilder();
+            sb.append(requestLine)
+                    .append("\r\n");
+            body.setRequest(this);
+            if(body.size() == -1){
+                header("Transfer-Encoding","chunked");
+            }else{
+                header("Content-length",String.valueOf(body.size()));
+            }
+
+            Set<String> set = headers.keySet();
+            for (String s : set) {
+                String value = header(s);
+                if(value != null){
+                    sb.append(s)
+                            .append(" : ")
+                            .append(value)
+                            .append("\r\n");
+                }
+            }
+
+            sb.append('\n');
+            byte[] bytes = sb.toString().getBytes();
+            source.source(bytes);
+
+            return 0;
+        }else{
+            return body.write(source);
+        }
     }
 
     public static class Builder{
@@ -90,7 +172,7 @@ public class Request0{
             return this;
         }
 
-        public Request0 builder(){
+        public Request0 build(){
             if(r.url == null){
                 throw new RuntimeException("url == null");
             }
@@ -99,41 +181,39 @@ public class Request0{
                 throw new RuntimeException("url invalid");
             }
 
-            String prefix = r.url.substring(0, 5);
-            String s0 = null;
-            if(HttpGK.HTTPS.equals(prefix)){
+            URI uri = URI.create(r.url);
+
+            r.protocol = uri.getScheme();
+            r.host = uri.getHost();
+            if(uri.getQuery() != null){
+                r.path = uri.getPath()+"?"+uri.getQuery();
+            }else{
+                r.path = uri.getPath();
+                if(r.path == null || "".equals(r.path)){
+                    r.path = "/";
+                }
+            }
+
+            if("https".equals(r.protocol)){
                 r.port = 443;
-                s0 = r.url.substring(7);
-            }else if(prefix.startsWith(HttpGK.HTTP)){
+            }else if("http".equals(r.protocol)){
                 r.port = 80;
-                s0 = r.url.substring(6);
             }else{
-                throw new RuntimeException("protocol invalid = "+prefix);
+                throw new RuntimeException("只支持http或者https  protocol = "+r.protocol);
             }
 
-            int len0 = s0.indexOf('/');
-            if(len0 == -1){
-                len0 = s0.length();
-            }
-            String s1 = s0.substring(0,len0);
-            String s2 = "";
-            if(len0 == s0.length()){
-                s2 = "/";
+            r.requestLine = String.format(HttpGK.REQUEST_LINE_FORMAT,r.method,r.path,"HTTP/1.1");
+
+            r.header("host",r.host);
+            r.header("date",HttpGK.getTime());
+            if("GET".equalsIgnoreCase(r.method)){
+
             }else{
-                s2 = s0.substring(len0);
+                //r.header("Transfer-Encoding","chunked");
+                if(r.body == null){
+                    r.body = RequestBody0.EMPTY_BODY;
+                }
             }
-            r.host = s1;
-            r.path = s2;
-
-            if(r.protocol == null){
-                r.protocol = HttpGK.PROTOCOL_HTTP_1_1;
-            }
-
-            if(!(r.protocol.equals(HttpGK.PROTOCOL_HTTP_1_1) || r.protocol.equals(HttpGK.PROTOCOL_HTTP_2_0))){
-                throw new RuntimeException("protocol not support");
-            }
-
-            r.requestLine = String.format(HttpGK.REQUST_LINE_FORMAT,r.method,r.path,r.protocol);
 
             return r;
         }

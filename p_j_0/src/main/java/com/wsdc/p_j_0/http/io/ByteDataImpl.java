@@ -1,4 +1,6 @@
-package com.wsdc.p_j_0.http;
+package com.wsdc.p_j_0.http.io;
+
+import com.wsdc.p_j_0.http.Client;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,16 +11,16 @@ public class ByteDataImpl implements IByteData {
     Segment header;
     Segment footer;
 
-    ByteDataImpl inner;
+    byte[] cache = new byte[64];
 
-    int use = 0;
+    int size = 0;
 
     InputStream is = new InputStream0();
     OutputStream os = new OutputStream0();
 
-    public ByteDataImpl(Client client, ByteDataImpl inner) {
+    public ByteDataImpl(Client client) {
         this.client = client;
-        this.inner = inner;
+
     }
 
     @Override
@@ -32,23 +34,56 @@ public class ByteDataImpl implements IByteData {
     }
 
     @Override
-    public void write(byte[] data) throws IOException {
+    public int size() {
+        return 0;
+    }
+
+    @Override
+    public void source(byte[] data) throws IOException {
         os.write(data);
     }
 
     @Override
-    public void write(byte[] data, int start, int end) throws IOException {
+    public void source(byte[] data, int start, int end) throws IOException {
         os.write(data,start,end-start);
     }
 
     @Override
-    public int read(byte[] data) throws IOException {
+    public int sink(byte[] data) throws IOException {
         return is.read(data);
     }
 
     @Override
+    public int source(InputStream is) throws IOException {
+        //  会不会有问题
+        if(is.available() > 0){
+            int read = is.read(cache);
+            if(read == -1){
+                return read;
+            }
+            source(cache,0,read);
+        }
+        return 0;
+    }
+
+    @Override
+    public int source(IByteData source) throws IOException {
+        return 0;
+    }
+
+    @Override
+    public int sink(OutputStream os) throws IOException {
+        return 0;
+    }
+
+    @Override
+    public int sink(IByteData sink) throws IOException {
+        return 0;
+    }
+
+    @Override
     public byte[] bytes(int size) throws IOException{
-        byte[] rtn = new byte[use];
+        byte[] rtn = new byte[this.size];
         is.read(rtn);
         return rtn;
     }
@@ -63,37 +98,8 @@ public class ByteDataImpl implements IByteData {
     }
 
     @Override
-    public String readLine() throws IOException {
-        while(true){
-            try {
-                int read = is.read();
-
-                if(read != -1){
-                    inner.os.write(read);
-                    if(read == '\r'){
-                        //  \r\n是连续在一起的所以需要连续一起读出来
-                        inner.os.write(is.read());
-                        break;
-                    }
-
-                    if(read == '\n'){
-                        break;
-                    }
-                }else{
-                    break;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        //String rtn = inner.string();
-        //return rtn;
-        return "ok";
-    }
-
-    @Override
     public int readLine(Segment segment) throws IOException {
-        int size = use>64?64:use;
+        int size = this.size >64?64: this.size;
         for (int i = 0; i < size; i++) {
             int read = inputStream().read();
             segment.write(read);
@@ -103,6 +109,26 @@ public class ByteDataImpl implements IByteData {
         }
         return -1;
     }
+
+    @Override
+    public int readBuffer(Segment segment) throws IOException {
+        int size = this.size >64?64: this.size;
+        for (int i = 0; i < size; i++) {
+            int read = inputStream().read();
+            segment.write(read);
+        }
+        return size==0?-1:size;
+    }
+
+    @Override
+    public void exit() {
+        Segment segment = header;
+        while((segment != null)){
+            client.getSegmentPool().put(segment);
+            segment = header.next;
+        }
+    }
+
 
     private final class InputStream0 extends InputStream{
 
@@ -123,8 +149,8 @@ public class ByteDataImpl implements IByteData {
             }else{
                 read = header.read();
             }
-            use--;
-            if(use == 0){
+            size--;
+            if(size == 0){
                 client.getSegmentPool().put(header);
                 header = null;
                 footer = null;
@@ -134,7 +160,7 @@ public class ByteDataImpl implements IByteData {
 
         @Override
         public int available() throws IOException {
-            return use;
+            return size;
         }
     }
 
@@ -155,7 +181,7 @@ public class ByteDataImpl implements IByteData {
                 segment.write(b);
             }
 
-            use++;
+            size++;
         }
     }
 }

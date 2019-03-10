@@ -12,7 +12,7 @@ import java.util.TreeMap;
  *          <li>    同一个地址最多缓存8条连接
  *          <li>    如果缓存的连接在5分钟之内没有任何数据交互，那么将关闭这个连接
  */
-public abstract class ConnectionPool {
+public class ConnectionPool {
     String addressCombine = "%s:%d";
     Map<String,Address> addressMap = new TreeMap<>();
     Client client;
@@ -27,11 +27,18 @@ public abstract class ConnectionPool {
         String key = String.format(addressCombine,address,port);
         Address address0 = addressMap.get(key);
 
+        //System.out.println("address == null "+(address0 == nu\\));
+
         if(address0 == null){
             address0 = new Address(address,port,client);
             address0.queue = new LinkedList<>();
             address0.capacity = client.addressCacheSize;
         }
+
+        //
+        addressMap.put(key,address0);
+
+        System.out.println(address0.queue.size());
 
         Connection poll = address0.queue.poll();
 

@@ -1,4 +1,4 @@
-package com.wsdc.p_j_0.http;
+package com.wsdc.p_j_0.http.io;
 
 /*
  *  碎片  (存储数据)
@@ -108,15 +108,15 @@ public class Segment {
      *          如果读到了\n，表示成功读取到字符串，停止读取，并且返回1
 
     public int readLine0(Segment segment){
-        int size = write-read;
+        int size = source-sink;
         if(size == 0){
             return -1;
         }
 
         size = size>64?64:size;
         for (int i = 0; i < size; i++) {
-            int read0 = read();
-            segment.write(read0);
+            int read0 = sink();
+            segment.source(read0);
             if(read0 == '\n'){
                 return 1;
             }

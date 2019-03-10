@@ -1,5 +1,10 @@
 package com.wsdc.p_j_0.http;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 /*
  *  公共数据常量池
  *  <li>    不使用枚举
@@ -7,6 +12,20 @@ package com.wsdc.p_j_0.http;
  *  <li>    不使用枚举
  */
 public class HttpGK {
+    public static Map<String,String> defaultMap = new HashMap<>();
+
+    static{
+        defaultMap.put("Transfer-Encoding","chunked");
+    }
+
+    public static SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+    public static String getTime(){
+        Date date = new Date(System.currentTimeMillis());
+        String format = timeFormat.format(date);
+        return format;
+    }
+
+
     public static final String GET = "GET";
     public static final String POST = "POST";
 
@@ -16,42 +35,102 @@ public class HttpGK {
     public static final String HTTP = "http";
     public static final String HTTPS = "https";
 
-    public static final String REQUST_LINE_FORMAT = "%s %s %s";
+    public static final String REQUEST_LINE_FORMAT = "%s %s %s";
 
     //  支持的协议
     public static final String PROTOCOL_HTTP_1_1 = "HTTP/1.1";
     public static final String PROTOCOL_HTTP_2_0 = "HTTP/2.0";
 
-    //  媒体类型
-    public static final String CONTENT_TYPE = "Content-Type";
+    /*
+     *  上行和下行是有区别的
+     *  <li>    上行通常是固定了几种格式
+     *          <li>    上行同时是表单和json
+     *  <li>    下行通常是不固定的
+     */
+    public static class ContentType{
+        //  表单  (常用)
+        public static final String FORM = "Content-Type : application/x-www-form-urlencoded";
 
-    //  分块传输
-    public static final String TRANSFER_ENCODING = "Transfer-Encoding";
+        //  json
+        public static final String JSON = "Content-Type : application/json";
 
-    //  分块传输的值  (如果使用该功能，传输下面这个值)
-    public static final String CHUNKED = "chunked";
+        //  多媒体文本   (上传文件)
+        public static final String MULTIPART = "Content-Type : multi/form-data";
 
-    //  请求体长度
-    public static final String CONTENT_LENGTH = "Content-Length";
+    }
 
-    //  是否使用压缩格式    (gzip)  如果是大文件(超过4K)可以使用这个头信息
-    public static final String CONTENT_ENCODING = "Content-Encoding";
+    /*
+     *  对requestBody的限定
+     */
+    public static class ContentLength{
+        public static final String LENGTH = "Content-Length : ";
 
-    //  标记主机地址
-    public static final String HOST = "host";
+        //  分块编码固定这种格式
+        public static final String ENCODING = "Transfer-Encoding : chunked";
+    }
 
-    //  标记使用者
-    public static final String USER_AGENT = "user_agent";
+    /*
+     *  缓存控制    关于缓存的几个标签
+     */
+    public static class CacheControl{
+        public static final String NO_CACHE = "Cache-Control : no-cache";
+        public static final String MAX_AGE = "Cache-Control : max-age=";
 
-    public static final String ETAG = "Etag";
+        /*
+         *  Etag和if-none-match是成对出现的
+         */
+        public static final String ETAG = "Etag : ";
+        public static final String IF_NONE_MATCH = "If-None-Match : ";
+    }
 
-    public static final String IF_NOT_MATCH = "If-Not-Match";
+    /*
+     *  如果需要断点续传
+     *  <li>    判断原始文件的长度
+     *  <li>    长度从0开始，含头含尾 (一定注意0-499才表示500个自己)
+     *
+     *  <li>    如果服务器支持range参数，那么返回的是206    不是200
+     */
+    public static class RANGE{
+        /*
+         *  指定区间
+         */
+        public static final String RANGE0 = "Range : bytes=%d-%d";
 
-    //  缓存控制
-    public static final String CACHE_CONTROL = "Cache-Control";
+        /*
+         *  指定开头
+         *  <li>    通常使用这种方式
+         */
+        public static final String RANGE1 = "Range : bytes=%d-";
 
-    //  重定向
-    public static final String LOCATION = "Location";
+        /*
+         *  指定结尾
+         *  <li>
+         */
+        public static final String RANGE2 = "Range : bytes=-%d";
 
+        //  服务器允许接收range
+        public static final String ACCEPT_RANGES = "Accept-Ranges : bytes";
 
+        //  服务器不支持
+        public static final String ACCEPT_RANGES_NONE = "Accept-Ranges : none";
+    }
+
+    /*
+     *  是否长链接
+     *  <li>    1.1默认长链接
+     */
+    public static class Connection{
+        public static final String KEEP_ALIVE = "Connection : Keep-Alive";
+        public static final String CLOSE = "Connection : Close";
+    }
+
+    /*
+     *  通用请求头
+     */
+    public static class Common{
+        public static final String HOST = "Host : ";
+        public static final String DATE = "Date : ";
+        public static final String USER_AGENT = "User-Agent : wsdchigh-1.0.0";
+        public static final String ACCEPT_ENCODING = "Accept-Encoding : gzip";
+    }
 }

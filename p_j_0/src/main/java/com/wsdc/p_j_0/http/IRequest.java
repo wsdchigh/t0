@@ -1,5 +1,7 @@
 package com.wsdc.p_j_0.http;
 
+import com.wsdc.p_j_0.http.io.IByteData;
+
 import java.util.Map;
 
 public interface IRequest {

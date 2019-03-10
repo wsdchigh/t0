@@ -1,23 +1,35 @@
 package com.wsdc.p_j_0.http;
 
+import com.wsdc.p_j_0.http.io.IO;
+import com.wsdc.p_j_0.http.io.IOs;
+
+import java.io.IOException;
+
 public class Call0 implements ICall {
     Request0 request;
     Response0 response;
     Client client;
-    IByteData source;
-    IByteData sink;
+    IO source;
+    IO sink;
+    IO buffer;
+    IO buffer1;
     int tryCount = 4;
-    Segment segment;
+    Connection connection;
+    int status = STATUS_REQUEST;
+    Exception e;
+
 
     public Call0(Request0 request, Client client) {
         this.request = request;
         this.client = client;
 
-        response = new Response0();
-        source = new ByteDataImpl(client,new ByteDataImpl(client,null));
-        sink = new ByteDataImpl(client,new ByteDataImpl(client,null));
+        response = new Response0(this);
+        source = IOs.buffer(client);
+        sink = IOs.buffer(client);
+        buffer = IOs.buffer(client);
+        buffer1 = IOs.buffer(client);
 
-        segment = client.getSegmentPool().get();
+        request.prepare(this);
     }
 
     @Override
@@ -37,26 +49,71 @@ public class Call0 implements ICall {
 
     @Override
     public Connection connection() {
-        return null;
+        if(connection == null){
+            connection = client.connectionPool().getConnection(this);
+        }
+        return connection;
     }
 
     @Override
-    public IByteData sink() {
+    public IO sink() {
         return sink;
     }
 
     @Override
-    public IByteData source() {
+    public IO source() {
         return source;
     }
 
     @Override
-    public Segment headerSegment() {
-        return segment;
+    public IO buffer() {
+        return buffer;
     }
+
+    @Override
+    public IO buffer1() {
+        return buffer1;
+    }
+
 
     @Override
     public int try0() {
         return tryCount--;
+    }
+
+    @Override
+    public void execute() throws IOException {
+        Connection connection = client.connectionPool().getConnection(this);
+    }
+
+    @Override
+    public int status() {
+        return status;
+    }
+
+    @Override
+    public void setStatus(int newStatus) {
+        status = newStatus;
+    }
+
+    @Override
+    public void finish() {
+        //  一次调用结束之后，执行该函数，回收数据
+        if(e == null){
+            //  成功
+
+        }else{
+            //  失败
+        }
+
+        source.finish();
+        sink.finish();
+        buffer.finish();
+        buffer1.finish();
+    }
+
+    @Override
+    public void exception(Exception e) {
+        this.e = e;
     }
 }

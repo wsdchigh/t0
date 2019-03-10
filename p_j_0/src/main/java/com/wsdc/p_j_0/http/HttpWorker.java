@@ -8,13 +8,23 @@ public class HttpWorker implements Worker {
     }
 
     @Override
-    public void requestEncoded(ICall call) {
+    public void request(ICall call) {
         ConnectionPool pool = client.connectionPool();
         Connection connection = pool.getConnection(call);
     }
 
     @Override
-    public void responseDecoded(ICall call) {
+    public void write(ICall call) {
+
+    }
+
+    @Override
+    public void response(ICall call) {
+
+    }
+
+    @Override
+    public void read(ICall call) {
 
     }
 }

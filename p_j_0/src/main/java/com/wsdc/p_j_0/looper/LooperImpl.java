@@ -38,7 +38,7 @@ public class LooperImpl implements Looper {
         if(instance == null){
             l.lock();
             if(instance == null){
-                instance = new LooperImpl(10);
+                instance = new LooperImpl(1);
                 try{
                     instance.work();
                 }catch (Exception e){
@@ -164,6 +164,7 @@ public class LooperImpl implements Looper {
                         try{
                             rtn0 = lc.loop();
                         }catch (Exception e){
+                            e.printStackTrace();
                             e0 = e;
                         }
                         rtn = rtn|rtn0;

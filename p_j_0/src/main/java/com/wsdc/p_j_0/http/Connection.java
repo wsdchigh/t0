@@ -3,10 +3,27 @@ package com.wsdc.p_j_0.http;
 import com.wsdc.p_j_0.looper.LCall;
 import com.wsdc.p_j_0.looper.Looper;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /*
  *  链接
@@ -21,6 +38,7 @@ public class Connection implements LCall {
     private String host;
     private int port;
     private Socket socket;
+    private SSLSocket sslSocket;
     private ICall call;
     private Looper looper;
     private Client client;
@@ -31,9 +49,6 @@ public class Connection implements LCall {
 
     //  记录缓存的空闲时间
     long spareTime = 0l;
-
-    byte[] cache = new byte[256];
-
     /*
      *  标记状态值
      *  <li>    0   初始状态    (未连接)
@@ -105,11 +120,77 @@ public class Connection implements LCall {
      *
      *  <li>    根据是否为ssl决定使用哪个socket
      */
-    public boolean connect() throws IOException {
-        socket = new Socket(host, port);
-        inputStream = socket.getInputStream();
-        outputStream = socket.getOutputStream();
-        return false;
+    public void connect() throws IOException {
+        if("http".equals(call.request().protocol)){
+            socket = new Socket(host, port);
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
+        }else{
+            try {
+                File file = new File("E:\\al\\p_j_0\\src\\main\\java\\wsdc.jks");
+                System.out.println(file.getAbsoluteFile());
+                KeyStore keyStore = KeyStore.getInstance("pkcs12");
+                FileInputStream fis = new FileInputStream(file);
+                keyStore.load(fis,"wsdc1993".toCharArray());
+
+                KeyManagerFactory factory0 = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                factory0.init(keyStore,"wsdc1993".toCharArray());
+                KeyManager[] keyManagers = factory0.getKeyManagers();
+
+
+                SSLContext context = SSLContext.getInstance("SSL", "SunJSSE");
+                context.init(keyManagers,new TrustManager[]{new X509TrustManager() {
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+
+                    }
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+
+                    }
+
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
+                }},new SecureRandom());
+
+                SSLSocketFactory factory = context.getSocketFactory();
+
+                socket = factory.createSocket(host, port);
+                ((SSLSocket) socket).startHandshake();
+                //System.out.println("host = "+host+"     port = "+port);
+                inputStream = socket.getInputStream();
+                outputStream = socket.getOutputStream();
+
+                /*
+                String s = "GET / HTTP/1.1\r\n" +
+                        "host:www.baidu.com\r\n\r\n";
+                outputStream.write(s.getBytes());
+                outputStream.flush();
+                System.out.println(s);
+
+                byte[] data= new byte[2048];
+
+                int read = inputStream.read(data);
+                System.out.println(new String(data,0,read));
+                */
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            }  catch (NoSuchProviderException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
+        socket.setSoTimeout(5000);
+
     }
 
     public int status() {
@@ -125,46 +206,116 @@ public class Connection implements LCall {
         status = STATUS_CONNECTED_IO;
     }
 
-
     @Override
     public boolean loop() throws Exception {
-        if(call != null){
-            write0();
-            read0();
-            parse0();
-            return true;
+        /*
+         *  IO先后顺序
+         *  <li>    只有request写完了，才能读取response
+         */
+        if (call != null) {
+            //  一定要控制这个返回值  如果有任何写入一定要返回true
+            boolean rtn = false;
+            switch (call.status()) {
+                case ICall.STATUS_REQUEST:
+                    int l1 = call.request().write(call.source());
+                    int l2 = call.source().sink(outputStream);
+                    //int l2 = call.source().sink(call.buffer());
+                    if(l1 == -1 && l2 == 0){
+
+                        call.setStatus(ICall.STATUS_RESPONSE_HEADER);
+                        if(needReadBefore()){
+                            int read = inputStream.read();
+
+                            //  sslSocket inputStream.available() == 0 可以能回出现这种状态
+                            //  需要率先读取一个byte    (阻塞)
+                            call.sink().source(new byte[]{(byte) (read&0xff)});
+                        }
+                    }
+                    outputStream.flush();
+
+                    rtn = true;
+                    break;
+
+                case ICall.STATUS_RESPONSE_HEADER:
+                    /*
+                     *  读取请求头头
+                     *  <li>    一次会从流中读取64位，但是一行可能没有64位
+                     *          会存在以下情况
+                     *          <li>    流中的数据已经读完了，但是header还没有解析完毕
+                     *          <li>    如果body中的数据比较少，那么可能body读已经读完了
+                     *
+                     */
+                    //System.out.println("size = "+inputStream.available());
+                    //System.out.println(inputStream.getClass().getName());
+                    if(inputStream.available() > 0){
+                        call.sink().source(inputStream);
+                        rtn = true;
+                    }
+                    if(call.sink().size() > 0){
+                        int line = -1;
+                        line = call.sink().readLine(call.buffer());
+                        if(line != -1){
+                            String string = call.buffer().string();
+                            System.out.println(string);
+                            if("\n".equals(string) || "\r\n".equals(string)){
+                                call.setStatus(ICall.STATUS_RESPONSE_BODY);
+                                int i = call.response().parseBody();
+                                if(i == -1){
+                                    //  避免body此时已经读完了，所以需要先行判断一次
+                                    System.out.println(">>>>>>>>>>>>>>>>>");
+                                    call.setStatus(ICall.STATUS_END);
+                                }
+                            }else{
+                                if(call.response().responseLine == null){
+                                    call.response().setResponseLine(string);
+                                }else{
+                                    call.response().headerLine(string);
+                                }
+                            }
+                        }
+                    }
+
+                    break;
+
+                case ICall.STATUS_RESPONSE_BODY:
+                    /*
+                     *  先读一个字节  (通常是会阻塞的)
+                     *  <li>    ssl,chunked会让inputStream.available()一直 == 0
+                     */
+                    if(inputStream.available() == 0){
+                        if(needReadBefore()){
+                            int read = inputStream.read();
+                            call.sink().source(new byte[]{(byte) (read&0xff)});
+                        }
+                    }
+
+                    call.sink().source(inputStream);
+                    int i = call.response().parseBody();
+                    if(i == -1){
+                        call.setStatus(ICall.STATUS_END);
+                    }
+                    rtn = true;
+                    break;
+
+                case ICall.STATUS_END:
+                    //  不要在这里处理成功处理
+                    //  移动到移除队列的时候再行处理
+                    requestExit();
+                    rtn = true;
+                    break;
+            }
+            return rtn;
         }
-       return false;
+        return false;
     }
 
-    private void read0() throws IOException{
-        if(inputStream.available() > 0){
-            int read = inputStream.read(cache);
-            call.sink().write(cache,0,read);
-        }
-    }
-
-    private void write0() throws IOException{
-        int write = call.request().write(call.source());
-        int read = call.source().read(cache);
-        if(read != -1){
-            outputStream.write(cache,0,read);
-            outputStream.flush();
-        }
-    }
-
-    private void parse0() throws Exception{
-        Segment segment = call.headerSegment();
-        int read0 = call.sink().readLine(segment);
-        if(read0 != -1){
-            byte[] reset = segment.reset();
-            //String s =
-        }
-    }
 
     @Override
     public void exception(int status0, Exception e) {
         status = STATUS_CONNECTED_IO_END;
+
+        //  直接失败
+        requestExit();
     }
 
     /*
@@ -179,15 +330,21 @@ public class Connection implements LCall {
 
     @Override
     public void exitQueue() throws Exception {
-        if (status == STATUS_CONNECTED_IO) {
+        if (status != STATUS_CONNECTED_IO_END) {
             if (address.queue.size() < address.capacity) {
                 address.queue.offer(this);
                 spareTime = System.currentTimeMillis();
             }
 
+            System.out.println("读取结束");
+            System.out.println(call.sink().string());
+            System.out.println(call.buffer1().string());
+            call.finish();
             call = null;
+            status = ICall.STATUS_REQUEST;
         } else {
             close();
+            call.finish();
         }
     }
 
@@ -213,5 +370,10 @@ public class Connection implements LCall {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String https = "https";
+    private boolean needReadBefore(){
+        return https.equals(call.request().protocol);
     }
 }
