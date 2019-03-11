@@ -181,16 +181,25 @@ public class Response0 {
      *
      *  <li>
      */
-    public String string(){
-        return "";
+    public String string() throws IOException{
+        if(getHeader("content-length") != null){
+            return call.sink().string();
+        }
+        return call.buffer1().string();
     }
 
-    public byte[] bytes(){
-        return new byte[0];
+    public byte[] bytes() throws IOException {
+        if(getHeader("content-length") != null){
+            return call.sink().bytes();
+        }
+        return call.buffer1().bytes();
     }
 
     public InputStream inputStream(){
-        return null;
+        if(getHeader("content-length") != null){
+            return call.sink().inputStream();
+        }
+        return call.buffer1().inputStream();
     }
 
     /*

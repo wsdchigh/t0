@@ -17,6 +17,7 @@ public class Call0 implements ICall {
     Connection connection;
     int status = STATUS_REQUEST;
     Exception e;
+    ICallback cb;
 
 
     public Call0(Request0 request, Client client) {
@@ -115,5 +116,15 @@ public class Call0 implements ICall {
     @Override
     public void exception(Exception e) {
         this.e = e;
+    }
+
+    @Override
+    public ICallback callback() {
+        return cb;
+    }
+
+    @Override
+    public void setCallback(ICallback cb) {
+        this.cb = cb;
     }
 }

@@ -160,22 +160,8 @@ public class Connection implements LCall {
 
                 socket = factory.createSocket(host, port);
                 ((SSLSocket) socket).startHandshake();
-                //System.out.println("host = "+host+"     port = "+port);
                 inputStream = socket.getInputStream();
                 outputStream = socket.getOutputStream();
-
-                /*
-                String s = "GET / HTTP/1.1\r\n" +
-                        "host:www.baidu.com\r\n\r\n";
-                outputStream.write(s.getBytes());
-                outputStream.flush();
-                System.out.println(s);
-
-                byte[] data= new byte[2048];
-
-                int read = inputStream.read(data);
-                System.out.println(new String(data,0,read));
-                */
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             } catch (KeyManagementException e) {
@@ -219,9 +205,11 @@ public class Connection implements LCall {
                 case ICall.STATUS_REQUEST:
                     int l1 = call.request().write(call.source());
                     int l2 = call.source().sink(outputStream);
+                    //byte[] data = new byte[1024];
                     //int l2 = call.source().sink(call.buffer());
+                    //int l2 = call.source().sink(data);
+                    //System.out.println(new String(data,0,l2));
                     if(l1 == -1 && l2 == 0){
-
                         call.setStatus(ICall.STATUS_RESPONSE_HEADER);
                         if(needReadBefore()){
                             int read = inputStream.read();
@@ -256,7 +244,7 @@ public class Connection implements LCall {
                         line = call.sink().readLine(call.buffer());
                         if(line != -1){
                             String string = call.buffer().string();
-                            System.out.println(string);
+                            //System.out.println(string);
                             if("\n".equals(string) || "\r\n".equals(string)){
                                 call.setStatus(ICall.STATUS_RESPONSE_BODY);
                                 int i = call.response().parseBody();
@@ -309,13 +297,14 @@ public class Connection implements LCall {
         return false;
     }
 
-
+    Exception e0 = null;
     @Override
     public void exception(int status0, Exception e) {
         status = STATUS_CONNECTED_IO_END;
 
         //  直接失败
         requestExit();
+        e0 = e;
     }
 
     /*
@@ -337,12 +326,19 @@ public class Connection implements LCall {
             }
 
             System.out.println("读取结束");
-            System.out.println(call.sink().string());
-            System.out.println(call.buffer1().string());
-            call.finish();
+            if(call.callback() != null){
+                if(!call.callback().success(call)){
+                    call.finish();
+                }
+            }else{
+                call.finish();
+            }
             call = null;
             status = ICall.STATUS_REQUEST;
         } else {
+            if(call.callback() != null){
+                call.callback().failure(call,e0);
+            }
             close();
             call.finish();
         }

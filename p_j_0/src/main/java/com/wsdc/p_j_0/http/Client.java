@@ -56,6 +56,12 @@ public class Client {
         call.execute();
     }
 
+    public void call(Request0 request0, ICall.ICallback cb) throws IOException {
+        ICall call = new Call0(request0,this);
+        call.setCallback(cb);
+        call.execute();
+    }
+
     public SegmentPool getSegmentPool(){
         if(segmentPool == null){
             segmentPool = new SegmentPool(100);

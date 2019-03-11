@@ -2,8 +2,12 @@ package test.wsdc.p_j_9;
 
 import com.wsdc.p_j_0.http.Call0;
 import com.wsdc.p_j_0.http.Client;
+import com.wsdc.p_j_0.http.HttpGK;
 import com.wsdc.p_j_0.http.ICall;
 import com.wsdc.p_j_0.http.Request0;
+import com.wsdc.p_j_0.http.RequestBody0;
+import com.wsdc.p_j_0.http.body.FormBody;
+import com.wsdc.p_j_0.http.body.MultiBody;
 
 import org.junit.Test;
 
@@ -400,5 +404,145 @@ public class HttpTest {
         }
     }
 
+    @Test
+    public void testLocal(){
+        Client client = new Client();
 
+        Request0 request = new Request0.Builder()
+                .url("http://127.0.0.1:8080/a.do?api=test")
+                .method("GET")
+                .build();
+
+        try {
+            client.call(request, new ICall.ICallback() {
+                @Override
+                public boolean success(ICall call) throws IOException{
+                    System.out.println(call.response().string());
+                    return false;
+                }
+
+                @Override
+                public void failure(ICall call, Exception e) {
+
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.currentThread().sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testPost(){
+        Client client = new Client();
+
+        FormBody body = new FormBody.Builder()
+                .add("username", "wsdchigh")
+                .add("password", "wsdc1993")
+                .build();
+        Request0 request = new Request0.Builder()
+                .url("http://127.0.0.1:8080/a.do?api=test_post")
+                .method("POST")
+                .body(body)
+                .build();
+
+        try {
+            client.call(request, new ICall.ICallback() {
+                @Override
+                public boolean success(ICall call) throws IOException{
+                    System.out.println(call.response().string());
+                    return false;
+                }
+
+                @Override
+                public void failure(ICall call, Exception e) {
+
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.currentThread().sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testJson(){
+        Client client = new Client();
+        Request0 request = new Request0.Builder()
+                .url("http://127.0.0.1:8080/a.do?api=test_json")
+                .method("POST")
+                .body(RequestBody0.create(HttpGK.ContentType.JSON,"{\"a\":12345}"))
+                .build();
+
+        try {
+            client.call(request, new ICall.ICallback() {
+                @Override
+                public boolean success(ICall call) throws IOException{
+                    System.out.println(call.response().string());
+                    return false;
+                }
+
+                @Override
+                public void failure(ICall call, Exception e) {
+
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.currentThread().sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testMulti(){
+        Client client = new Client();
+        MultiBody body = new MultiBody.Builder()
+                .addString("username", "password")
+                .addString("username1", "password1")
+                .build();
+
+        Request0 request = new Request0.Builder()
+                .url("http://127.0.0.1:8080/a.do?api=test_json")
+                .method("POST")
+                .body(body)
+                .build();
+
+        try {
+            client.call(request, new ICall.ICallback() {
+                @Override
+                public boolean success(ICall call) throws IOException{
+                    System.out.println(call.response().string());
+                    return false;
+                }
+
+                @Override
+                public void failure(ICall call, Exception e) {
+
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.currentThread().sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -71,6 +71,10 @@ public interface ICall{
 
     void exception(Exception e);
 
+    ICallback callback();
+
+    void setCallback(ICallback cb);
+
     public interface ICallback{
         /*
          *  成功回调
@@ -78,8 +82,8 @@ public interface ICall{
          *          <li>    true，表示我需要时间处理，之后会自己去关闭资源
          *          <li>    false 我已经处理完了，可以关闭资源了
          */
-        boolean success(ICall call);
+        boolean success(ICall call) throws IOException;
 
-        void failure(ICall call,Exception e);
+        void failure(ICall call,Exception e) throws IOException;
     }
 }

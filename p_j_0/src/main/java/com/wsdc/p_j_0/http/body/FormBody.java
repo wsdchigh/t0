@@ -1,6 +1,7 @@
 package com.wsdc.p_j_0.http.body;
 
-import com.wsdc.p_j_0.http.Request0;
+import com.wsdc.p_j_0.http.HttpGK;
+import com.wsdc.p_j_0.http.ICall;
 import com.wsdc.p_j_0.http.RequestBody0;
 import com.wsdc.p_j_0.http.io.IO;
 
@@ -19,21 +20,21 @@ public class FormBody extends RequestBody0 {
 
     @Override
     public int write(IO source) throws IOException {
-        if(bodyIO.size() > 0){
-            source.source(bodyIO);
-            return 1;
+        if(call.buffer().size() > 0){
+            call.source().source(call.buffer());
+            return 0;
         }
         return -1;
     }
 
     @Override
     public String contentType() {
-        return "Content-Length : "+size();
+        return HttpGK.ContentType.FORM;
     }
 
     @Override
-    protected void setRequest(Request0 request) throws IOException {
-        super.setRequest(request);
+    protected void setCall(ICall call) throws IOException {
+        super.setCall(call);
         StringBuilder sb = new StringBuilder();
         Set<String> set = form.keySet();
         for (String s : set) {
@@ -47,9 +48,12 @@ public class FormBody extends RequestBody0 {
             }
         }
 
+        if(sb.length() == 0){
+            return;
+        }
         String s = sb.substring(0,sb.length()-1);
-        bodyIO.source(s.getBytes());
-        size = bodyIO.size();
+        call.buffer().source(s.getBytes());
+        size = call.buffer().size();
     }
 
     @Override
@@ -66,10 +70,12 @@ public class FormBody extends RequestBody0 {
         FormBody body = new FormBody();
 
         public Builder add(String key,String value){
+            body.form.put(key,value);
             return this;
         }
 
         public Builder add(Map<String,String> maps){
+            body.form.putAll(maps);
             return this;
         }
 

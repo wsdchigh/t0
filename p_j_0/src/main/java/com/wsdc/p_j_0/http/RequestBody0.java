@@ -8,8 +8,8 @@ import java.io.IOException;
  *  请求体
  */
 public abstract class RequestBody0 {
-    protected IO bodyIO;
     Request0 request;
+    protected ICall call;
 
     /*
      *  将数据写入到源中
@@ -38,17 +38,13 @@ public abstract class RequestBody0 {
      */
     public abstract int size();
 
-    protected void setRequest(Request0 request) throws IOException {
-        this.request = request;
-        bodyIO = request.call.buffer();
+    protected void setCall(ICall call) throws IOException {
+        this.call = call;
+        this.request = call.request();
     }
 
     public Request0 request(){
         return request;
-    }
-
-    public void finish(){
-        bodyIO.finish();
     }
 
     public static final RequestBody0 EMPTY_BODY = new RequestBody0() {
@@ -59,7 +55,7 @@ public abstract class RequestBody0 {
 
         @Override
         public String contentType() {
-            return null;
+            return HttpGK.ContentType.FORM;
         }
 
         @Override
@@ -72,4 +68,42 @@ public abstract class RequestBody0 {
             return 0;
         }
     } ;
+
+    //  使用这种方式传json create("application/json","{"a":1234546}")
+    public static RequestBody0 create(final String contentType, final String content){
+        RequestBody0 body = new RequestBody0() {
+            @Override
+            protected void setCall(ICall call) throws IOException {
+                super.setCall(call);
+                call.buffer().source(content.getBytes());
+            }
+
+            @Override
+            public int write(IO source) throws IOException {
+                if(call.buffer().size() > 0 ){
+                    call.source().source(call.buffer());
+                    return 0;
+                }
+                return -1;
+            }
+
+            @Override
+            public String contentType() {
+                return contentType;
+            }
+
+            @Override
+            public Object content() {
+                return content;
+            }
+
+            @Override
+            public int size() {
+                return call.buffer().size();
+            }
+        };
+
+
+        return body;
+    }
 }

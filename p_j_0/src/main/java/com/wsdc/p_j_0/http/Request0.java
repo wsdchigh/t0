@@ -30,7 +30,7 @@ public class Request0{
     String method;
     String requestLine;
     String host;
-    int port = 80;
+    int port = 0;
     String protocol;
     Map<String,String> headers = new HashMap<>();
     ICall call;
@@ -117,25 +117,30 @@ public class Request0{
             StringBuilder sb = new StringBuilder();
             sb.append(requestLine)
                     .append("\r\n");
-            body.setRequest(this);
+            body.setCall(call);
+            System.out.println("---------------");
             if(body.size() == -1){
                 header("Transfer-Encoding","chunked");
-            }else{
+            }else if(body.size() >= 0){
                 header("Content-length",String.valueOf(body.size()));
+            }else if(body.size() == -2){
+                //  什么也不要添加
             }
+
+            header("Content-type",body.contentType());
 
             Set<String> set = headers.keySet();
             for (String s : set) {
                 String value = header(s);
                 if(value != null){
                     sb.append(s)
-                            .append(" : ")
+                            .append(":")
                             .append(value)
                             .append("\r\n");
                 }
             }
 
-            sb.append('\n');
+            sb.append("\r\n");
             byte[] bytes = sb.toString().getBytes();
             source.source(bytes);
 
@@ -194,9 +199,12 @@ public class Request0{
                 }
             }
 
+           r.port = uri.getPort();
             if("https".equals(r.protocol)){
+                if(r.port == -1)
                 r.port = 443;
             }else if("http".equals(r.protocol)){
+                if(r.port == -1)
                 r.port = 80;
             }else{
                 throw new RuntimeException("只支持http或者https  protocol = "+r.protocol);
@@ -206,6 +214,10 @@ public class Request0{
 
             r.header("host",r.host);
             r.header("date",HttpGK.getTime());
+
+            if(r.method == null){
+                r.method = "GET";
+            }
             if("GET".equalsIgnoreCase(r.method)){
 
             }else{

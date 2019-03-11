@@ -48,14 +48,14 @@ public class HttpGK {
      *  <li>    下行通常是不固定的
      */
     public static class ContentType{
-        //  表单  (常用)
-        public static final String FORM = "Content-Type : application/x-www-form-urlencoded";
+        //  表单  (常用)    Content-Type
+        public static final String FORM = "application/x-www-form-urlencoded";
 
         //  json
-        public static final String JSON = "Content-Type : application/json";
+        public static final String JSON = "application/json";
 
-        //  多媒体文本   (上传文件)
-        public static final String MULTIPART = "Content-Type : multi/form-data";
+        //  多媒体文本   (上传文件)  后面通常需要追加 ;boundary=任意字符
+        public static final String MULTIPART = "multipart/form-data";
 
     }
 
