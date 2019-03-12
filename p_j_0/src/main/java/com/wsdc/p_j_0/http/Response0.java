@@ -96,7 +96,7 @@ public class Response0 {
 
         //System.out.println("size = "+size);
         if(size > 0){
-            //System.out.println("size = "+size+"     now = "+call.sink().size());
+            System.out.println("size = "+size+"     now = "+call.sink().size());
             int readSize = call.sink().size();
             if(readSize == this.size){
                 return -1;

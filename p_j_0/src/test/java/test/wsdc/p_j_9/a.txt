@@ -1,0 +1,38 @@
+POST /s.do?a=b HTTP/1.1
+Content-Type: multipart/mixed; boundary=8ce486a3-2013-45d1-85ab-735e30cffc7f
+Content-Length: 282
+Host: 127.0.0.1:8888
+Connection: Keep-Alive
+Accept-Encoding: gzip
+User-Agent: okhttp/3.10.0
+
+--8ce486a3-2013-45d1-85ab-735e30cffc7f
+Content-Disposition: form-data; name="username"
+Content-Length: 8
+
+wsdchigh
+--8ce486a3-2013-45d1-85ab-735e30cffc7f
+Content-Disposition: form-data; name="password"
+Content-Length: 8
+
+wsdc1993
+--8ce486a3-2013-45d1-85ab-735e30cffc7f--
+
+
+
+POST /a.do?api=test_multi HTTP/1.1
+date:2019-03-13 00-59-22
+Content-type:multipart/form-data;boundary=ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5
+host:192.168.1.102
+
+--ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5
+Content-Disposition: form-data;name="username"
+Content-Length:8
+
+password
+--ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5
+Content-Disposition: form-data;name="username1"
+Content-Length:9
+
+password1
+--ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5--

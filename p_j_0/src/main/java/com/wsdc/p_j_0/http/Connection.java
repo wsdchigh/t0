@@ -205,10 +205,14 @@ public class Connection implements LCall {
                 case ICall.STATUS_REQUEST:
                     int l1 = call.request().write(call.source());
                     int l2 = call.source().sink(outputStream);
-                    //byte[] data = new byte[1024];
-                    //int l2 = call.source().sink(call.buffer());
-                    //int l2 = call.source().sink(data);
-                    //System.out.println(new String(data,0,l2));
+                    /*
+                    byte[] data = new byte[1024];
+                    int l2 = call.source().sink(data);
+                    System.out.println(new String(data,0,l2));
+                    if(true){
+                        return true;
+                    }
+                    */
                     if(l1 == -1 && l2 == 0){
                         call.setStatus(ICall.STATUS_RESPONSE_HEADER);
                         if(needReadBefore()){
@@ -244,7 +248,7 @@ public class Connection implements LCall {
                         line = call.sink().readLine(call.buffer());
                         if(line != -1){
                             String string = call.buffer().string();
-                            //System.out.println(string);
+                            System.out.println(string);
                             if("\n".equals(string) || "\r\n".equals(string)){
                                 call.setStatus(ICall.STATUS_RESPONSE_BODY);
                                 int i = call.response().parseBody();

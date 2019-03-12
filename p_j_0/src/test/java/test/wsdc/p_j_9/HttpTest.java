@@ -11,6 +11,7 @@ import com.wsdc.p_j_0.http.body.MultiBody;
 
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -511,13 +512,13 @@ public class HttpTest {
     @Test
     public void testMulti(){
         Client client = new Client();
+        File file = new File("a.html");
         MultiBody body = new MultiBody.Builder()
-                .addString("username", "password")
-                .addString("username1", "password1")
+                .addFile("files",file,file.getName())
                 .build();
 
         Request0 request = new Request0.Builder()
-                .url("http://127.0.0.1:8080/a.do?api=test_json")
+                .url("http://192.168.1.102:8080/a.do?api=test_multi")
                 .method("POST")
                 .body(body)
                 .build();
@@ -540,8 +541,87 @@ public class HttpTest {
         }
 
         try {
-            Thread.currentThread().sleep(4000);
+            Thread.currentThread().sleep(18000);
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Test
+    public void testMultiServe(){
+        try {
+            ServerSocket ss = new ServerSocket(8888);
+
+            int i = 0;
+            Socket accept = ss.accept();
+
+            final Thread t = Thread.currentThread();
+
+            Thread t0 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.currentThread().sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    t.interrupt();
+                }
+            });
+
+            t0.start();
+
+            byte[] data = new byte[2096];
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            try{
+                while(i++ < 10){
+                    int read = accept.getInputStream().read(data);
+                    bos.write(data,0,read);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+            byte[] bytes = bos.toByteArray();
+            System.out.println(new String(bytes));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testMulti2(){
+        try {
+            Socket socket = new Socket("127.0.0.1",8080);
+            String s = "POST /a.do?api=test_multi HTTP/1.1\r\n" +
+                    "date:2019-03-13 00-59-22\r\n" +
+                    "Content-type:multipart/form-data;boundary=ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5\r\n" +
+                    "\r\n" +
+                    "--ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5\r\n" +
+                    "Content-Disposition: form-data;name=\"username\"\r\n" +
+                    "Content-Length:8\r\n" +
+                    "\r\n" +
+                    "password\r\n" +
+                    "--ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5\r\n" +
+                    "Content-Disposition: form-data;name=\"username1\"\r\n" +
+                    "Content-Length:9\r\n" +
+                    "\r\n" +
+                    "password1\r\n" +
+                    "--ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5--";
+            socket.getOutputStream().write(s.getBytes());
+            socket.getOutputStream().flush();
+
+            InputStream is = socket.getInputStream();
+            byte[] data = new byte[6630];
+
+            int read = is.read(data);
+            System.out.println(new String(data,0,read));
+
+            read = is.read(data);
+            System.out.println(new String(data,0,read));
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

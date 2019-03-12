@@ -6,6 +6,7 @@ import com.wsdc.p_j_0.http.io.IO;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +23,7 @@ import java.util.UUID;
  *          <li>    表单  表单是一种特殊的纯文本
  *
  *  <li>    需要边界
- *          <li>    ;boundary=---avdfewedfhwefhuehdjfhuw        (任意字符，前面最好是有多个-符号)
+ *          <li>    ;boundary=avdfewedfhwefhuehdjfhuw        (任意字符，前面最好是有多个-符号)
  *          <li>    这个分解符在之后的过程中  唯一
  *          <li>    边界标识符尽量复杂一定  不要和正文内容出现一样    ()
  *
@@ -30,7 +31,8 @@ import java.util.UUID;
  */
 public class MultiBody extends RequestBody0 {
     List<BodyWrap> list = new LinkedList<>();
-    String boundary = "--------------"+UUID.randomUUID().toString();
+    String boundary = new String(Base64.getEncoder().encode(UUID.randomUUID().toString().getBytes()));
+    String boundary1 = "--"+boundary;
     int index = 0;
 
     @Override
@@ -38,13 +40,18 @@ public class MultiBody extends RequestBody0 {
         if(index < list.size()){
             int write = list.get(index).write(source);
             if(write == -1){
+                //System.out.println("index = "+index+"   size = "+list.size());
                 index++;
             }
 
             return 1;
+        }else if(index == list.size()){
+            source.source((boundary1+"--").getBytes());
+            source.source(new byte[]{'\r','\n','\r','\n'});
+            System.out.println("结束了");
+            index++;
         }
-        source.source(boundary.getBytes());
-        source.source(new byte[]{'\r','\n','\r','\n'});
+
         return -1;
     }
 
@@ -66,18 +73,19 @@ public class MultiBody extends RequestBody0 {
     public static class Builder{
         MultiBody body = new MultiBody();
 
+        //  不要添加string  并不是所有的服务器均支持这些功能  通常就是用来歘那图片的
         public Builder addString(String key,String value){
-            body.list.add(new BodyWrap(body.boundary,key,null,null,value,null));
+            body.list.add(new BodyWrap(body.boundary1,key,null,null,value,null));
             return this;
         }
 
         public Builder addFile(String key,File file,String fileName){
-            body.list.add(new BodyWrap(body.boundary,key,fileName,file,null,null));
+            body.list.add(new BodyWrap(body.boundary1,key,fileName,file,null,null));
             return this;
         }
 
         public Builder addForm(String key,String form){
-            body.list.add(new BodyWrap(body.boundary,key,null,null,null,form));
+            body.list.add(new BodyWrap(body.boundary1,key,null,null,null,form));
             return this;
         }
 
@@ -122,22 +130,43 @@ public class MultiBody extends RequestBody0 {
         public int write(IO io) throws IOException {
             sb.replace(0,sb.length(),"");
             if(text != null){
+                byte[] bytes = text.getBytes();
                 if(step++ == 0){
                     sb.append(boundary)
                             .append("\r\n")
                             .append("Content-Disposition: form-data;")
                             .append("name=")
+                            .append('\"')
                             .append(name)
-                            .append("\"\r\n");
+                            .append("\"\r\n")
+                            .append("Content-Length:")
+                            .append(bytes.length)
+                            .append("\r\n\r\n");
                     io.source(sb.toString().getBytes());
                 }
-                io.source(text.getBytes());
+                io.source(bytes);
                 io.source(new byte[]{'\r','\n'});
                 return -1;
             }else if(file != null){
+                byte[] bytes = "1234567890".getBytes();
                 if(step++ == 0){
-
+                    sb.append(boundary)
+                            .append("\r\n")
+                            .append("Content-Disposition: form-data;")
+                            .append("name=")
+                            .append('\"')
+                            .append(name)
+                            .append(";filename=")
+                            .append(file.getName())
+                            .append("\"\r\n")
+                            .append("Content-Type:")
+                            .append("plain/text")
+                            .append("\r\n\r\n");
+                    io.source(sb.toString().getBytes());
                 }
+
+                io.source("1234567890".getBytes());
+                return -1;
             }else if(form != null){
                 if(step++ == 0){
 
