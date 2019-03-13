@@ -7,7 +7,7 @@ import com.wsdc.p_j_0.http.ICall;
 import com.wsdc.p_j_0.http.Request0;
 import com.wsdc.p_j_0.http.RequestBody0;
 import com.wsdc.p_j_0.http.body.FormBody;
-import com.wsdc.p_j_0.http.body.MultiBody;
+import com.wsdc.p_j_0.http.body.FileBody;
 
 import org.junit.Test;
 
@@ -512,9 +512,13 @@ public class HttpTest {
     @Test
     public void testMulti(){
         Client client = new Client();
-        File file = new File("a.html");
-        MultiBody body = new MultiBody.Builder()
-                .addFile("files",file,file.getName())
+        File file1 = new File("C:\\Users\\wsdchigh\\Desktop\\img1\\a8.png");
+        File file2 = new File("C:\\Users\\wsdchigh\\Desktop\\img1\\a2.jpg");
+        File file3 = new File("C:\\Users\\wsdchigh\\Desktop\\img1\\a3.png");
+        FileBody body = new FileBody.Builder()
+                .addFile("files1",file1,file1.getName())
+                //.addFile("files2",file2,file2.getName())
+                //.addFile("files3",file3,file3.getName())
                 .build();
 
         Request0 request = new Request0.Builder()
@@ -541,7 +545,7 @@ public class HttpTest {
         }
 
         try {
-            Thread.currentThread().sleep(18000);
+            Thread.currentThread().sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -562,7 +566,7 @@ public class HttpTest {
                 @Override
                 public void run() {
                     try {
-                        Thread.currentThread().sleep(5000);
+                        Thread.currentThread().sleep(10000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -578,13 +582,25 @@ public class HttpTest {
             try{
                 while(i++ < 10){
                     int read = accept.getInputStream().read(data);
-                    bos.write(data,0,read);
+                    if(read != -1){
+                        bos.write(data,0,read);
+                    }
                 }
             }catch (Exception e){
                 e.printStackTrace();
             }
 
             byte[] bytes = bos.toByteArray();
+            int len = bytes.length;
+            System.out.println("len = "+len);
+
+            System.out.println(bytes[len-1]);
+            System.out.println(bytes[len-2]);
+            System.out.println(bytes[len-3]);
+            System.out.println(bytes[len-4]);
+            System.out.println(bytes[len-5]);
+            System.out.println(bytes[len-6]);
+
             System.out.println(new String(bytes));
         } catch (IOException e) {
             e.printStackTrace();
@@ -595,21 +611,42 @@ public class HttpTest {
     public void testMulti2(){
         try {
             Socket socket = new Socket("127.0.0.1",8080);
-            String s = "POST /a.do?api=test_multi HTTP/1.1\r\n" +
-                    "date:2019-03-13 00-59-22\r\n" +
-                    "Content-type:multipart/form-data;boundary=ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5\r\n" +
-                    "\r\n" +
-                    "--ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5\r\n" +
-                    "Content-Disposition: form-data;name=\"username\"\r\n" +
-                    "Content-Length:8\r\n" +
-                    "\r\n" +
-                    "password\r\n" +
-                    "--ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5\r\n" +
-                    "Content-Disposition: form-data;name=\"username1\"\r\n" +
-                    "Content-Length:9\r\n" +
-                    "\r\n" +
-                    "password1\r\n" +
-                    "--ODU1M2I0MWYtNWYyOC00M2IzLWJmYjctNDcxMTg4MTc1ZmQ5--";
+            String s = "POST /a.do?api=test_multi HTTP/1.1\n" +
+                    "Content-Type: multipart/mixed; boundary=6d4a8f02-b7f1-4430-bffd-9af2efd0a11d\n" +
+                    "Content-Length: 562\n" +
+                    "Host: 127.0.0.1:8080\n" +
+                    "Connection: Keep-Alive\n" +
+                    "Accept-Encoding: gzip\n" +
+                    "User-Agent: okhttp/3.10.0\n" +
+                    "\n" +
+                    "--6d4a8f02-b7f1-4430-bffd-9af2efd0a11d\n" +
+                    "Content-Disposition: form-data; name=\"file1\"; filename=\"file1\"\n" +
+                    "Content-Type: plain/text\n" +
+                    "Content-Length: 19\n" +
+                    "\n" +
+                    "ksv\n" +
+                    "ksv \n" +
+                    "ksv\n" +
+                    "ksv\n" +
+                    "--6d4a8f02-b7f1-4430-bffd-9af2efd0a11d\n" +
+                    "Content-Disposition: form-data; name=\"file2\"; filename=\"file2\"\n" +
+                    "Content-Type: plain/text\n" +
+                    "Content-Length: 19\n" +
+                    "\n" +
+                    "ksv\n" +
+                    "ksv \n" +
+                    "ksv\n" +
+                    "ksv\n" +
+                    "--6d4a8f02-b7f1-4430-bffd-9af2efd0a11d\n" +
+                    "Content-Disposition: form-data; name=\"file3\"; filename=\"file13\"\n" +
+                    "Content-Type: plain/text\n" +
+                    "Content-Length: 19\n" +
+                    "\n" +
+                    "ksv\n" +
+                    "ksv \n" +
+                    "ksv\n" +
+                    "ksv\n" +
+                    "--6d4a8f02-b7f1-4430-bffd-9af2efd0a11d--\r\n";
             socket.getOutputStream().write(s.getBytes());
             socket.getOutputStream().flush();
 

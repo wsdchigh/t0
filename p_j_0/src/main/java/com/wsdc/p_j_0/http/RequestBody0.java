@@ -6,6 +6,8 @@ import java.io.IOException;
 
 /*
  *  请求体
+ *  <li>    只有表单和json使用 (Content-Length)
+ *          <li>    其他情况一律使用    transfer-encoding:chunked   (使用分块编码)
  */
 public abstract class RequestBody0 {
     Request0 request;
