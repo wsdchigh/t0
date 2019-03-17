@@ -17,10 +17,17 @@ public class BufferIO extends IO {
         super(client);
     }
 
+    public BufferIO(SegmentPool pool) {
+        super(pool);
+    }
+
+    int k = 0;
+
     @Override
     public int source(InputStream is) throws IOException {
         int size0 = Math.min(is.available(),64);
         int read = is.read(cache,0,size0);
+        //System.out.println("size = "+((k=k+read)));
         source(cache,0,read);
         return read;
     }

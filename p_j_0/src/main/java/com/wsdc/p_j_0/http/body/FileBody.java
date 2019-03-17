@@ -129,10 +129,8 @@ public class FileBody extends RequestBody0 {
                         .append('\"');
             }
 
-            sb.append("\nContent-Type:")
-                    .append("\"")
-                    .append(file.length())
-                    .append("\"");
+            sb.append("\r\nContent-Length:")
+                    .append(file.length());
 
             System.out.println("file length = "+file.length());
 

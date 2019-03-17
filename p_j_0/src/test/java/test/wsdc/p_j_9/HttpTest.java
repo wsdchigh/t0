@@ -6,14 +6,17 @@ import com.wsdc.p_j_0.http.HttpGK;
 import com.wsdc.p_j_0.http.ICall;
 import com.wsdc.p_j_0.http.Request0;
 import com.wsdc.p_j_0.http.RequestBody0;
-import com.wsdc.p_j_0.http.body.FormBody;
 import com.wsdc.p_j_0.http.body.FileBody;
+import com.wsdc.p_j_0.http.body.FormBody;
+import com.wsdc.p_j_0.http.io.IO;
+import com.wsdc.p_j_0.http.io.IOs;
 
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,6 +31,8 @@ import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.Set;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -117,20 +122,24 @@ public class HttpTest {
 
         if(true){
             Request0.Builder requestBuilder1 = new Request0.Builder();
-            Request0 request1 = requestBuilder1.url("https://www.baidu.com/")
+            Request0 request1 = requestBuilder1.url("http://www.baidu.com/")
                     .method("GET")
-                    .header("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
-                    .header("Accept-Encoding","gzip, deflate, br")
-                    .header("Accept-Language","zh-CN,zh;q=0.9")
-                    .header("Cache-Control","no-cache")
-                    .header("Connection","keep-alive")
-                    .header("Pragma","no-cache")
-                    .header("Upgrade-Insecure-Requests","1")
                     .header("User-Agent","wsdchigh")
                     .build();
 
             try {
-                client.call(request1);
+                client.call(request1, new ICall.ICallback() {
+                    @Override
+                    public boolean success(ICall call) throws IOException {
+                        System.out.println(call.response().string());
+                        return false;
+                    }
+
+                    @Override
+                    public void failure(ICall call, Exception e) throws IOException {
+
+                    }
+                });
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -138,9 +147,9 @@ public class HttpTest {
 
         try {
             Thread.currentThread().sleep(3000);
-            if(true){
+            if(false){
                 Request0.Builder requestBuilder1 = new Request0.Builder();
-                Request0 request1 = requestBuilder1.url("https://www.baidu.com/")
+                Request0 request1 = requestBuilder1.url("https://www.huya.com/")
                         .method("GET")
                         .header("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
                         .header("Accept-Encoding","gzip, deflate, br")
@@ -153,7 +162,18 @@ public class HttpTest {
                         .build();
 
                 try {
-                    client.call(request1);
+                    client.call(request1, new ICall.ICallback() {
+                        @Override
+                        public boolean success(ICall call) throws IOException {
+                            System.out.println(call.response().string());
+                            return false;
+                        }
+
+                        @Override
+                        public void failure(ICall call, Exception e) throws IOException {
+
+                        }
+                    });
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -512,13 +532,13 @@ public class HttpTest {
     @Test
     public void testMulti(){
         Client client = new Client();
-        File file1 = new File("C:\\Users\\wsdchigh\\Desktop\\img1\\a8.png");
+        File file1 = new File("C:\\Users\\wsdchigh\\Desktop\\img1\\a1.png");
         File file2 = new File("C:\\Users\\wsdchigh\\Desktop\\img1\\a2.jpg");
         File file3 = new File("C:\\Users\\wsdchigh\\Desktop\\img1\\a3.png");
         FileBody body = new FileBody.Builder()
                 .addFile("files1",file1,file1.getName())
-                //.addFile("files2",file2,file2.getName())
-                //.addFile("files3",file3,file3.getName())
+                .addFile("files2",file2,file2.getName())
+                .addFile("files3",file3,file3.getName())
                 .build();
 
         Request0 request = new Request0.Builder()
@@ -556,12 +576,9 @@ public class HttpTest {
     public void testMultiServe(){
         try {
             ServerSocket ss = new ServerSocket(8888);
-
             int i = 0;
             Socket accept = ss.accept();
-
             final Thread t = Thread.currentThread();
-
             Thread t0 = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -659,6 +676,65 @@ public class HttpTest {
             read = is.read(data);
             System.out.println(new String(data,0,read));
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void ioFile(){
+        Client client = new Client();
+        IO buffer = IOs.buffer(client);
+
+        try {
+            FileInputStream fis=  new FileInputStream("C:\\Users\\wsdchigh\\Desktop\\img1\\a1.png");
+            System.out.println("origin length = "+fis.available());
+            while((fis.available() > 0)){
+                buffer.source(fis);
+            }
+            System.out.println(buffer.size());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testBreak(){
+        Client client = new Client();
+
+        try{
+            Request0.Builder builder = new Request0.Builder();
+            Request0 request = builder.url("http://127.0.0.1:8080/ksv.txt")
+                    .header("Range", "bytes=7-")
+                    //.method("GET")
+                    .build();
+
+            client.call(request, new ICall.ICallback() {
+                @Override
+                public boolean success(ICall call) throws IOException {
+                    System.out.println(call.response().code);
+                    Map<String, String> headers = call.response().headers();
+                    Set<String> set = headers.keySet();
+                    for (String s : set) {
+                        System.out.println("key = "+s+"     value = "+headers.get(s));
+                    }
+                    System.out.println(call.response().string());
+                    return false;
+                }
+
+                @Override
+                public void failure(ICall call, Exception e) throws IOException {
+
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try{
+            Thread.currentThread().sleep(10000);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

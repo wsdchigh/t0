@@ -1,8 +1,5 @@
 package com.wsdc.p_j_0.http;
 
-import com.wsdc.p_j_0.http.io.IByteData;
-import com.wsdc.p_j_0.http.io.Segment;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -17,8 +14,8 @@ public class Response0 {
     public static final int STATUS_BODY = 2;
 
     String responseLine;
-    int code;
-    String protocol;
+    public int code;
+    public String protocol;
 
     Map<String,String> headers = new HashMap<>();
 
@@ -97,7 +94,7 @@ public class Response0 {
 
         //System.out.println("size = "+size);
         if(size > 0){
-            System.out.println("size = "+size+"     now = "+call.sink().size());
+            //System.out.println("size = "+size+"     now = "+call.sink().size());
             int readSize = call.sink().size();
             if(readSize == this.size){
                 return -1;
@@ -132,9 +129,9 @@ public class Response0 {
             if(chunkSize0 == -1){
                 if(call.sink().readLine(call.buffer()) != -1){
                     String string = call.buffer().string();
-                    System.out.println("origin = "+string);
+                    //System.out.println("origin = "+string);
                     chunkSize0 = Integer.parseInt(string.trim(),16);
-                    System.out.println("size0 = "+chunkSize0);
+                    //System.out.println("size0 = "+chunkSize0);
                 }
             }
 
@@ -144,14 +141,14 @@ public class Response0 {
                     chunkSize0 = -1;
                     call.sink().sink(call.buffer(),2);
                     byte[] bytes = call.buffer().bytes();
-                    System.out.println("------------"+bytes[0]+"    "+bytes[1]);
+                    //System.out.println("------------"+bytes[0]+"    "+bytes[1]);
                 }
             }
 
             if(chunkSize0 == 0){
                 call.sink().sink(call.buffer());
                 if("\r\n".equals(call.buffer().string())){
-                    System.out.println("读取完毕");
+                    //System.out.println("读取完毕");
                 }
                 return -1;
             }
@@ -201,21 +198,5 @@ public class Response0 {
             return call.sink().inputStream();
         }
         return call.buffer1().inputStream();
-    }
-
-    /*
-     *  缓冲过程
-     *  <li>    数据先从网络读取到sink
-     *  <li>    在将数据从sink读取到segment
-     *  <li>    期间缓冲数组越小，那么读取的过程就快
-     *
-     *  <li>    减少占用空间
-     */
-    public int readFromNet(IByteData sink) throws IOException {
-        return -1;
-    }
-
-    public int readFromSink(IByteData sink,Segment segment) throws IOException{
-        return -1;
     }
 }

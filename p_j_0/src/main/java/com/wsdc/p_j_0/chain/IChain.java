@@ -65,6 +65,8 @@ public interface IChain<K,D> {
     IChain<K,D> remove(K k);
     IChain<K,D> remove(List<K> ks);
 
+    IChain<K,D> removeAll();
+
     void start();
 
     void exit();

@@ -2,8 +2,6 @@ package com.wsdc.p_j_0.http;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /*
  *  公共数据常量池
@@ -12,12 +10,6 @@ import java.util.Map;
  *  <li>    不使用枚举
  */
 public class HttpGK {
-    public static Map<String,String> defaultMap = new HashMap<>();
-
-    static{
-        defaultMap.put("Transfer-Encoding","chunked");
-    }
-
     public static SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
     public static String getTime(){
         Date date = new Date(System.currentTimeMillis());

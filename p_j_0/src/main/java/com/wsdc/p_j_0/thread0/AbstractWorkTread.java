@@ -83,4 +83,10 @@ public abstract class AbstractWorkTread<A> implements IThread<A>{
          */
         t.interrupt();
     }
+
+    @Override
+    public void reset() {
+        deque.clear();
+        t.interrupt();
+    }
 }

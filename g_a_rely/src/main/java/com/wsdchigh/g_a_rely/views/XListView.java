@@ -21,6 +21,17 @@ public class XListView extends ListView {
             int last = first + getChildCount();
             int total = getCount();
 
+            if(total <= 4){
+                if(prepareLoading != null){
+                    long t2 = System.currentTimeMillis();
+                    if(t2 - t1 > 3000){
+                        t1 = t2;
+                        prepareLoading.prepare();
+                    }
+                }
+                return;
+            }
+
             /*
              *  3s最多触发一次
              */
@@ -108,6 +119,15 @@ public class XListView extends ListView {
         }
     }
 
+    int maxToPrepare = 4;
+    public void setMaxToPrepare(int maxToPrepare){
+        this.maxToPrepare = maxToPrepare;
+    }
+
+    /*
+     *  预先刷新
+     *  <li>    如果总的长度快要到了，那么需要发送预先刷新信号
+     */
     public interface OnPrepareLoading{
         void prepare();
     }

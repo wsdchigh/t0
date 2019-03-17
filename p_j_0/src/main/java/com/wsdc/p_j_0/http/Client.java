@@ -13,8 +13,6 @@ import java.io.IOException;
  *  <li>    本质是一个异步操作
  */
 public class Client {
-    Worker worker;
-
     String protocol = HttpGK.PROTOCOL_HTTP_1_1;
 
     //  地址缓存的连接的数量
@@ -48,7 +46,7 @@ public class Client {
     } ;
 
     public Client() {
-        worker = new HttpWorker(this);
+
     }
 
     public void call(Request0 request0) throws IOException {
@@ -71,6 +69,13 @@ public class Client {
 
     public ConnectionPool connectionPool(){
         return connectionPool;
+    }
+
+    /*
+     *  退出
+     */
+    public void exit(){
+
     }
 
     public static class Builder{

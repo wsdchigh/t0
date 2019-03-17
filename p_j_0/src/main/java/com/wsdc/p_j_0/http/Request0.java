@@ -27,7 +27,7 @@ import java.util.Set;
  */
 public class Request0{
     String url;
-    String method;
+    String method = "GET";
     String requestLine;
     String host;
     int port = 0;
@@ -36,8 +36,6 @@ public class Request0{
     ICall call;
     RequestBody0 body;
     String path;
-
-    Boolean isAuto;
 
     int step = 0;
 
@@ -215,9 +213,6 @@ public class Request0{
             r.header("host",r.host);
             r.header("date",HttpGK.getTime());
 
-            if(r.method == null){
-                r.method = "GET";
-            }
             if("GET".equalsIgnoreCase(r.method)){
 
             }else{

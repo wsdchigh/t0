@@ -12,7 +12,8 @@ import java.io.OutputStream;
  *  <li>
  */
 public abstract class IO {
-    Client client;
+    //Client client;
+    SegmentPool pool;
     Segment header;
     Segment footer;
     InputStream is = new DefaultInputStream();
@@ -23,7 +24,12 @@ public abstract class IO {
     int size = 0;
 
     public IO(Client client) {
-        this.client = client;
+        //this.client = client;
+        pool = client.getSegmentPool();
+    }
+
+    public IO(SegmentPool pool){
+        this.pool = pool;
     }
 
     /*
@@ -162,7 +168,7 @@ public abstract class IO {
         if(header != null){
             Segment s = header;
             while(s != null){
-                client.getSegmentPool().put(s);
+                pool.put(s);
                 s = s.next;
             }
         }
@@ -191,7 +197,7 @@ public abstract class IO {
             if(size > 0){
                 if(header.available() == 0){
                     Segment next = header.next;
-                    client.getSegmentPool().put(header);
+                    pool.put(header);
                     if(next == null){
                         header = null;
                         footer = null;
@@ -219,22 +225,20 @@ public abstract class IO {
 
         @Override
         public void write(int b) throws IOException {
-
-            if(b==-1){
-                return;
-            }
+            /*
+             *  写是不分 -1 的
+             */
             if(footer == null){
-                header = footer = client.getSegmentPool().get();
+                header = footer = pool.get();
             }
             if(footer.write(b) == 0){
                 //System.out.println("创建新的segment");
-                Segment segment = client.getSegmentPool().get();
+                Segment segment = pool.get();
                 footer.next = segment;
                 segment.prev = footer;
                 footer = segment;
                 segment.write(b);
             }
-
             size++;
         }
     }

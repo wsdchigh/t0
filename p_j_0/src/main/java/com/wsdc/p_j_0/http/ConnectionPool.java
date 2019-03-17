@@ -54,6 +54,13 @@ public class ConnectionPool {
         return poll;
     }
 
+    /*
+     *  退出
+     */
+    public void exit(){
+
+    }
+
 
 
     //  存储地址信息
@@ -68,7 +75,7 @@ public class ConnectionPool {
         public Address(String host, int port,Client client) {
             this.host = host;
             this.port = port;
-            key = String.format(host,port);
+            key = host+"_"+port;
             capacity = client.addressCacheSize;
         }
 

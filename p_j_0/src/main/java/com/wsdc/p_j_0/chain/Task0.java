@@ -97,11 +97,6 @@ public abstract class Task0<K,D> implements ITask<K,D>{
         return chain;
     }
 
-    @Override
-    public void modify() {
-        shouldExecute = false;
-    }
-
     TaskProxy<K,D> post;
     @Override
     public void post() {

@@ -3,22 +3,16 @@ package com.wsdc.p_j_0.http;
 import com.wsdc.p_j_0.looper.LCall;
 import com.wsdc.p_j_0.looper.Looper;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.security.KeyManagementException;
-import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -127,6 +121,7 @@ public class Connection implements LCall {
             outputStream = socket.getOutputStream();
         }else{
             try {
+                /*
                 File file = new File("E:\\al\\p_j_0\\src\\main\\java\\wsdc.jks");
                 System.out.println(file.getAbsoluteFile());
                 KeyStore keyStore = KeyStore.getInstance("pkcs12");
@@ -155,7 +150,24 @@ public class Connection implements LCall {
                         return new X509Certificate[0];
                     }
                 }},new SecureRandom());
+                */
+                SSLContext context = SSLContext.getInstance("SSL", "SunJSSE");
+                context.init(null,new TrustManager[]{new X509TrustManager() {
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
 
+                    }
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+
+                    }
+
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
+                }},null);
                 SSLSocketFactory factory = context.getSocketFactory();
 
                 socket = factory.createSocket(host, port);
@@ -248,7 +260,7 @@ public class Connection implements LCall {
                         line = call.sink().readLine(call.buffer());
                         if(line != -1){
                             String string = call.buffer().string();
-                            System.out.println(string);
+                            //System.out.println(string);
                             if("\n".equals(string) || "\r\n".equals(string)){
                                 call.setStatus(ICall.STATUS_RESPONSE_BODY);
                                 int i = call.response().parseBody();
@@ -272,7 +284,7 @@ public class Connection implements LCall {
                 case ICall.STATUS_RESPONSE_BODY:
                     /*
                      *  先读一个字节  (通常是会阻塞的)
-                     *  <li>    ssl,chunked会让inputStream.available()一直 == 0
+                     *  <li>    ssl会让inputStream.available()一直 == 0
                      */
                     if(inputStream.available() == 0){
                         if(needReadBefore()){
@@ -372,7 +384,7 @@ public class Connection implements LCall {
         }
     }
 
-    private String https = "https";
+    private static String https = "https";
     private boolean needReadBefore(){
         return https.equals(call.request().protocol);
     }

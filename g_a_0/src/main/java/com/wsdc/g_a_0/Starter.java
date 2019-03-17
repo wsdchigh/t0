@@ -2,7 +2,6 @@ package com.wsdc.g_a_0;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 import com.wsdc.file.FileUtils;
@@ -56,6 +55,14 @@ import java.io.OutputStream;
  *
  *  <li>    配置一个初始的自动路由
  *          <li>    启动页 ->  那个插件
+ *
+ *
+ *  <li>    支持同步加载和异步加载
+ *          <li>    组件具有同步和异步
+ *                  因为同步加载组件会比较耗时，引导屏/主页屏/公共组件  设置为同步
+ *                  <li>    其他情况设置为异步
+ *                  <li>    减少加载耗时  (路由的任何一次前进操作，均会询问)
+ *                          <li>    可能路由加载错误?可能路由加载慢    避免出现错误而造成app的宕机
  */
 public class Starter{
     /*

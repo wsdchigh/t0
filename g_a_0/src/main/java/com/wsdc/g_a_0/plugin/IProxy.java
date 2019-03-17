@@ -1,8 +1,6 @@
 package com.wsdc.g_a_0.plugin;
 
 /*
- *  具体功能的执行者
- *  <li>    IData已经维系了父子关系  (IProxy可以不去维持)
  *
  *  <li>    里面注册了字符串类型的key
  *          <li>    如果需要处理，必须要有可以

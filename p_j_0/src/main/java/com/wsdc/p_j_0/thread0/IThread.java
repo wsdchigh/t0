@@ -31,6 +31,14 @@ public interface IThread<A> {
     void exit();
 
     /*
+     *   重置
+     *   <li>    如果线程不需要使用了，那么使用exit函数
+     *   <li>    如果只是之前的任务全部丢弃，使用新的任务   则使用该函数
+     *           实现复用
+     */
+    void reset();
+
+    /*
      *  主要执行线程
      *  <li>    这里不要抛异常
      *  <li>    这里需要try异常

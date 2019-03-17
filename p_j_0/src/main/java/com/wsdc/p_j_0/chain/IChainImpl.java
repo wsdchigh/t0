@@ -14,6 +14,10 @@ import java.util.concurrent.locks.ReentrantLock;
 /*
  *  为了减少主线程的压力
  *  <li>    尽可能的将任务移动到IO线程中去执行
+ *
+ *  <li>    如果你需要在主线程中执行任务  需要在post函数中执行操作
+ *          <li>    那么此时注册的taskKey不需要其他任务去注册
+ *          <li>    函数在执行完之后，再行发布信号 (任意信号)
  */
 public class IChainImpl implements IChain<Integer,Map<Integer,Object>> {
     /*
@@ -31,7 +35,7 @@ public class IChainImpl implements IChain<Integer,Map<Integer,Object>> {
     private Queue<Sem> sems = new LinkedList<>();
     private Lock lock = new ReentrantLock();
 
-    //  线程不安全
+    //  线程不安全   如果post需要使用到，先取出数据，不要在其他线程操作该对象
     private Map<Integer,Object> objectMap = new TreeMap<>();
     /*
      *  通常是一个组件对应一个任务池
@@ -167,6 +171,14 @@ public class IChainImpl implements IChain<Integer,Map<Integer,Object>> {
             }
         }
         tasks.removeAll(tmpTasks);
+        lock.unlock();
+        return this;
+    }
+
+    @Override
+    public IChain<Integer, Map<Integer, Object>> removeAll() {
+        lock.lock();
+
         lock.unlock();
         return this;
     }

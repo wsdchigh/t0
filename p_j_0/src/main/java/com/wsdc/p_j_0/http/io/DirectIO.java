@@ -17,6 +17,10 @@ public class DirectIO extends IO {
         super(client);
     }
 
+    public DirectIO(SegmentPool pool) {
+        super(pool);
+    }
+
     @Override
     public int source(InputStream is) throws IOException {
         int read = is.read(cache);

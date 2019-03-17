@@ -65,16 +65,6 @@ public interface ITask<K,D> {
     IChain<K,D> getIChain();
 
     /*
-     *  任务执行完之后，调用这个函数
-     *  <li>    任务执行完之后，需要修改状态为不可执行
-     *          <li>    否则，每次loop，任务度标记为可执行，会导致无限执行
-     *
-     *  <li>    其他任务的执行完毕之后，可能会影响都这个任务的属性
-     *          <li>    调用这个函数去修改其他task
-     */
-    void modify();
-
-    /*
      *   任务执行完之后，将数据跑出来
      *   <li>    可以post到其他线程
      *   <li>    如果想要在主线程中去处理数据
@@ -90,5 +80,5 @@ public interface ITask<K,D> {
      */
     int status();
 
-    void setStatus(int stauts);
+    void setStatus(int status);
 }
