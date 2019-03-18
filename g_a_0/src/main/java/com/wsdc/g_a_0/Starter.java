@@ -63,6 +63,16 @@ import java.io.OutputStream;
  *                  <li>    其他情况设置为异步
  *                  <li>    减少加载耗时  (路由的任何一次前进操作，均会询问)
  *                          <li>    可能路由加载错误?可能路由加载慢    避免出现错误而造成app的宕机
+ *
+ *
+ *  <li>    所有操作一律异步
+ *          <li>    所有的应用，均需要一个引导页面；我们争取在引导页面完成之后加载核心内容
+ *                  <li>    引导页面，需要容器自身来完成
+ *
+ *          <li>    优先加载主要的APK，其他的APK文件依次加载
+ *                  <li>    所有的apk配置自己的优先级
+ *
+ *          <li>    内部持有线程
  */
 public class Starter{
     /*
@@ -94,6 +104,11 @@ public class Starter{
      */
     private IPlugin globalPlugin;
 
+    /*
+     *  全局APK
+     */
+    private APK globalApk;
+
     public Starter(Context context) {
         this.context = context;
 
@@ -101,7 +116,7 @@ public class Starter{
             copyConfig();
         }
         loadingConfig();
-        asyncToggle();
+        loadApk();
     }
 
     /*
@@ -118,7 +133,7 @@ public class Starter{
      *
      *  <li>    服务器异步访问，同步数据
      *          <li>    比对版本，不同则下载
-     *          <li>    删除过时数据，避免占用过多内存
+     *          <li>    删除过时数据，避免占用过多存储空间
      */
     public static void install(Context context){
         instance = new Starter(context);
@@ -203,7 +218,10 @@ public class Starter{
         }
     }
 
-    private void asyncToggle(){
+    /*
+     *  加载apk信息
+     */
+    private void loadApk(){
 
     }
 

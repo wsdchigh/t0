@@ -8,6 +8,7 @@ import java.util.Map;
 
 /*
  *  路由表
+ *  <li>    负责加载插件
  */
 public interface IRouterMap {
     /*
@@ -18,9 +19,10 @@ public interface IRouterMap {
      *  <li>    如果上层的插件不存在，这里会创建上层的插件
      *
      *  <li>    mode    启动参数
+     *
+     *  <li>    如果对应的插件不存在?对应的apk文件尚未加载成功   返回 null
      */
     IPlugin getRouterPlugin(String key, int mode);
-
 
     /*
      *  如果插件不参与路由

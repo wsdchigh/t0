@@ -2,8 +2,8 @@ package com.wsdc.g_a_0.base;
 
 import android.app.Activity;
 import android.content.res.Resources;
-import android.graphics.Camera;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Window;
@@ -117,6 +117,14 @@ public class BaseActivity extends FragmentActivity {
         }
     }
 
+    /*
+     *  如果是6.0以上需要权限申请
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
     @Override
     public void onBackPressed() {
         IRouter router = Starter.getInstance().getRouter();
@@ -126,7 +134,6 @@ public class BaseActivity extends FragmentActivity {
         if(rtn != IRouter.ROUTER_BACK_FRAGMENT){
             super.onBackPressed();
         }else{
-
             plugin.proxy().proxy(500);
         }
     }

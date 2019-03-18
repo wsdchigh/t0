@@ -8,6 +8,9 @@ import dalvik.system.BaseDexClassLoader;
  *  记录任何一个APK的配置
  *  <li>    ClassLoader
  *  <li>    Resources
+ *
+ *  <li>    考虑到apk的体积比较大，或者比较多
+ *          <li>    考虑同步加载和异步加载
  */
 public interface APK {
     /*
@@ -29,4 +32,18 @@ public interface APK {
      *   获取所有的插件信息
      */
     //XInfoAll infoAll();
+
+    /*
+     *  是否加载
+     *  <li>    如果apk没有加载，那么此时是无法加载插件的
+     */
+    boolean hasLoading();
+
+    /*
+     *  加载
+     *  <li>    同步，加载的时候回立即加载
+     *  <li>    异步，使用一个异步线程去执行加载任务
+     *          完成的时候回标记loading
+     */
+    void loading() throws Exception;
 }
