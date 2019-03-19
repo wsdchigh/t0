@@ -54,6 +54,23 @@ public class XInfo {
     //  标记当前APK为自身APK，而不是其他的插件
     public boolean local;
 
+    /*
+     *  是否同步
+     *  <li>    默认异步
+     */
+    public boolean sync = false;
+
+    /*
+     *  是否为全局APK
+     *  <li>    全局apk，提供公共配置依赖
+     *  <li>    容器可以不配置任何元素 (依赖)
+     *  <li>    所有公共依赖均使用公共APK来存储
+     *          <li>    尽管每一个apk可能都有这些class文件
+     *
+     *  <li>    这个不是全局插件    (两者没有多大交集)
+     */
+    public boolean isPublicApk = false;
+
     public static class XPlugin{
         //  路由的key 唯一
         public String key;
@@ -66,6 +83,19 @@ public class XInfo {
 
         //  如果下面有Fragment，那么Activity需要提供一个位置(View)
         public int fragmentContainerID;
+
+        /*
+         *  任何一次编译均会改变ID值
+         *  <li>    选择静态的配置路径，通过反射获取值
+         *          保证编译均能正确的获取值
+         *
+         *  <li>    rName
+         *          通常是获取R文件，这里是指定R文件的路径    包名
+         *  <li>    containerPath
+         *          配置具体的路径 比如 R.layout.a
+         */
+        public String rName;
+        public String containerPath;
 
         //  根据key匹配一个或者多个Activity?Fragment
         /*

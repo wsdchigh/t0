@@ -11,3 +11,9 @@ tasks.withType(JavaCompile) {
 
 sourceCompatibility = "7"
 targetCompatibility = "7"
+
+
+Task test = tasks.findByPath("test")
+test.onlyIf {
+    true
+}
