@@ -44,6 +44,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 public class HttpTest {
+
     @Test
     public void testRequest(){
         Client client = new Client();
@@ -79,25 +80,26 @@ public class HttpTest {
     public void testHttp0(){
         Client client = new Client();
 
-        /*
-        Request0.Builder requestBuilder = new Request0.Builder();
-        Request0 request = requestBuilder.url("http://img.wsdchigh.site/index.html#/home")
-                .method("GET")
-                .build();
 
-        try {
-            client.call(request);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(false){
+            Request0.Builder requestBuilder = new Request0.Builder();
+            Request0 request = requestBuilder.url("http://img.wsdchigh.site/index.html#/home")
+                    .method("GET")
+                    .build();
+
+            try {
+                client.call(request);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                Thread.currentThread().sleep(8000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
-        try {
-            Thread.currentThread().sleep(8000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-*/
         Request0.Builder requestBuilder1 = new Request0.Builder();
         Request0 request1 = requestBuilder1.url("http://www.huya.com/")
                 .method("GET")
@@ -359,7 +361,8 @@ public class HttpTest {
         }
     }
 
-    //  模拟一个https服务端
+    //  模拟一个https服务端            需要注释掉
+    /*
     @Test
     public void testCreateHttpsServer(){
         try {
@@ -424,6 +427,7 @@ public class HttpTest {
             e.printStackTrace();
         }
     }
+    */
 
     @Test
     public void testLocal(){
