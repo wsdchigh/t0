@@ -8,8 +8,8 @@ import com.wsdc.p_j_0.http.Request0;
 import com.wsdc.p_j_0.http.RequestBody0;
 import com.wsdc.p_j_0.http.body.FileBody;
 import com.wsdc.p_j_0.http.body.FormBody;
-import com.wsdc.p_j_0.http.io.IO;
-import com.wsdc.p_j_0.http.io.IOs;
+import com.wsdc.p_j_0.io.IO;
+import com.wsdc.p_j_0.io.IOs;
 
 import org.junit.Test;
 

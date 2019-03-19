@@ -1,6 +1,6 @@
 package com.wsdc.p_j_0.http;
 
-import com.wsdc.p_j_0.http.io.IO;
+import com.wsdc.p_j_0.io.IO;
 
 import java.io.IOException;
 

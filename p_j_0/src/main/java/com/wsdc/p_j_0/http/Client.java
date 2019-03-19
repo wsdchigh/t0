@@ -1,6 +1,6 @@
 package com.wsdc.p_j_0.http;
 
-import com.wsdc.p_j_0.http.io.SegmentPool;
+import com.wsdc.p_j_0.io.SegmentPool;
 import com.wsdc.p_j_0.looper.Looper;
 import com.wsdc.p_j_0.looper.LooperImpl;
 import com.wsdc.p_j_0.thread0.AbstractWorkTread;

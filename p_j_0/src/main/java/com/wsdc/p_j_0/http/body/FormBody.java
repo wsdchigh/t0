@@ -3,7 +3,7 @@ package com.wsdc.p_j_0.http.body;
 import com.wsdc.p_j_0.http.HttpGK;
 import com.wsdc.p_j_0.http.ICall;
 import com.wsdc.p_j_0.http.RequestBody0;
-import com.wsdc.p_j_0.http.io.IO;
+import com.wsdc.p_j_0.io.IO;
 
 import java.io.IOException;
 import java.util.HashMap;

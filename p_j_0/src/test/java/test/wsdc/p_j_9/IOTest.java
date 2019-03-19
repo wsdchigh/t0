@@ -1,8 +1,8 @@
 package test.wsdc.p_j_9;
 
 import com.wsdc.p_j_0.http.Client;
-import com.wsdc.p_j_0.http.io.IO;
-import com.wsdc.p_j_0.http.io.IOs;
+import com.wsdc.p_j_0.io.IO;
+import com.wsdc.p_j_0.io.IOs;
 
 import org.junit.Test;
 

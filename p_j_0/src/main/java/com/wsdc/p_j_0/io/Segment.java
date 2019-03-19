@@ -1,4 +1,4 @@
-package com.wsdc.p_j_0.http.io;
+package com.wsdc.p_j_0.io;
 
 /*
  *  碎片  (存储数据)
