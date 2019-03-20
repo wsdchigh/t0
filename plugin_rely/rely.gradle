@@ -1,4 +1,0 @@
-dependencies{
-    //  依赖配置表
-    implementation 'com.alibaba:fastjson:1.2.55'
-}

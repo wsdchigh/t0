@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">plugin_test</string>
-
-    <integer name="default_key">1</integer>
-</resources>
