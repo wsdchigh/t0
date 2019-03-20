@@ -1,6 +1,0 @@
-plugins {
-    id 'org.hidetake.ssh' version '2.9.0'
-}
-/*
- *  ssh插件
- */
